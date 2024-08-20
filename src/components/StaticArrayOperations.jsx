@@ -8,19 +8,10 @@ const StaticArrayOperations = () => {
   const [arrayLength, setArrayLength] = useState(0);
   const [customIdx, setCustomIdx] = useState(0);
   const [arrExist, setArrExist] = useState(false);
-  let idxSpace = [];
 
   const divRefs = useRef([]);
 
   const [divs, setDivs] = useState([]);
-
-  useEffect(() => {
-    console.log('woring');
-    for(let i = 0; i < arrayLength; i++) { 
-        idxSpace[i] = array[i] ? array[i].toString().length * 7.7 : 11.7;
-    }
-  },[array]);
-
 
 useEffect(() => {
     const newDivs = [];
@@ -28,8 +19,8 @@ useEffect(() => {
       newDivs.push(
         <div
           key={i}
-          className="border border-gray-100 text-green-800 py-1 px-3"
-          style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
+          className="text-green-800 flex items-center justify-center md:px-4 px-6 w-14"
+          // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
         >
           {i}
         </div>
@@ -92,93 +83,100 @@ useEffect(() => {
   }
 
   return (
-    <div className="flex bg-green-100 p-6 h-50p w-full">
-      <div className='w-70p'>
-        <h1 className="text-xl font-bold m-2 mb-4">Static Array Operations</h1>
+    <div className="md:flex bg-green-100 h-fit w-full p-2p">
+      <div className='md:w-70p w-full mb-2'>
+        <h1 className="text-xl font-bold mb-4">Static Array Operations</h1>
         
-        <div className="flex justify-between mb-4 w-full">
-          <div className='w-full'>
+        <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
+          <div className='mr-2'>
             <input
               type="number"
             //   value={element}
               onChange={(e) => setArrayLength(parseInt(e.target.value))}
-              className="border border-gray-300 rounded-l-md px-2 py-1 h-10 w-50p"
-              placeholder="Enter Array length"
+              className="border border-gray-300 md:p-2 p-1 h-fit w-44p rounded-l-md"
+              placeholder="Enter length"
             />
             <button
               onClick={createArray}
-              className="bg-blue-500 text-white  rounded-r-md px-2 py-1 h-10 w-30"
+              className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-r-md"
             >
               Create array
             </button>
           </div>
-          <div className='w-full'>
+          <div className='flex flex-wrap justify-end'>
             <input
               type="number"
               value={element}
               onChange={(e) => setElement(e.target.value)}
-              className="border border-gray-300 rounded-l-md px-2 py-1 h-10 w-30p"
+              className="border border-gray-300 md:p-2 p-1 h-fit w-36p rounded-l-md"
               placeholder="Enter element"
             />
             <input
               type="number"
             //   value={element}
               onChange={(e) => setCustomIdx(parseInt(e.target.value))}
-              className="border border-gray-300 px-2 py-1 h-10 w-30p"
+              className="border border-gray-300 md:p-2 p-1 h-fit w-36p"
               placeholder="Enter index"
             />
             <button
               onClick={arrayInsert}
-              className="bg-blue-500 text-white px-3 py-1 h-10 w-30 rounded-r-md"
+              className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-r-md"
             >
               Insert
             </button>
           </div> 
           
         </div>
-        <div className='h-40p m-2 ml-0 mb-6 p-1 border border-gray-300'>
-          <div className="flex ">
-            {divs}
+        <div className='flex m-2 mx-0 mb-6 border border-gray-300'>
+          <div className='w-full p-2'>
+            <div className="flex ml-8">
+              {divs}
             </div>
-          <div className="flex flex-wrap">
-          <p>{arrExist ? 'arr': ''}</p>
-            {array.map((item, index) => (
-              <div
-                id={item}
-                key={index}
-                ref={divRefs.current[index]}
-                className="border border-black h-10 text-green-800 px-4 py-2"
-                // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
-              >
-                {item}
-              </div>
-            ))}
+            <div className="flex flex-wrap">
+            <p className='m-1 font-bold'>{arrExist ? 'Arr': ''}</p>
+              {array.map((item, index) => (
+                <div
+                  id={item}
+                  key={index}
+                  ref={divRefs.current[index]}
+                  className="border border-black flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
+                  // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className='p-1 text-white md:font-bold text-xs md:text-base bg-gray-800'>
+              <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
           </div>
         </div>
-        <div className='flex justify-between'>
+        <div className='flex flex-wrap justify-between'>
             <button
             onClick={deleteByIdx}
-            className="bg-blue-500 text-white px-2 py-1 h-10 w-36 rounded-md"
+            className="bg-blue-500 text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
             >
               delete by index
             </button>
             <button
               onClick={deleteByEle}
-              className="bg-blue-500 text-white px-2 py-1 h-10 w-36 rounded-md"
+              className="bg-blue-500 text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
             >
               delete by element
             </button>
             <button
               onClick={removeArray}
-              className="border border-2 border-red-500 text-red-500 font-bold hover:bg-red-500 hover:text-white px-4 py-2 rounded-md"
+              className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
             >
               delete array
             </button>
         </div>
         
       </div>
-      <div className='h-full w-30p bg-black m-4 ml-10 mr-0'>
-
+      <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
+        <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
+            <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
+        </div>
       </div>
     </div>
   );

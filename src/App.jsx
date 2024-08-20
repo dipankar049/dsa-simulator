@@ -5,20 +5,30 @@ import DynamicArrayOperations from './components/DynamicArrayOperations'
 import MenubarUn from './components/MenubarUn'
 import Navbar from './components/Navbar'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LinkedlistOperations2 from './components/LinkedlistOperations2';
+import DoublyLinkedlistOperations from './components/DoublyLinkedlistOperations';
+import LinearSearch from './components/LinearSearch';
 
 function App() {
 
   return (
     <BrowserRouter>
-    <div className='flex w-full h-full'>
+    <div className='flex w-full h-fit'> 
       <MenubarUn />
       <div className='w-full'>
         <Navbar/>
-        <div className="h-full">
+        <div className="h-full"> 
           {/* <ArrayVisualizer /> */}
-          <StaticArrayOperations/>
+          {/* <StaticArrayOperations/>
           <hr className="border-black border-1"></hr>
-          <DynamicArrayOperations />
+          <DynamicArrayOperations /> */}
+          
+          <Routes>
+            {/* <Route path="/" element={<TaskManagerHome2 ref={childARef}/>} /> */}
+            <Route path="/arrayOp" element={<><StaticArrayOperations/><DynamicArrayOperations /></>} />
+            <Route path="/listOp" element={<><LinkedlistOperations2 /><DoublyLinkedlistOperations/></>} />
+            <Route path="/linSearch" element={<LinearSearch />} />
+          </Routes>
         </div>
       </div>
     </div>

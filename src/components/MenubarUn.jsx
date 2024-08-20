@@ -7,18 +7,18 @@ export default function MenubarUn() {
         <p className='text-2xl font-serif font-bold text-center mb-7 mt-1'>DSA Visualizer</p>
           <div className='rounded-tl w-full h-full p-2 divider'>
             {/* <div className='w-full p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md'> */}
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="#">
+            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/arrayOp">
                 {/* <img src={homeImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
                 Array
-            </Link>
+            </Link> 
             {/* </div> */}
             <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="#">
+            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/listOp">
                 {/* <img src={calenderImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
                 Linked List
             </Link>
             <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="#">
+            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/linSearch">
                 {/* <img src={routineImage} className='mb-1 mr-1 mb-2' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
                 Linear Search
             </Link>  
