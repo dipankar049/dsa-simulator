@@ -23,17 +23,17 @@ export default function MenubarUn() {
                 Linear Search
             </Link>  
             <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <div className='w-full p-1 pl-2 cursor-pointer hover:bg-emerald-100 rounded-r-3xl rounded-l-md'>
+            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/binSearch">
                 {/* <img src={addTaskImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/>Add New Task */}
                 Binary Search
-            </div>
+            </Link>
             <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="#">
+            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/bubbleSort">
                 {/* <img src={updateTaskImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
                 Bubble sort
             </Link>
             <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="#">
+            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/mergeSort">
                 {/* <img src={weeklyImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
                 Merge Sort
             </Link>   
@@ -43,7 +43,7 @@ export default function MenubarUn() {
                 Quick sort
             </Link> 
             <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="#">
+            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/selecionSort">
                 {/* <img src={resetTaskImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
                 Selection sort
             </Link> 

@@ -2,67 +2,64 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 
-const LinearSearch = () => {
-    const [array, setArray] = useState([22,54,33,12098,9733,44]);
+const BinarySearch = () => {
+    const [array, setArray] = useState([22, 25, 32, 48, 51, 57, 64, 73, 88]);
     const [element, setElement] = useState('');
     const [arrExist, setArrExist] = useState(true);
     const [isEqual, setIsEqual] = useState(false);
     const [searchEle, setSearchEle] = useState(0);
-    // const [searchEle2, setSearchEle2] = useState(0);
     const [idx, setIdx] = useState(0);
     const [cancleFun, setCancleFun] = useState(false);
+    const [low, setLow] = useState(0);
+    const [high, setHigh] = useState(array.length - 1);
+    const [mid, setMid] = useState(0);
+    const [isVisible, setIsVisible] = useState(false);
+    const [isMidVisible, setIsMidVisible] = useState(false);
     const [isFound, setIsFound] = useState('');
+    const [iterations, setIterations] = useState(0);
     const divRefs = useRef([]);
-    const [isVisible, setIsVisible] = useState('false');
 
     const [divs, setDivs] = useState([]);
 
-    // function LinSearch() {
-    //     for(let i = 0; i < array.length; i++) {
-    //         if(!isEqual) {
-    //             setTimeout(() => {
-    //                 setIdx(i);
-    //                 if(searchEle == array[i]) {
-    //                     setIsEqual(true);
-    //                 }
-    //             }, i * 1000);
-    //         }
-    //     }
-    // } 
-
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    
-    
-    // const controller = new AbortController();
-    // const {signal} = controller;
 
-    const LinSearch = async () => {
-        // setSearchEle(searchEle2);
-        setIsVisible(true);
-        setIsFound('');
-        let localIsEqual = false;
-        // setIdx(0);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        for (let i = 0; i < array.length; i++) {
-            // if(signal.aborted) {
-            //     console.log('hii');
-            //     return;
-            // }
-            if (!localIsEqual) {
-                setIdx(i); // Update the index to reflect the current search position
-                await delay(1000); // Wait for 1 second before proceeding
-    
-                if (searchEle == array[i]) {
-                    setIsEqual(true);
-                    localIsEqual = true;
-                    console.log("found");
-                    break; // Set isEqual to true if the element is found
-                }
-            }
-            console.log(i);
-            // setIsEqual(localIsEqual);
+    const binSearch = async () => {
+        if (array.length === 0) {
+            return;
         }
-        if(localIsEqual) {
+        let currentLow = low;
+        let currentHigh = high;
+        setIsFound('');
+        setIterations(0);
+        let localIsEqual = false;
+        let i = 0;
+
+        while (currentLow <= currentHigh) {
+            let midValue = Math.floor((currentLow + currentHigh) / 2);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            setMid(midValue);
+            setIsMidVisible(true);
+            setIterations(++i);
+            // Wait for 1 second to simulate delay
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
+            if (searchEle === array[midValue]) {
+                localIsEqual = true;
+                setIsEqual(true);
+                break;
+            } else if (searchEle < array[midValue]) {
+                currentHigh = midValue - 1;
+            } else {
+                currentLow = midValue + 1;
+            }
+
+            // Update the state after each iteration
+            setLow(currentLow);
+            setHigh(currentHigh);
+            // setIsEqual(localIsEqual);
+            // setIterations(iterations + 1);
+        }
+        if (localIsEqual) {
             setIsFound('Found');
         } else {
             setIsFound('Not Found')
@@ -70,13 +67,20 @@ const LinearSearch = () => {
     }
 
     useEffect(() => {
-        // if(idx > 0) controller.abort;
-        setIsFound('');
-        setIdx(0);
+        if (array.length == 0) {
+            setIsVisible(false);
+            setHigh(0);
+
+        } else {
+            setIsVisible(true);
+            setHigh(array.length - 1);
+        }
         setIsEqual(false);
-        setIsVisible(false);
-        // LinSearch();
-    },[array, searchEle]);
+        setLow(0);
+        setIsMidVisible(false);
+        setIsFound('');
+        setIterations(0);
+    }, [array, searchEle]);
 
     useEffect(() => {
         const newDivs = [];
@@ -85,7 +89,7 @@ const LinearSearch = () => {
                 <div
                     key={i}
                     className="text-green-800 flex items-center justify-center md:px-4 px-6 w-14"
-                    // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
+                // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
                 >
                     {i}
                 </div>
@@ -98,13 +102,14 @@ const LinearSearch = () => {
     const createArray = () => {
         setArray([]);
         setArrExist(true);
+        setIsMidVisible(false);
     };
 
     function arrayPushOperation() {
-        if(!arrExist) {
+        if (!arrExist) {
             return;
         };
-        if(element) {
+        if (element) {
             setArray([...array, element]);
         }
         setElement('');
@@ -112,8 +117,8 @@ const LinearSearch = () => {
     };
 
     function arrayPopOperation() {
-    //   console.log(idx);
-        if(array.length < 0) {
+        //   console.log(idx);
+        if (array.length < 0) {
             // console.log("empty array, can't delete");
             return;
         }
@@ -127,12 +132,13 @@ const LinearSearch = () => {
     const removeArray = () => {
         setArray([]);
         setArrExist(false);
+        setIsVisible(false);
     }
 
-    return ( 
+    return (
         <div className="md:flex bg-green-100 h-fit w-full p-2p">
             <div className='md:w-70p w-full mb-2'>
-                <h1 className="text-xl font-bold mb-4">Linear Search</h1>
+                <h1 className="text-xl font-bold mb-4">Binary Search</h1>
                 <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
                     <div className=''>
                         <button
@@ -145,13 +151,13 @@ const LinearSearch = () => {
                     <div className='flex flex-wrap justify-end'>
                         <input
                             type="number"
-                            // value={element}
-                            onChange={(e) => setSearchEle(e.target.value)}
+                            // value={searchEle}
+                            onChange={(e) => setSearchEle(parseInt(e.target.value))}
                             className="border border-gray-300 md:p-2 p-1 h-fit w-50p rounded-l-md"
                             placeholder="Enter element"
                         />
                         <button
-                            onClick={LinSearch}
+                            onClick={binSearch}
                             className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-r-md"
                         >
                             Search
@@ -160,20 +166,41 @@ const LinearSearch = () => {
                 </div>
                 <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
                     <div className='w-full p-2'>
-                        <div className=''>
+                        <div>
+                            <div className='flex justify-between'>
+                                <p className='pl-4 font-bold'>Search element = {searchEle}</p>
+                                <p className='font-bold'>Iterations = {iterations}</p>
+                            </div>
                             <div className="flex ml-10">
                                 {array.map((item, index) => (
                                     <div
                                         // id={item}
                                         key={index}
-                                        
+
                                         className='flex justify-center h-10 py-2 w-14 text-base'
                                         style={{ color: `${isEqual ? 'red' : 'blue'}`, }}
                                     // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                     >
                                         {/* <p ref={SearchEleRef} 
-                                        style={{ color: `${isEqual ? 'blue' : 'red'}`, }}>  */}
-                                        {`${index === idx ? searchEle : ''}`}
+                                            style={{ color: `${isEqual ? 'blue' : 'red'}`, }}>  */}
+                                        {`${index === mid ? (isMidVisible ? 'Mid' : '') : ''}`}
+                                        {/* </p> */}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex ml-10">
+                                {array.map((item, index) => (
+                                    <div
+                                        // id={item}
+                                        key={index}
+
+                                        className='flex justify-center h-10 py-2 w-14 text-base'
+                                        style={{ color: `${isEqual ? 'blue' : 'blue'}`, }}
+                                    // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
+                                    >
+                                        {/* <p ref={SearchEleRef} 
+                                            style={{ color: `${isEqual ? 'blue' : 'red'}`, }}>  */}
+                                        {`${index === low ? 'Low' : (index === high ? 'High' : '')}`}
                                         {/* </p> */}
                                     </div>
                                 ))}
@@ -181,18 +208,19 @@ const LinearSearch = () => {
                             <div className="flex ml-10">
                                 {divs}
                             </div>
-                            <div className="flex">
+                            <div className="flex flex-wrap">
                                 <p className='m-2 font-bold'>{arrExist ? 'Arr' : ''}</p>
                                 {array.map((item, index) => (
                                     <div
                                         id={item}
                                         key={index}
                                         ref={divRefs.current[index]}
-                                        className="border border-black bg-green-200 flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
+                                        className="border border-black bg-green-100 flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
                                         // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
-                                        style={{ color: `${index === idx ? (isEqual ? 'red' : 'black') : 'black'}`,
-                                                fontSize: `${index === idx ? (isEqual ? 'medium' : '') : ''}`,
-                                                fontWeight: `${index === idx ? 'bold' : ''}` }}
+                                        style={{
+                                            color: `${index === mid ? (isEqual ? 'red' : 'black') : 'black'}`,
+                                            fontWeight: `${index === mid ? 'bold' : ''}`
+                                        }}
                                     // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                     >
                                         {item}
@@ -200,26 +228,23 @@ const LinearSearch = () => {
                                 ))}
                                 <p className='m-2 font-bold text-green-500'>{isFound}</p>
                             </div>
-                            <div className='p-4'>
-                                <p className='font-bold' style={{visibility: `${isVisible ? 'visible' : 'hidden'}`}}>
-                                    {searchEle} == Arr[{idx}]({array[idx]})
-                                    <span style={{color: `${isEqual ? 'red' : 'blue'}`}}>
-                                        {isEqual ? ' ---->Equal' : ' ---->Not Equal'}
-                                    </span> 
-                                </p>
-                            </div>
+                        </div>
+                        <div className='p-4 font-bold' style={{ visibility: `${isVisible ? 'visible' : 'hidden'}` }}>
+                            <span>Low = {low} </span>
+                            <span>{isMidVisible ? `Mid = ${mid}` : ''}  </span>
+                            <span>High = {high}</span>
                         </div>
                     </div>
                     <div className='p-1 text-white md:font-bold text-xs md:text-base bg-gray-800 rounded-r-md'>
                         <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p><p>I</p><p>Z</p><p>E</p><p>D</p><p>S</p><p>A</p>
-                    </div> 
+                    </div>
                 </div>
                 <div className='flex flex-wrap justify-between'>
                     <div className=''>
                         <input
                             type="number"
                             value={element}
-                            onChange={(e) => setElement(e.target.value)}
+                            onChange={(e) => setElement(parseInt(e.target.value))}
                             className="border border-gray-300 md:p-2 p-1 h-fit w-36p rounded-l-md"
                             placeholder="Enter element"
                         />
@@ -230,19 +255,19 @@ const LinearSearch = () => {
                             Push
                         </button>
                         <button
-                            onClick={() => {arrayPopOperation()}}
+                            onClick={() => { arrayPopOperation() }}
                             className="bg-blue-500 text-white md:p-2 p-1 h-fit"
                         >
                             Pop
                         </button>
                         <button
                             onClick={removeByEle}
-                            className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-r-md" 
+                            className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-r-md"
                         >
-                        delete by element
+                            delete by element
                         </button>
                     </div>
-                    
+
                     <button
                         onClick={removeArray}
                         className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
@@ -261,4 +286,4 @@ const LinearSearch = () => {
     );
 };
 
-export default LinearSearch;
+export default BinarySearch;

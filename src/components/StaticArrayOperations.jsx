@@ -127,19 +127,19 @@ useEffect(() => {
           </div> 
           
         </div>
-        <div className='flex m-2 mx-0 mb-6 border border-gray-300'>
+        <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
           <div className='w-full p-2'>
             <div className="flex ml-8">
               {divs}
             </div>
             <div className="flex flex-wrap">
-            <p className='m-1 font-bold'>{arrExist ? 'Arr': ''}</p>
+            <p className='m-2 font-bold'>{arrExist ? 'Arr': ''}</p>
               {array.map((item, index) => (
                 <div
                   id={item}
                   key={index}
                   ref={divRefs.current[index]}
-                  className="border border-black flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
+                  className="border border-black bg-green-300 flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
                   // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                 >
                   {item}
@@ -147,7 +147,7 @@ useEffect(() => {
               ))}
             </div>
           </div>
-          <div className='p-1 text-white md:font-bold text-xs md:text-base bg-gray-800'>
+          <div className='p-1 text-white md:font-bold text-xs md:text-base bg-gray-800 rounded-r-md'>
               <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
           </div>
         </div>
@@ -173,7 +173,7 @@ useEffect(() => {
         </div>
         
       </div>
-      <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
+      <div className='min-h-full w-full md:w-28p bg-black md:m-4 md:mr-0 md:ml-2p'>
         <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
             <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
         </div>

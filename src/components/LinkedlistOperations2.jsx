@@ -109,9 +109,9 @@ export default function DynamicArrayOperations() {
             </div>  
           
           </div>
-          <div className='flex m-2 mx-0 mb-6 border border-gray-300'>
+          <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
             <div className='w-full p-2'>
-              <p className='m-1'>{arrExist ? 'Linkedlist': ''}</p>
+              <p className='m-2 font-bold'>{arrExist ? 'Linkedlist': ''}</p>
               <div className="flex flex-wrap">
                 {array.map((item, index) => (
                   <>
@@ -119,7 +119,7 @@ export default function DynamicArrayOperations() {
                     id={item}
                     key={index}
                     ref={divRefs.current[index]}
-                    className="flex justify-center border border-black text-green-800 md:px-4 p-2 md:py-2 py-1 mt-2"
+                    className="flex justify-center border border-black bg-green-300 md:px-4 p-2 md:py-2 py-1 mt-2"
                   //   style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                   >
                     {item}
@@ -130,7 +130,7 @@ export default function DynamicArrayOperations() {
                 ))}
               </div> 
             </div>
-            <div className='p-1 text-white md:font-bold text-xs md:text-base bg-gray-800'>
+            <div className='p-1 text-white md:font-bold text-xs md:text-base bg-gray-800 rounded-r-md'>
                 <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
             </div>
           </div>
