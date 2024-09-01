@@ -1,0 +1,33 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* styles.css */
+.arrIdxPad {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  @media (min-width: 640px) {
+    .arrIdxPad {
+      padding-left: 17px;  /* Padding for small to medium screens */
+      padding-right: 17px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .arrIdxPad {
+      padding-left: 23px;
+      padding-right: 23px;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .arrIdxPad {
+      padding-left: 23px;
+      padding-right: 23px;
+    }
+  }
+  

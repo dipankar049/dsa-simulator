@@ -74,7 +74,7 @@ export default function DoublyLinkedlistOperations() {
   
   
     return (
-      <div className="md:flex bg-green-100 h-fit w-full p-2p">
+      <div className="md:flex bg-green-100 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
         <div className='md:w-70p w-full mb-2'>
           <h1 className="text-xl font-bold mb-4">Doubly Linkedlist oprations</h1>
           <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
@@ -109,24 +109,30 @@ export default function DoublyLinkedlistOperations() {
             </div>  
           
           </div>
-          <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 roumded-md'>
-          <div className='w-full p-2'>
+          <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 roumded-md md:text-base sm:text-sm text-xs'>
+          <div className='w-full p-2 overflow-x-auto'>
             <p className='m-2 font-bold'>{arrExist ? 'Linkedlist': ''}</p>
-            <div className="flex flex-wrap">
+            <div className="flex xl:ml-2">
               {array.map((item, index) => (
                 <>
                 <div
                   id={item}
                   key={index}
                   ref={divRefs.current[index]}
-                  className="flex justify-center border border-black text-green-800 md:px-4 p-2 md:py-2 py-1 mt-2"
+                  className="flex justify-center border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2"
                 //   style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                 >
                   {item}
                 </div>
-                {/* <span className='mt-3 md:mt-4'>───➤</span> */}
-                <span className='mt-3 md:mt-4'>⮜───</span>
-                <p className='mt-3 md:mt-4'>{index == array.length-1 ? 'Null': ''}</p>
+                <div>
+                  <div className='flex'>
+                    <p className='mt-1'>──➤</p>
+                  </div>
+                  <div className='flex'>
+                    <p>⮜──</p>
+                  </div>
+                </div>
+                <p className='mt-3 md:mt-4 ml-1'>{index == array.length-1 ? 'Null': ''}</p>
                 </>
               ))}
             </div>
@@ -153,19 +159,19 @@ export default function DoublyLinkedlistOperations() {
             </div>
               <button
               onClick={removeItemAtIndex}
-                className="bg-blue-500 text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-r-md"
+                className="bg-blue-500 text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
               >
               delete by index
             </button>
             <button
               onClick={removeByEle}
-              className="bg-blue-500 text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-r-md" 
+              className="bg-blue-500 text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md" 
             >
               delete by element
             </button>
             <button
               onClick={removeArray}
-              className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
+              className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 xl:m-0 mt-1 h-fit rounded-md"
             >
               delete Linkedlist
             </button>

@@ -1,10 +1,11 @@
 import React from 'react'
 import { useState, useRef, useEffect } from 'react';
+// import './styles/DSA_styles.css';
 
 export default function DynamicArrayOperations() {
     const [array, setArray] = useState([]);
     const [element, setElement] = useState('');
-    const [arrayLength, setArrayLength] = useState(0);
+    const [arrayLength, setArrayLength] = useState('');
     const [arrExist, setArrExist] = useState(false);
     const [customIdx, setCustomIdx] = useState('');
   
@@ -17,7 +18,7 @@ export default function DynamicArrayOperations() {
         newDivs.push(
           <div
             key={i}
-            className="text-green-800 flex items-center justify-center md:px-4 px-6 w-14"
+            className="flex items-center justify-center flex-shrink-0 lg:w-14 md:12 w-10"
             // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
           >
             {i}
@@ -29,8 +30,9 @@ export default function DynamicArrayOperations() {
     
   
     const createArray = () => {
-        setArray(Array(arrayLength).fill('Null'));
+        setArray(Array(arrayLength).fill('NULL'));
         setArrExist(true);
+        setArrayLength('');
     };
   
     function arrayPushOperation() {
@@ -57,7 +59,7 @@ export default function DynamicArrayOperations() {
                       newArray = [...newArray, element]; // Add element to newArray
                       temp--;
                   } else {
-                      newArray = [...newArray, 'Null']; // Add 'Null' to newArray
+                      newArray = [...newArray, 'NULL']; // Add 'Null' to newArray
                       temp--;
                   }
               }
@@ -99,7 +101,7 @@ export default function DynamicArrayOperations() {
   
   
     return (
-      <div className="md:flex bg-green-100 h-fit w-full p-2p">
+      <div className="md:flex bg-green-100 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
         <div className='md:w-70p w-full mb-2'>
           <h1 className="text-xl font-bold mb-4">Dynamic array oprations</h1>
           <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
@@ -109,7 +111,7 @@ export default function DynamicArrayOperations() {
               //   value={element}
                 onChange={(e) => setArrayLength(parseInt(e.target.value))}
                 className="border border-gray-300 md:p-2 p-1 h-fit w-44p rounded-l-md"
-                placeholder="Enter Array length"
+                placeholder="Length"
               />
               <button
                 onClick={createArray}
@@ -128,7 +130,7 @@ export default function DynamicArrayOperations() {
               />
               <button
                 onClick={arrayPushOperation}
-                className="bg-blue-500 text-white md:p-2 p-1 h-fit"
+                className="bg-blue-500 text-white md:p-2 p-1 h-fit transition ease-in delay-150 hover:-translate-y-1 hover:scale-102"
               >
                 Push
               </button>
@@ -141,19 +143,24 @@ export default function DynamicArrayOperations() {
             </div>  
           </div>
           <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
-            <div className='w-full p-2'>
-              <div className="flex ml-8">
+            <div className='w-full p-2 overflow-x-auto'>
+            <p className='m-2 font-bold'>{arrExist ? 'Arr': ''}</p>
+              <div className="flex md:ml-4">
                 {divs}
               </div>
-              <div className="flex flex-wrap">
-                <p className='m-2 font-bold'>{arrExist ? 'Arr': ''}</p>
+              <div className="flex md:ml-4">
+                
                 {array.map((item, index) => (
                   <div
                     id={item}
                     key={index}
                     ref={divRefs.current[index]}
-                    className="border border-black bg-green-300 flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
+                    className="border border-black bg-green-300 flex justify-center md:w-12 lg:w-14 w-10 flex-shrink-0 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap animate-fadeIn"
                     // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
+                    style={{
+                      animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
+                      animationFillMode: 'both' // Ensures the element stays visible after the animation ends
+                    }}
                   >
                     {item}
                   </div>
@@ -182,9 +189,8 @@ export default function DynamicArrayOperations() {
             </div>
               <button
               onClick={removeItemAtIndex}
-                className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-md"
+                className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102"
               >
-            
               delete by index
             </button>
             <button

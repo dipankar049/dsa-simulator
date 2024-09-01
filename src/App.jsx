@@ -22,7 +22,7 @@ function App() {
       <MenubarUn />
       <div className='w-full'>
         <Navbar/>
-        <div className="h-full"> 
+        <div className="h-full w-full"> 
           {/* <ArrayVisualizer /> */}
           {/* <StaticArrayOperations/>
           <hr className="border-black border-1"></hr>

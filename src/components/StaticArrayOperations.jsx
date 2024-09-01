@@ -1,12 +1,13 @@
 // src/components/ArrayVisualizer.js
 
 import React, { useState, useRef, useEffect } from 'react';
+// import './styles/DSA_styles.css';
 
 const StaticArrayOperations = () => {
   const [array, setArray] = useState([]);
   const [element, setElement] = useState('');
-  const [arrayLength, setArrayLength] = useState(0);
-  const [customIdx, setCustomIdx] = useState(0);
+  const [arrayLength, setArrayLength] = useState('');
+  const [customIdx, setCustomIdx] = useState(0); 
   const [arrExist, setArrExist] = useState(false);
 
   const divRefs = useRef([]);
@@ -15,11 +16,11 @@ const StaticArrayOperations = () => {
 
 useEffect(() => {
     const newDivs = [];
-    for (let i = 0; i < arrayLength; i++) {
+    for (let i = 0; i < array.length; i++) {
       newDivs.push(
         <div
           key={i}
-          className="text-green-800 flex items-center justify-center md:px-4 px-6 w-14"
+          className="flex items-center justify-center flex-shrink-0 lg:w-14 md:12 w-10"
           // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
         >
           {i}
@@ -31,31 +32,31 @@ useEffect(() => {
   
 
   const createArray = () => {
-    if(!arrayLength) {
+    if(arrayLength == 0 || arrayLength > 20) {
       return;
     }
-      setArray(Array(arrayLength).fill('NULL'));
-      setArrExist(true);
+    setArray(Array(arrayLength).fill('NULL'));
+    setArrExist(true);
   }; 
 
     function arrayInsert() {
       if(!arrExist) {
         return;
       };
-        if(customIdx > arrayLength) {
-            console.log("array full, can't insert");
-            return;
-        }
-        if(element) {
-            setArray(prevArray => 
-                prevArray.map((item, i) => (i === customIdx ? element : item))
-            );
-        }
-        setElement('');
+      if(customIdx > array.length) {
+          console.log("array full, can't insert");
+          return;
+      }
+      if(element) {
+          setArray(prevArray => 
+              prevArray.map((item, i) => (i === customIdx ? element : item))
+          );
+      }
+      setElement('');
     }
 
   function deleteByIdx() {
-    if(customIdx > arrayLength || customIdx < 0) {
+    if(customIdx > array.length || customIdx < 0) {
         console.log("Invalid index");
         return;
     }
@@ -83,7 +84,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="md:flex bg-green-100 h-fit w-full p-2p">
+    <div className="md:flex bg-green-100 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
       <div className='md:w-70p w-full mb-2'>
         <h1 className="text-xl font-bold mb-4">Static Array Operations</h1>
         
@@ -91,10 +92,10 @@ useEffect(() => {
           <div className='mr-2'>
             <input
               type="number"
-            //   value={element}
+              value={arrayLength}
               onChange={(e) => setArrayLength(parseInt(e.target.value))}
-              className="border border-gray-300 md:p-2 p-1 h-fit w-44p rounded-l-md"
-              placeholder="Enter length"
+              className="border border-gray-300 md:p-2 p-1 h-fit w-40p rounded-l-md"
+              placeholder="Length"
             />
             <button
               onClick={createArray}
@@ -128,19 +129,24 @@ useEffect(() => {
           
         </div>
         <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
-          <div className='w-full p-2'>
-            <div className="flex ml-8">
+          <div className='w-full p-2 overflow-x-auto'>
+          <p className=' md:m-2 font-bold'>{arrExist ? 'Arr': ''}</p>
+            <div className="flex md:ml-4">
               {divs}
             </div>
-            <div className="flex flex-wrap">
-            <p className='m-2 font-bold'>{arrExist ? 'Arr': ''}</p>
+            
+            <div className="flex md:ml-4">
               {array.map((item, index) => (
                 <div
                   id={item}
                   key={index}
                   ref={divRefs.current[index]}
-                  className="border border-black bg-green-300 flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
+                  className="border border-black bg-green-300 flex justify-center md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 flex-shrink-0 overflow-hidden whitespace-nowrap animate-fadeIn"
                   // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
+                  style={{
+                    animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
+                    animationFillMode: 'both' // Ensures the element stays visible after the animation ends
+                  }}
                 >
                   {item}
                 </div>

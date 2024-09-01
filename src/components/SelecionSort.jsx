@@ -75,7 +75,7 @@ const SelectionSort = () => {
             newDivs.push(
                 <div
                     key={i}
-                    className="text-green-800 flex items-center justify-center md:px-4 px-6 w-14"
+                    className="flex items-center justify-center flex-shrink-0 lg:w-14 md:12 w-10"
                 // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
                 >
                     {i}
@@ -123,7 +123,7 @@ const SelectionSort = () => {
     }
 
     return (
-        <div className="md:flex bg-green-100 h-fit w-full p-2p">
+        <div className="md:flex bg-green-100 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
             <div className='md:w-70p w-full mb-2'>
                 <h1 className="text-xl font-bold mb-4">Selection Sort</h1>
                 <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
@@ -138,7 +138,7 @@ const SelectionSort = () => {
                     <div className='flex flex-wrap justify-end'>
                         <button
                             onClick={selectionSort}
-                            className="bg-blue-500 text-white md:px-4 p-2 h-fit rounded-md"
+                            className="bg-blue-500 text-white px-4 md:px-4 md:p-2 p-1 h-fit rounded-md"
                         >
                             Sort
                         </button>
@@ -151,29 +151,31 @@ const SelectionSort = () => {
                                 <p className='pl-4 font-bold'>Comparisons = {comparisons}</p>
                                 <p className='font-bold'>Iterations = {iterations}</p>
                             </div>
-                            <div className="flex ml-10">
-                                {divs}
-                            </div>
-                            <div className="flex flex-wrap">
-                                <p className='m-2 font-bold'>{arrExist ? 'Arr' : ''}</p>
-                                {array.map((item, index) => (
-                                    <div
-                                        id={item}
-                                        key={index}
-                                        ref={divRefs.current[index]}
-                                        className="border border-black bg-green-200 flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
-                                        // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
-                                        style={{
-                                            color: `${index === min ? 'red' : (index === seacondEle ? (isSmaller ? 'red' : 'blue') : 'black')}`,
-                                            fontWeight: `${(index === min || index === seacondEle || index === firstEle) ? 'bold' : ''}`,
-                                            backgroundColor: `${index === firstEle ? 'white' : ''}`
-                                        }}
-                                    // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
-                                    >
-                                        {item}
-                                    </div>
-                                ))}
-                                <p className='m-2 font-bold text-green-500'>{isSorted ? 'Sorted' : ''}</p>
+                            <p className='m-2 font-bold'>{arrExist ? 'Arr' : ''}</p>
+                            <div className='overflow-x-auto'>
+                                <div className="flex md:ml-4">
+                                    {divs}
+                                </div>
+                                <div className="flex md:ml-4">
+                                    {array.map((item, index) => (
+                                        <div
+                                            id={item}
+                                            key={index}
+                                            ref={divRefs.current[index]}
+                                            className="border border-black bg-green-200 flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap"
+                                            // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
+                                            style={{
+                                                color: `${index === min ? 'red' : (index === seacondEle ? (isSmaller ? 'red' : 'blue') : 'black')}`,
+                                                fontWeight: `${(index === min || index === seacondEle || index === firstEle) ? 'bold' : ''}`,
+                                                backgroundColor: `${index === firstEle ? 'white' : ''}`
+                                            }}
+                                        // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
+                                        >
+                                            {item}
+                                        </div>
+                                    ))}
+                                    <p className='m-2 font-bold text-green-500'>{isSorted ? 'Sorted' : ''}</p>
+                                </div>
                             </div>
                         </div>
                         <div className='p-4 font-bold' style={{ visibility: `${isVisible ? 'visible' : 'hidden'}` }}>

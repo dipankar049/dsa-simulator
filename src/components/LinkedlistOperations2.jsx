@@ -74,7 +74,7 @@ export default function DynamicArrayOperations() {
   
   
     return (
-      <div className="md:flex bg-green-100 h-fit w-full p-2p">
+      <div className="md:flex bg-green-100 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
         <div className='md:w-70p w-full mb-2'>
           <h1 className="text-xl font-bold mb-4">Singly Linkedlist oprations</h1>
           <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
@@ -110,21 +110,21 @@ export default function DynamicArrayOperations() {
           
           </div>
           <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
-            <div className='w-full p-2'>
+            <div className='w-full p-2 overflow-x-auto'>
               <p className='m-2 font-bold'>{arrExist ? 'Linkedlist': ''}</p>
-              <div className="flex flex-wrap">
+              <div className="flex xl:ml-2">
                 {array.map((item, index) => (
                   <>
                   <div
                     id={item}
                     key={index}
                     ref={divRefs.current[index]}
-                    className="flex justify-center border border-black bg-green-300 md:px-4 p-2 md:py-2 py-1 mt-2"
+                    className="flex justify-center border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2"
                   //   style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                   >
                     {item}
                   </div>
-                  <p className='mt-3 md:mt-4'>───➤</p>
+                  <p className='mt-3 md:mt-4'>──➤</p>
                   <p className='mt-3 md:mt-4'>{index == array.length-1 ? 'Null': ''}</p>
                   </>
                 ))}
@@ -164,13 +164,13 @@ export default function DynamicArrayOperations() {
               </button>
               <button
                 onClick={removeArray}
-                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
+                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 xl:m-0 my-1 h-fit rounded-md"
               >
                 delete Linkedlist
               </button>
             </div>
         </div>
-        <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
+        <div className='min-h-full w-full md:w-28p bg-black md:m-4 md:mr-0 md:ml-2p'>
           <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
               <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
           </div>

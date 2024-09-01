@@ -28,23 +28,88 @@ const MergeSort = () => {
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     
 
-    const divide = async () => {
+    // const divide = async () => {
 
-        let i = queuePointer;
-        let newSubArrayInfo = [...subArrayInfo]; // Local copy to avoid state update issues
-        let localQueue = [...queue]; // Local copy to avoid state update issues
-        let singleDiv = 0;
+    //     let i = queuePointer;
+    //     let newSubArrayInfo = [...subArrayInfo]; // Local copy to avoid state update issues
+    //     let localQueue = [...queue]; // Local copy to avoid state update issues
+    //     let singleDiv = 0;
+    //     let multiDiv = false;
+    //     await delay(1000);
+    //     while (i < localQueue.length) {
+    //         let mid;
+    //         if(newSubArrayInfo[i].left === newSubArrayInfo[i].right) {
+    //             singleDiv++;
+    //             newSubArrayInfo.push(
+    //                 { left: newSubArrayInfo[i].left, right: newSubArrayInfo[i].right }
+    //             );
+    //         } else {
+    //             console.log("gettingtrue");
+    //             multiDiv = true;
+    //             mid = Math.floor((newSubArrayInfo[i].left + newSubArrayInfo[i].right) / 2);
+    //             newSubArrayInfo.push(
+    //                 { left: newSubArrayInfo[i].left, right: mid },
+    //                 { left: mid + 1, right: newSubArrayInfo[i].right }
+    //             );
+    //         }
+    //         console.log("Mid value calculated:", newSubArrayInfo);  
+            
+    //         i++;
+    //     }
+    
+    //     let k = i;
+    //     let j = (i - queuePointer) * 2 - singleDiv;
+    
+    //     while (j > 0) {
+    //         localQueue.push(i++);
+    //         console.log('Everhing fine');
+    //         j--;
+    //     }
+    
+    //     setSubArrayInfo(newSubArrayInfo);
+    //     setQueue(localQueue);
+    //     setQueuePointer(k);
+
+    //     // await Promise.resolve();
+    //     if (multiDiv) {
+    //         await delay(1000);
+    //         console.log('new call');
+    //         await divide(); // Trigger another call to divide if necessary
+    //     } else {
+    //         return;
+    //     }
+    // };
+
+    // const mergeSort = () => {
+    //     if (array.length === 0) {
+    //         return;
+    //     }
+    //     // while(multiDiv) {
+    //     // //     console.log('working');
+    //     //     multiDiv = false;
+    //         divide();
+    //     //     console.log("No of multiDivs",multiDiv);
+    //     // }
+    // }
+    let singleDiv = 0;
+    const divide = async (localQueue, localQueuePointer, newSubArrayInfo) => {
+        // if (singleDiv != (localQueue.length - localQueuePointer)) {
+        //     return;
+        // }
+        let i = localQueuePointer;
+        singleDiv = 0;
         let multiDiv = false;
+    
         await delay(1000);
+    
         while (i < localQueue.length) {
             let mid;
-            if(newSubArrayInfo[i].left === newSubArrayInfo[i].right) {
+            if (newSubArrayInfo[i].left === newSubArrayInfo[i].right) {
                 singleDiv++;
                 newSubArrayInfo.push(
                     { left: newSubArrayInfo[i].left, right: newSubArrayInfo[i].right }
                 );
             } else {
-                console.log("gettingtrue");
                 multiDiv = true;
                 mid = Math.floor((newSubArrayInfo[i].left + newSubArrayInfo[i].right) / 2);
                 newSubArrayInfo.push(
@@ -52,40 +117,58 @@ const MergeSort = () => {
                     { left: mid + 1, right: newSubArrayInfo[i].right }
                 );
             }
-            console.log("Mid value calculated:", mid);  
-            
+    
             i++;
         }
     
         let k = i;
-        let j = (i - queuePointer) * 2 - singleDiv;
+        let j = (i - localQueuePointer) * 2 - singleDiv;
     
         while (j > 0) {
             localQueue.push(i++);
             j--;
         }
     
+        // Update state after processing this iteration
         setSubArrayInfo(newSubArrayInfo);
         setQueue(localQueue);
         setQueuePointer(k);
-
-        // await Promise.resolve();
-        // if (multiDiv) {
-        //     await divide(); // Trigger another call to divide if necessary
-        // }
+    
+        // Continue recursion if there are further divisions needed
+        if (multiDiv) {
+            console.log('no of singlediv', singleDiv);
+            await delay(1000);
+            divide([...localQueue], k, [...newSubArrayInfo]); // Pass copies for safety
+        }
     };
-
+    
     const mergeSort = () => {
         if (array.length === 0) {
             return;
         }
-        // while(multiDiv) {
-        // //     console.log('working');
-        //     multiDiv = false;
-            divide();
-        //     console.log("No of multiDivs",multiDiv);
-        // }
-    }
+    
+        const localQueue = [...queue];
+        const localQueuePointer = queuePointer;
+        const newSubArrayInfo = [...subArrayInfo];
+    
+        divide(localQueue, localQueuePointer, newSubArrayInfo);
+    };
+
+    const getSpacingX = () => {
+        const screenWidth = window.innerWidth;
+    
+        if (screenWidth >= 1024) {
+          // Large screens (e.g., desktops)
+          return 25; // Custom padding for large screens
+        } else if (screenWidth >= 768) {
+          // Medium screens (e.g., tablets)
+          return 20; // Custom padding for medium screens
+        } else {
+          // Small screens (e.g., mobile)
+          return 15; // Custom padding for small screens
+        }
+      };
+      console.log(getSpacingX());
 
     useEffect(() => { 
         setSubArrayInfo([{left: 0, right: array.length -1}])
@@ -105,7 +188,7 @@ const MergeSort = () => {
             newDivs.push(
                 <div
                     key={i}
-                    className="text-green-800 flex items-center justify-center md:px-4 px-6 w-14"
+                    className="flex items-center justify-center flex-shrink-0 lg:w-14 md:12 w-10"
                 // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
                 >
                     {i}
@@ -119,13 +202,14 @@ const MergeSort = () => {
     useEffect(() => {
         if(queuePointer > 0) {
             const newDivs = [];
-            for(let j = queuePointer; j < queue.length; j ++) {
+            let k = 0;
+            for(let j = queuePointer; j < queue.length; j++, k++) {
                 for (let i = subArrayInfo[j].left; i <= subArrayInfo[j].right; i++) {
                     newDivs.push(
                         <div
                             key={i}
-                            className="border border-black flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-5 overflow-hidden whitespace-nowrap"
-                            style={{ marginRight: `${i === subArrayInfo[j]?.right ? (i === subArrayInfo[queue.length - 1]?.right ? '0' : '20') : '0'}px` }}
+                            className="border border-black flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap"
+                            style={{ marginRight: `${i === subArrayInfo[j]?.right ? (i === subArrayInfo[queue.length - 1]?.right ? '0' : `20`) : '0'}px` }}
                         >
                             {array[i]}
                         </div>
@@ -177,7 +261,7 @@ const MergeSort = () => {
     }
 
     return (
-        <div className="md:flex bg-green-100 h-fit w-full p-2p">
+        <div className="md:flex bg-green-100 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
             <div className='md:w-70p w-full mb-2'>
                 <h1 className="text-xl font-bold mb-4">Merge Sort</h1>
                 <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
@@ -205,51 +289,58 @@ const MergeSort = () => {
                                 <p className='pl-4 font-bold'>Comparisons = {comparisons}</p>
                                 <p className='font-bold'>Iterations = {iterations}</p>
                             </div>
-                            <div className="flex ml-16">
-                                {divs}
-                            </div>
-                            <div className="flex flex-wrap ml-6">
-                                <p className='m-2 font-bold'>{arrExist ? 'Arr' : ''}</p>
-                                {array.map((item, index) => (
-                                    <div
-                                        id={item}
-                                        key={index}
-                                        ref={divRefs.current[index]}
-                                        className="border border-black flex justify-center md:px-4 px-1 md:py-2 py-1 w-14 mt-1 overflow-hidden whitespace-nowrap"
-                                        // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
-                                        style={{
-                                            color: `${index === firstEle ? (isGreater ? 'red' : 'blue') : (index === seacondEle ? (isGreater ? 'red' : 'blue') : 'black')}`,
-                                            fontWeight: `${index === firstEle ? 'bold' : (index === seacondEle ? 'bold' : '')}`
-                                        }}
-                                    // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
-                                    >
-                                        {item}
+                            <p className='m-2 font-bold'>{arrExist ? 'Arr' : ''}</p>
+                            <div className='flex'>
+                                <div className='overflow-x-auto grid place-items-center'>
+                                    <div className="flex md:ml-12 m-4">
+                                        {divs}
                                     </div>
-                                ))}
-                            </div>
-                            
-                            <div className="">
-                                {dividedArrays.map((item, index) => (
-                                    <div
-                                        // id={item}
-                                        key={index}
-                                        className='flex'
-                                        style={{marginLeft: `${(59 - (index * 5))}px`}}
-                                    >
-                                        {item}
+                                    <div className="flex md:ml-12 m-4 mb-0">
+                                        {array.map((item, index) => (
+                                            <div
+                                                id={item}
+                                                key={index}
+                                                ref={divRefs.current[index]}
+                                                className="border border-black flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap"
+                                                // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
+                                                style={{
+                                                    color: `${index === firstEle ? (isGreater ? 'red' : 'blue') : (index === seacondEle ? (isGreater ? 'red' : 'blue') : 'black')}`,
+                                                    fontWeight: `${index === firstEle ? 'bold' : (index === seacondEle ? 'bold' : '')}`
+                                                }}
+                                            // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
+                                            >
+                                                {item}
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                                {/* {dividedArrays.map((row, rowIndex) => (
-                                    <div key={rowIndex} className="flex">
-                                    {row.map((cell, colIndex) => (
-                                        <div key={colIndex} >
-                                        {cell}
-                                        </div>
-                                    ))}
+                                    
+                                    <div className="md:ml-7 grid place-items-center">
+                                        {/* <div className="inline-block"> */}
+                                            {dividedArrays.map((item, index) => (
+                                                <div
+                                                    // id={item}
+                                                    key={index}
+                                                    className='flex mt-3'
+                                                    // style={{marginLeft: `${(35 - (index * 5))}px`}}
+                                                    // style={{marginLeft: `${15 - (index * 5)}px`}}
+                                                >
+                                                    {item}
+                                                </div>
+                                            ))}
+                                            {/* {dividedArrays.map((row, rowIndex) => (
+                                                <div key={rowIndex} className="flex">
+                                                {row.map((cell, colIndex) => (
+                                                    <div key={colIndex} >
+                                                    {cell}
+                                                    </div>
+                                                ))}
+                                                </div>
+                                            ))} */}
+                                        {/* </div> */}
                                     </div>
-                                ))} */}
+                                </div>
                             </div>
-                            <div>
+                            {/* <div>
                                 {subArrayInfo.map((item, index) => (
                                     <div
                                         // id={item}
@@ -260,7 +351,7 @@ const MergeSort = () => {
                                         index-{index} {item.left}{item.right} {queue} {queuePointer}
                                     </div>
                                 ))}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     <div className='p-1 text-white md:font-bold text-xs md:text-base bg-gray-800 rounded-r-md'>
