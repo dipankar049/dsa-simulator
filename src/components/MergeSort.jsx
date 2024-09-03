@@ -6,8 +6,6 @@ const MergeSort = () => {
     const [array, setArray] = useState([20, 64, 132, 101, 95, 7, 64, 153, 80]);
     const [element, setElement] = useState('');
     const [arrExist, setArrExist] = useState(true);
-    const [isVisible, setIsVisible] = useState(false);
-    const [isMidVisible, setIsMidVisible] = useState(false);
     const [iterations, setIterations] = useState(0);
     const [comparisons, setComparisons] = useState(0);
     const divRefs = useRef([]);
@@ -24,8 +22,14 @@ const MergeSort = () => {
 
     const [divs, setDivs] = useState([]);
     const [dividedArrays, setDividedArrays] = useState([[]]);
+    const [emptyElement, setEmptyElement] = useState(false);
+    const [oldArray, setOldArray] = useState(false);
 
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    useEffect(() => {
+        setEmptyElement(false);
+    },[element]);
     
 
     // const divide = async () => {
@@ -208,7 +212,7 @@ const MergeSort = () => {
                     newDivs.push(
                         <div
                             key={i}
-                            className="border border-black flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap"
+                            className="border border-black bg-green-200 flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap"
                             style={{ marginRight: `${i === subArrayInfo[j]?.right ? (i === subArrayInfo[queue.length - 1]?.right ? '0' : `20`) : '0'}px` }}
                         >
                             {array[i]}
@@ -223,6 +227,7 @@ const MergeSort = () => {
 
 
     const createArray = () => {
+        setOldArray(false);
         setArray([]);
         setArrExist(true);
         setIsMidVisible(false);
@@ -233,6 +238,12 @@ const MergeSort = () => {
         if (!arrExist) {
             return;
         };
+        if(element === '') {
+            setEmptyElement(true);
+            return;
+        }
+        setEmptyElement(false);
+        setOldArray(true);
         if (element) {
             setArray([...array, element]);
         }
@@ -242,7 +253,7 @@ const MergeSort = () => {
 
     function arrayPopOperation() {
         //   console.log(idx);
-        if (array.length < 0) {
+        if (array.length <= 0) {
             // console.log("empty array, can't delete");
             return;
         }
@@ -250,10 +261,17 @@ const MergeSort = () => {
     }
 
     const removeByEle = () => {
+        if(element === '') {
+            setEmptyElement(true);
+            return;
+        }
+        setEmptyElement(false);
         setArray(array.filter(item => item != element));
+        setElement('');
     };
 
     const removeArray = () => {
+        setOldArray(false);
         setArray([]);
         setArrExist(false);
         setIsVisible(false);
@@ -261,14 +279,14 @@ const MergeSort = () => {
     }
 
     return (
-        <div className="md:flex bg-green-100 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
+        <div className="md:flex bg-gradient-to-tl from-cyan-200 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
             <div className='md:w-70p w-full mb-2'>
                 <h1 className="text-xl font-bold mb-4">Merge Sort</h1>
                 <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
                     <div className=''>
                         <button
                             onClick={createArray}
-                            className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-md"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-md"
                         >
                             Create New array
                         </button>
@@ -276,13 +294,13 @@ const MergeSort = () => {
                     <div className='flex flex-wrap justify-end'>
                         <button
                             onClick={mergeSort}
-                            className="bg-blue-500 text-white md:px-4 p-2 h-fit rounded-md"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:px-4 p-2 h-fit rounded-md"
                         >
                             Sort
                         </button>
                     </div>
                 </div>
-                <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
+                <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md shadow-xl'>
                     <div className='w-full p-2'>
                         <div>
                             <div className='flex justify-between'>
@@ -295,17 +313,19 @@ const MergeSort = () => {
                                     <div className="flex md:ml-12 m-4">
                                         {divs}
                                     </div>
-                                    <div className="flex md:ml-12 m-4 mb-0">
+                                    <div className="flex md:ml-12 m-4 my-0">
                                         {array.map((item, index) => (
                                             <div
                                                 id={item}
                                                 key={index}
                                                 ref={divRefs.current[index]}
-                                                className="border border-black flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap"
+                                                className="border border-black bg-cyan-300 flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap animate-fadeIn rounded-sm"
                                                 // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
                                                 style={{
                                                     color: `${index === firstEle ? (isGreater ? 'red' : 'blue') : (index === seacondEle ? (isGreater ? 'red' : 'blue') : 'black')}`,
-                                                    fontWeight: `${index === firstEle ? 'bold' : (index === seacondEle ? 'bold' : '')}`
+                                                    fontWeight: `${index === firstEle ? 'bold' : (index === seacondEle ? 'bold' : '')}`,
+                                                    animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`, // Stagger the delay by 0.2s per item
+                                                    animationFillMode: 'both' // Ensures the element stays visible after the animation ends
                                                 }}
                                             // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                             >
@@ -354,7 +374,7 @@ const MergeSort = () => {
                             </div> */}
                         </div>
                     </div>
-                    <div className='p-1 text-white md:font-bold text-xs md:text-base bg-gray-800 rounded-r-md'>
+                    <div className='p-1 text-white md:font-bold text-xs md:text-base bg-cyan-800 rounded-r-md'>
                         <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p><p>I</p><p>Z</p><p>E</p><p>D</p><p>S</p><p>A</p>
                     </div>
                 </div>
@@ -363,25 +383,26 @@ const MergeSort = () => {
                         <input
                             type="number"
                             value={element}
-                            onChange={(e) => setElement(parseInt(e.target.value))}
-                            className="border border-gray-300 md:p-2 p-1 h-fit w-36p rounded-l-md"
+                            onChange={(e) => setElement(e.target.value)}
+                            className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
+                            style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
                             placeholder="Enter element"
                         />
                         <button
                             onClick={arrayPushOperation}
-                            className="bg-blue-500 text-white md:p-2 p-1 h-fit"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
                         >
                             Push
                         </button>
                         <button
                             onClick={() => { arrayPopOperation() }}
-                            className="bg-blue-500 text-white md:p-2 p-1 h-fit"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
                         >
                             Pop
                         </button>
                         <button
                             onClick={removeByEle}
-                            className="bg-blue-500 text-white md:p-2 p-1 h-fit rounded-r-md"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
                         >
                             delete by element
                         </button>
@@ -389,7 +410,7 @@ const MergeSort = () => {
 
                     <button
                         onClick={removeArray}
-                        className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
+                        className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
                     >
                         delete array
                     </button>
