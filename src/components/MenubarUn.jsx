@@ -38,7 +38,7 @@ export default function MenubarUn() {
                 Merge Sort
             </Link>   
             <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="#">
+            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/quickSort">
                 {/* <img src={monthlyImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
                 Quick sort
             </Link> 

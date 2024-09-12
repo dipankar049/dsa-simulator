@@ -13,6 +13,7 @@ import Respon from './components/Respon';
 import BubbleSort from './components/BubbleSort';
 import SelectionSort from './components/SelecionSort';
 import MergeSort from './components/MergeSort';
+import QuickSort from './components/QuickSort';
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
             <Route path="/binSearch" element={<BinarySearch />} />
             <Route path="/bubbleSort" element={<BubbleSort />} />
             <Route path="/mergeSort" element={<MergeSort />} />
+            <Route path="/quickSort" element={<QuickSort />} />
             <Route path="/selecionSort" element={<SelectionSort />} />
           </Routes>
         </div>
