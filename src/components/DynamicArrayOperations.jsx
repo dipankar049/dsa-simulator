@@ -1,5 +1,6 @@
 import React from 'react'
 import { useState, useRef, useEffect } from 'react';
+import TopicCard from './TopicCard';
 // import './styles/DSA_styles.css';
 
 export default function DynamicArrayOperations() {
@@ -199,36 +200,7 @@ export default function DynamicArrayOperations() {
   
     return (
       <div className='p-2p'>
-        <details className="my-6 p-6 bg-gray-100 rounded-lg shadow-md" open>
-          <summary className="text-2xl font-bold text-gray-800">Dynamic Array</summary>
-          <p className="mt-2 text-gray-700">
-            A <strong>Dynamic Array</strong> is a data structure that resizes itself automatically when the number of elements exceeds its current capacity. Unlike static arrays, dynamic arrays provide flexibility by adjusting their size during runtime.
-          </p>
-          <p className="mt-2 text-gray-700">
-            Dynamic arrays are suitable for scenarios where the number of elements is unknown beforehand. They maintain constant-time access to elements while providing dynamic resizing capabilities.
-          </p>
-
-          <h3 className="text-xl font-semibold text-gray-800 mt-4">Example</h3>
-          <pre className="bg-gray-800 text-white p-4 rounded-md">
-            {`// Example in JavaScript
-        class DynamicArray {
-          constructor() {
-            this.array = [];
-            this.size = 0;
-          }
-
-          add(element) {
-            this.array[this.size] = element;
-            this.size++;
-          }
-        }
-
-        const dynamicArray = new DynamicArray();
-        dynamicArray.add(10);
-        dynamicArray.add(20);
-        console.log(dynamicArray.size); // Output: 2`}
-          </pre>
-        </details>
+        <TopicCard topicName="Dynamic Array" />
         <details className="bg-gradient-to-r from-cyan-200 h-fit w-full p-2p md:text-base sm:text-sm text-xs" open>
           <summary className="text-xl font-bold mb-4">Dynamic array oprations</summary>
            <div className='md:flex'>
@@ -363,31 +335,7 @@ export default function DynamicArrayOperations() {
             </div>
           </div>
         </details>
-        <details className="my-6 p-6 bg-gray-100 rounded-lg shadow-md" open>
-          <summary className="text-2xl font-bold text-gray-800">Real-Life Example</summary>
-          <p className="mt-2 text-gray-700">
-            A <strong>Dynamic Array</strong> is used when the amount of data can change over time. This means you don’t know how many elements you need to store when the program starts.
-          </p>
-          <p className="mt-2 text-gray-700">
-            For example, consider an online meeting. At the start, there might be no participants. As people join the meeting, their names need to be added. Similarly, when someone leaves the meeting, their name should be removed. A dynamic array is perfect for this because it can grow or shrink as needed.
-          </p>
-
-          {/* <h3 className="text-xl font-semibold text-gray-800 mt-4">Real-Life Example</h3> */}
-          <br />
-          <pre className="bg-gray-800 text-white p-4 rounded-md">
-            {`// Dynamic Array Example
-        let participants = []; // Initially, the array is empty.
-        participants.push("Alice"); // Alice joins the meeting.
-        participants.push("Bob"); // Bob joins the meeting.
-        console.log(participants); // Output: ["Alice", "Bob"]
-
-        participants.pop(); // Bob leaves the meeting.
-        console.log(participants); // Output: ["Alice"]`}
-          </pre>
-          <p className="mt-2 text-gray-700">
-            Unlike a static array, a dynamic array is flexible and can adjust its size automatically. However, it is slightly more complex internally as it reallocates memory when resizing.
-          </p>
-        </details>
+        <TopicCard topicName="Real-Life Use(Dynamic Array)" />
       </div>
     );
 }

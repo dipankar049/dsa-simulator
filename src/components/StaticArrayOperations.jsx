@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { DetailsStateContext } from '../context/DetailsContext';
 import { ThemeContext } from '../context/ThemeContext';
+import TopicCard from './TopicCard';
 
 const StaticArrayOperations = () => {
   const [array, setArray] = useState([15, 22, 12, 56, 24]);
@@ -164,49 +165,10 @@ const StaticArrayOperations = () => {
   return (
     <div className='p-2p bg-white text-gray-700 
                     dark:bg-gray-700 dark:text-white 
-                    md:text-base sm:text-sm text-xs'>
-      <details
-       className="my-6 p-6 bg-gray-100 dark:bg-gray-600 rounded-lg shadow-md"
-       id='array'
-       onToggle={(e) => {handleToggle('array', e.target.open)}}
-       open={detailsState['array'] !== undefined ? detailsState['array'] : true }
+                    md:text-base sm:text-sm text-xs'
       >
-        <summary>Array</summary>
-        <p className="mt-2">
-          An <strong>Array</strong> is a data structure that stores a collection of elements, each identified by an index or a key. It allows efficient access to elements by their index and is one of the most commonly used data structures in programming.
-        </p>
-        <p className="mt-2">
-          Arrays have a fixed size, meaning that once defined, the size of the array cannot be changed. This makes arrays simple but less flexible when the number of elements is unknown or dynamic.
-        </p>
-        
-        <h3 className="text-xl font-semibold mt-4">Example</h3>
-        <pre className="bg-gray-800 text-white p-4 rounded-md">
-          {`let numbers = [10, 20, 30, 40];
-  console.log(numbers[2]); // Output: 30`}
-        </pre>
-      </details>
-      <details 
-       className="my-6 p-6 bg-gray-100 dark:bg-gray-600 rounded-lg shadow-md"
-       id='staticArray'
-       onToggle={(e) => {handleToggle('staticArray', e.target.open)}}
-       open={detailsState['staticArray'] !== undefined ? detailsState['staticArray'] : true}
-      >
-        <summary>Static Array</summary>
-        <p className="mt-2">
-          A <strong>Static Array</strong> is an array that has a fixed size, defined at the time of its creation. The size cannot be changed during runtime, and if the number of elements exceeds the allocated size, an overflow occurs.
-        </p>
-        <p className="mt-2">
-          Static arrays are used when the size of the dataset is known beforehand and will not change. They provide constant-time access to elements but do not handle dynamic data well.
-        </p>
-
-        <h3 className="text-xl font-semibold mt-4">Example</h3>
-        <pre className="bg-gray-800 text-white p-4 rounded-md">
-          {`// Example in C (Static Array)
-  // In C, static arrays are declared with a fixed size.
-  int arr[5] = {1, 2, 3, 4, 5};
-  printf("%d", arr[2]); // Output: 3`}
-        </pre>
-      </details>
+      <TopicCard topicName="Array" />
+      <TopicCard topicName="Static Array" />
       <details 
        className="bg-gradient-to-l from-teal-200 h-fit w-full p-4 dark:from-gray-500 rounded-lg"
        id='staticArrayOp'
@@ -334,35 +296,8 @@ const StaticArrayOperations = () => {
           </div>
         </div>
       </details>
-      <div className='mt-6 dark:text-white'>
-        {/* Static Array Section */}
-        <details
-         className="bg-gray-100 rounded-lg shadow-md p-4 dark:bg-gray-600"
-         id='staticArrayEx'
-         onToggle={(e) => {handleToggle('staticArrayEx', e.target.open)}}
-         open={detailsState['staticArrayEx'] !== undefined ? detailsState['staticArrayEx'] : true }
-        >
-          <summary>
-            Real-life Example
-          </summary>
-          <p className="mt-2">
-            A <strong>Static Array</strong> is used when the amount of data is fixed and does not change over time. This means you know in advance how many elements you need to store.
-          </p>
-          <p className="mt-2">
-            Imagine you are creating a program to store the days of the week: "Monday, Tuesday, ..., Sunday." Since the number of days is always 7 and will not change, a static array is a good choice. 
-          </p>
-          <p className="mt-2">
-            Static arrays are simple to use but cannot be resized once created. If you try to store more elements than the fixed size, the program will run into an error. That's why they work well when you are sure about the size of your data.
-          </p>
-
-          <h3 className="text-xl font-semibold mt-4">Real-Life Example</h3>
-          <pre className="bg-gray-800 text-white p-4 rounded-md">
-            {`// Static Array Example
-        let daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-        console.log(daysOfWeek[0]); // Output: "Monday"`}
-          </pre>
-        </details>
-      </div>
+      <TopicCard topicName="Real-life Use(Static Array)" />
+      
     </div>
   );
 };
