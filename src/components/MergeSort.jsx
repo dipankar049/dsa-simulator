@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 const MergeSort = () => {
     const [array, setArray] = useState([20, 64, 132, 101, 95, 7, 64, 153, 80]);
+    const [sortedArray, setSortedArray] = useState([]);
     const [element, setElement] = useState('');
     const [arrExist, setArrExist] = useState(true);
     const [iterations, setIterations] = useState(0);
@@ -15,10 +16,14 @@ const MergeSort = () => {
     const [seacondEle, setSeacondEle] = useState(-1);
 
     const [subArrayInfo, setSubArrayInfo] = useState([{left: 0, right: array.length -1}]);
+    const [mergeArrayInfo, setMergeArrayInfo] = useState([{left: 0, right: array.length -1}]);
+
     const [midArray, setMidArray] = useState([]);
     const [currentArray, setCurrentArray] = useState(0);
     const [queue, setQueue] = useState([0]);
+    const [mergeQueue, setMergeQueue] = useState([0]);
     const [queuePointer, setQueuePointer] = useState(0);
+    const [mergeQueuePointer, setMergeQueuePointer] = useState(0);
 
     const [divs, setDivs] = useState([]);
     const [dividedArrays, setDividedArrays] = useState([[]]);
@@ -31,70 +36,6 @@ const MergeSort = () => {
         setEmptyElement(false);
     },[element]);
     
-
-    // const divide = async () => {
-
-    //     let i = queuePointer;
-    //     let newSubArrayInfo = [...subArrayInfo]; // Local copy to avoid state update issues
-    //     let localQueue = [...queue]; // Local copy to avoid state update issues
-    //     let singleDiv = 0;
-    //     let multiDiv = false;
-    //     await delay(1000);
-    //     while (i < localQueue.length) {
-    //         let mid;
-    //         if(newSubArrayInfo[i].left === newSubArrayInfo[i].right) {
-    //             singleDiv++;
-    //             newSubArrayInfo.push(
-    //                 { left: newSubArrayInfo[i].left, right: newSubArrayInfo[i].right }
-    //             );
-    //         } else {
-    //             console.log("gettingtrue");
-    //             multiDiv = true;
-    //             mid = Math.floor((newSubArrayInfo[i].left + newSubArrayInfo[i].right) / 2);
-    //             newSubArrayInfo.push(
-    //                 { left: newSubArrayInfo[i].left, right: mid },
-    //                 { left: mid + 1, right: newSubArrayInfo[i].right }
-    //             );
-    //         }
-    //         console.log("Mid value calculated:", newSubArrayInfo);  
-            
-    //         i++;
-    //     }
-    
-    //     let k = i;
-    //     let j = (i - queuePointer) * 2 - singleDiv;
-    
-    //     while (j > 0) {
-    //         localQueue.push(i++);
-    //         console.log('Everhing fine');
-    //         j--;
-    //     }
-    
-    //     setSubArrayInfo(newSubArrayInfo);
-    //     setQueue(localQueue);
-    //     setQueuePointer(k);
-
-    //     // await Promise.resolve();
-    //     if (multiDiv) {
-    //         await delay(1000);
-    //         console.log('new call');
-    //         await divide(); // Trigger another call to divide if necessary
-    //     } else {
-    //         return;
-    //     }
-    // };
-
-    // const mergeSort = () => {
-    //     if (array.length === 0) {
-    //         return;
-    //     }
-    //     // while(multiDiv) {
-    //     // //     console.log('working');
-    //     //     multiDiv = false;
-    //         divide();
-    //     //     console.log("No of multiDivs",multiDiv);
-    //     // }
-    // }
     let singleDiv = 0;
     const divide = async (localQueue, localQueuePointer, newSubArrayInfo) => {
         // if (singleDiv != (localQueue.length - localQueuePointer)) {
@@ -115,7 +56,10 @@ const MergeSort = () => {
                 );
             } else {
                 multiDiv = true;
-                mid = Math.floor((newSubArrayInfo[i].left + newSubArrayInfo[i].right) / 2);
+                mid = newSubArrayInfo[i].left + Math.floor((newSubArrayInfo[i].right - newSubArrayInfo[i].left) / 2);
+                if(newSubArrayInfo[i].left + 1 === newSubArrayInfo[i].right) {
+                    multiDiv = false;
+                }
                 newSubArrayInfo.push(
                     { left: newSubArrayInfo[i].left, right: mid },
                     { left: mid + 1, right: newSubArrayInfo[i].right }
@@ -139,14 +83,101 @@ const MergeSort = () => {
         setQueuePointer(k);
     
         // Continue recursion if there are further divisions needed
+        console.log("queuePointer", k, "Queue", localQueue, "subarray", newSubArrayInfo);
         if (multiDiv) {
-            console.log('no of singlediv', singleDiv);
+            // console.log('no of multidiv', multiDiv);
             await delay(1000);
-            divide([...localQueue], k, [...newSubArrayInfo]); // Pass copies for safety
+            await divide([...localQueue], k, [...newSubArrayInfo]); // Pass copies for safety
+        } else {
+            conquere([...localQueue], k, [...newSubArrayInfo]);
         }
     };
+
+    const conquere = async(localQueue, localQueuePointer, newSubArrayInfo) => {
+        // console.log('working conquere', newSubArrayInfo.length);
+        let i = localQueuePointer;
+        let arr = array;
+        // setSortedArray(arr);
+        while(i < newSubArrayInfo.length) {
+            if(arr[i] > arr[i + 1]) {
+                let temp = arr[i];
+                arr[i] = arr[i + 1];
+                arr[i + 1] = temp;
+            }
+            i = i + 2;
+            setSortedArray(arr);
+            if(i === newSubArrayInfo.length -1) {
+                break;
+            }
+        }
+        const localMergeQueue = [...mergeQueue];
+        const localMergeQueuePointer = mergeQueuePointer;
+        const newmergeArray = [...mergeArrayInfo];
+        
+        let j = Math.ceil((newSubArrayInfo.length - localQueuePointer + 1) / 2);
+        let k = localQueuePointer;
+        // console.log('localQueuePointer: ', localQueuePointer);
+
+        // const updatedArray = [...mergeArrayInfo];
+
+        // Modify the 0th object (making sure not to mutate the original state directly)
+        newmergeArray[0] = {
+            // ...newmergeArray[0],  // Copy the existing properties of the 0th object
+            left: newSubArrayInfo[k].left,       // Update the 'left' property
+            right: newSubArrayInfo[k + 1].left      // Update the 'right' property
+        };
+
+        // Update the state with the new array
+        setMergeArrayInfo(newmergeArray);
+        // console.log(k);
+        // console.log(newSubArrayInfo[k].left);
+        // console.log(newSubArrayInfo[k + 1].left);
+        // console.log(newmergeArray);
+        j--;
+        k = k + 2;
+        console.log(newSubArrayInfo.length);
+        
+        while(j) {
+            console.log(k);
+            if(k >= newSubArrayInfo.length) {
+                console.log(newSubArrayInfo.length);
+                newmergeArray.push(
+                    {left: newSubArrayInfo[k].left, right: newSubArrayInfo[k].left}
+                )
+            } else {
+                newmergeArray.push(
+                    {left: newSubArrayInfo[k].left, right: newSubArrayInfo[k + 1].left}
+                )
+            }
+            j--;
+            k = k + 2;
+        }
+        console.log(newmergeArray);
+
+    }
+
+    // useEffect(() => {
+    //     if(queuePointer > 0) {
+    //         const newDivs = [];
+    //         let k = 0;
+    //         for(let j = queuePointer; j < queue.length; j++, k++) {
+    //             for (let i = subArrayInfo[j].left; i <= subArrayInfo[j].right; i++) {
+    //                 newDivs.push(
+    //                     <div
+    //                         key={i}
+    //                         className="border border-black bg-green-200 flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap"
+    //                         style={{ marginRight: `${i === subArrayInfo[j]?.right ? (i === subArrayInfo[queue.length - 1]?.right ? '0' : `20`) : '0'}px` }}
+    //                     >
+    //                         {array[i]}
+    //                     </div>
+    //                 );
+    //             }
+    //         } 
+    //         setDividedArrays([...dividedArrays, newDivs]);
+    //     }
+    // }, [queuePointer]);
     
-    const mergeSort = () => {
+    const mergeSort = async() => {
         if (array.length === 0) {
             return;
         }
@@ -155,7 +186,8 @@ const MergeSort = () => {
         const localQueuePointer = queuePointer;
         const newSubArrayInfo = [...subArrayInfo];
     
-        divide(localQueue, localQueuePointer, newSubArrayInfo);
+        await divide(localQueue, localQueuePointer, newSubArrayInfo);
+        
     };
 
     const getSpacingX = () => {
@@ -172,7 +204,7 @@ const MergeSort = () => {
           return 15; // Custom padding for small screens
         }
       };
-      console.log(getSpacingX());
+    //   console.log(getSpacingX());
 
     useEffect(() => { 
         setSubArrayInfo([{left: 0, right: array.length -1}])
@@ -358,6 +390,7 @@ const MergeSort = () => {
                                             ))} */}
                                         {/* </div> */}
                                     </div>
+
                                 </div>
                             </div>
                             {/* <div>

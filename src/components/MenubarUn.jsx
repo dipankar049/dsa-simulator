@@ -2,54 +2,33 @@ import React from 'react'
 import { Link } from 'react-router-dom';
 
 export default function MenubarUn() {
-  return (
-    <div className='hidden lg:block w-16p h-screen pt-4 pl-3 text-base font-medium border-r-2 drop-shadow-sm'>
-        <p className='text-2xl font-serif font-bold text-center mb-7 mt-1'>DSA Visualizer</p>
-          <div className='rounded-tl w-full h-full p-2 divider'>
-            {/* <div className='w-full p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md'> */}
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/arrayOp">
-                {/* <img src={homeImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
-                Array
-            </Link> 
-            {/* </div> */}
-            <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/listOp">
-                {/* <img src={calenderImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
-                Linked List
-            </Link>
-            <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/linSearch">
-                {/* <img src={routineImage} className='mb-1 mr-1 mb-2' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
-                Linear Search
-            </Link>  
-            <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/binSearch">
-                {/* <img src={addTaskImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/>Add New Task */}
-                Binary Search
-            </Link>
-            <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/bubbleSort">
-                {/* <img src={updateTaskImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
-                Bubble sort
-            </Link>
-            <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/mergeSort">
-                {/* <img src={weeklyImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
-                Merge Sort
-            </Link>   
-            <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/quickSort">
-                {/* <img src={monthlyImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
-                Quick sort
-            </Link> 
-            <hr className='border-gray-300 mr-5 my-[2px]'/>
-            <Link className='w-full block p-1 pl-2 hover:bg-emerald-100 rounded-r-3xl rounded-l-md' to="/selecionSort">
-                {/* <img src={resetTaskImage} className='mb-1 mr-1' style={{height: '20px', width: '20px', display: 'inline'}}/> */}
-                Selection sort
-            </Link> 
-          </div>
-          
-          
+    return (
+      <div className="fixed hidden lg:w-1/5 md:block h-screen bg-white pt-4 pl-3 text-base font-medium border-r-2 border-gray-300 drop-shadow-sm dark:bg-gray-800">
+   
+        {/* Menu Items */}
+        <div className="rounded-tl w-full h-full p-2 space-y-1 dark:text-white">
+          <MenuItem label="Array" to="/arrayOp" />
+          <MenuItem label="Linked List" to="/listOp" />
+          <MenuItem label="Linear Search" to="/linSearch" />
+          <MenuItem label="Binary Search" to="/binSearch" />
+          <MenuItem label="Bubble Sort" to="/bubbleSort" />
+          <MenuItem label="Merge Sort" to="/mergeSort" />
+          <MenuItem label="Quick Sort" to="/quickSort" />
+          <MenuItem label="Selection Sort" to="/selecionSort" />
         </div>
-  )
-}
+      </div>
+    );
+  }
+  
+  // Reusable MenuItem Component
+  const MenuItem = ({ label, to }) => (
+    <>
+      <Link
+        to={to}
+        className="block w-full p-2 pl-4 text-gray-800 rounded-r-3xl rounded-l-md hover:bg-blue-200 hover:text-blue-600 dark:text-white dark:hover:text-blue-600"
+      >
+        {label}
+      </Link>
+      <hr className="border-gray-300 mx-3 my-1" />
+    </>
+  );

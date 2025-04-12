@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { DetailsStateContext } from '../context/DetailsContext';
+import { ThemeContext } from '../context/ThemeContext';
 
 const StaticArrayOperations = () => {
   const [array, setArray] = useState([15, 22, 12, 56, 24]);
@@ -15,6 +17,15 @@ const StaticArrayOperations = () => {
 
   const[operationIdxVisibility, setOperationIdxVisibility] = useState(false);
   const[operationEleVisibility, setOperationEleVisibility] = useState(false);
+
+  const {detailsState, updateState} = useContext(DetailsStateContext);
+  // const updateState = useDetailsDispatch();
+
+  const handleToggle = (id, isOpen) => {
+    updateState(id, isOpen); // Update context and persist state
+  };
+
+  const { theme } = useContext(ThemeContext);
 
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -36,7 +47,7 @@ const StaticArrayOperations = () => {
       newDivs.push(
         <div
           key={i}
-          className="flex items-center text-teal-800 justify-center flex-shrink-0 lg:w-14 md:12 w-10"
+          className="flex items-center text-black justify-center flex-shrink-0 lg:w-14 md:12 w-10"
           // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
         >
           {i}
@@ -151,125 +162,206 @@ const StaticArrayOperations = () => {
   }
 
   return (
-    <div className="md:flex bg-gradient-to-l from-teal-200 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
-      <div className='md:w-70p w-full mb-2'>
-        <h1 className="text-xl font-bold mb-4">Static Array Operations</h1>
+    <div className='p-2p bg-white text-gray-700 
+                    dark:bg-gray-700 dark:text-white 
+                    md:text-base sm:text-sm text-xs'>
+      <details
+       className="my-6 p-6 bg-gray-100 dark:bg-gray-600 rounded-lg shadow-md"
+       id='array'
+       onToggle={(e) => {handleToggle('array', e.target.open)}}
+       open={detailsState['array'] !== undefined ? detailsState['array'] : true }
+      >
+        <summary>Array</summary>
+        <p className="mt-2">
+          An <strong>Array</strong> is a data structure that stores a collection of elements, each identified by an index or a key. It allows efficient access to elements by their index and is one of the most commonly used data structures in programming.
+        </p>
+        <p className="mt-2">
+          Arrays have a fixed size, meaning that once defined, the size of the array cannot be changed. This makes arrays simple but less flexible when the number of elements is unknown or dynamic.
+        </p>
         
-        <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
-          <div className='mr-2'>
-            <input
-              type="number"
-              value={arrayLength}
-              onChange={(e) => setArrayLength(e.target.value)}
-              className=" md:p-2 p-1 h-fit w-40p rounded-l-md shadow-inner"
-              style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
-              placeholder="Length"
-            />
-            <button
-              onClick={createArray}
-              className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
-            >
-              Create New array
-            </button>
-          </div>
-          <div className='flex flex-wrap justify-end'>
-            <input
-              type="number"
-              value={element}
-              onChange={(e) => setElement(e.target.value)}
-              className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
-              style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
-              placeholder="Enter element"
-            />
-            <input
-              type="number"
-              value={customIdx}
-              onChange={(e) => setCustomIdx(e.target.value)}
-              className="md:p-2 p-1 h-fit w-36p shadow-inner"
-              style={{border: `${emptyInex ? '2px solid red' : '1px solid #d1d5db'}`}}
-              placeholder="Enter index"
-            />
-            <button
-              onClick={arrayInsert}
-              className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
-            >
-              Insert
-            </button>
-          </div> 
-          
-        </div>
-        <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 shadow-xl rounded-md'>
-          <div className='w-full p-2 overflow-x-auto'>
-            <p className='md:m-2 font-bold text-teal-800'>{arrExist ? 'Arr': ''}</p>
-            <div className="flex md:ml-4">
-              {divs}
-            </div>
-            
-            <div className="flex md:ml-4">
-              {array.map((item, index) => (
-                <div
-                  id={item}
-                  key={index}
-                  ref={divRefs.current[index]}
-                  className="border border-black rounded-sm flex justify-center md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 flex-shrink-0 overflow-hidden whitespace-nowrap animate-fadeIn"
-                  // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
-                  style={{
-                    color: operationIdxVisibility ? ((index == customIdx) ? 'red' : 'black') : 'black',
-                    backgroundColor: operationIdxVisibility ? ((index == customIdx) ? 'white' : '#6ee7b7') : '#6ee7b7',
-                    animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
-                    animationFillMode: 'both' // Ensures the element stays visible after the animation ends 
-                  }}
-                >
-                  {item}
+        <h3 className="text-xl font-semibold mt-4">Example</h3>
+        <pre className="bg-gray-800 text-white p-4 rounded-md">
+          {`let numbers = [10, 20, 30, 40];
+  console.log(numbers[2]); // Output: 30`}
+        </pre>
+      </details>
+      <details 
+       className="my-6 p-6 bg-gray-100 dark:bg-gray-600 rounded-lg shadow-md"
+       id='staticArray'
+       onToggle={(e) => {handleToggle('staticArray', e.target.open)}}
+       open={detailsState['staticArray'] !== undefined ? detailsState['staticArray'] : true}
+      >
+        <summary>Static Array</summary>
+        <p className="mt-2">
+          A <strong>Static Array</strong> is an array that has a fixed size, defined at the time of its creation. The size cannot be changed during runtime, and if the number of elements exceeds the allocated size, an overflow occurs.
+        </p>
+        <p className="mt-2">
+          Static arrays are used when the size of the dataset is known beforehand and will not change. They provide constant-time access to elements but do not handle dynamic data well.
+        </p>
+
+        <h3 className="text-xl font-semibold mt-4">Example</h3>
+        <pre className="bg-gray-800 text-white p-4 rounded-md">
+          {`// Example in C (Static Array)
+  // In C, static arrays are declared with a fixed size.
+  int arr[5] = {1, 2, 3, 4, 5};
+  printf("%d", arr[2]); // Output: 3`}
+        </pre>
+      </details>
+      <details 
+       className="bg-gradient-to-l from-teal-200 h-fit w-full p-4 dark:from-gray-500 rounded-lg"
+       id='staticArrayOp'
+       onToggle={(e) => {handleToggle('staticArrayOp', e.target.open)}}
+       open={detailsState['staticArrayOp'] !== undefined ? detailsState['staticArrayOp'] : true }
+      >
+      <summary className="mb-4">Static Array Operations</summary>
+        <div className='md:flex'>
+            <div className='md:w-70p w-full mb-2'>
+              <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
+                <div className='mr-2'>
+                  <input
+                    type="number"
+                    value={arrayLength}
+                    onChange={(e) => setArrayLength(e.target.value)}
+                    className=" md:p-2 p-1 h-fit w-40p rounded-l-md shadow-inner"
+                    style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    placeholder="Length"
+                  />
+                  <button
+                    onClick={createArray}
+                    className="bg-teal-600 hover:bg-teal-700"
+                  >
+                    Create New array
+                  </button>
                 </div>
-              ))}
-            </div>
-            <div className="flex md:ml-4">
-              {array.map((item, index) => (
-                <div
-                  key={index}
-                  ref={divRefs.current[index]}
-                  className="flex items-center font-bold text-red-800 justify-center flex-shrink-0 lg:w-14 md:12 w-10"
-                >
-                  <div style={{ visibility: operationEleVisibility ? ((index == customIdx) ? 'visible' : 'hidden') : 'hidden'
-                   }}>
-                    {/* <p>New Element</p> */}
-                    {element}
+                <div className='flex flex-wrap justify-end text-black'>
+                  <input
+                    type="number"
+                    value={element}
+                    onChange={(e) => setElement(e.target.value)}
+                    className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
+                    style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    placeholder="Enter element"
+                  />
+                  <input
+                    type="number"
+                    value={customIdx}
+                    onChange={(e) => setCustomIdx(e.target.value)}
+                    className="md:p-2 p-1 h-fit w-36p shadow-inner"
+                    style={{border: `${emptyInex ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    placeholder="Enter index"
+                  />
+                  <button
+                    onClick={arrayInsert}
+                    className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                  >
+                    Insert
+                  </button>
+                </div> 
+                
+              </div>
+              <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-300 dark:text-white border border-gray-300 shadow-xl rounded-md'>
+                <div className='w-full p-2 overflow-x-auto'>
+                  <p className='md:m-2 font-bold text-teal-800 dark:text-black'>{arrExist ? 'Array': ''}</p>
+                  <div className="flex md:ml-4">
+                    {divs}
+                  </div>
+                  
+                  <div className="flex md:ml-4">
+                    {array.map((item, index) => (
+                      <div
+                        id={item}
+                        key={index}
+                        ref={divRefs.current[index]}
+                        className="border border-black rounded-sm flex justify-center md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 flex-shrink-0 overflow-hidden whitespace-nowrap animate-fadeIn"
+                        // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
+                        style={{
+                          color: operationIdxVisibility ? ((index == customIdx) ? 'red' : 'black') : 'black',
+                          backgroundColor: operationIdxVisibility ? ((index == customIdx) ? 'white' : '#6ee7b7') : '#6ee7b7',
+                          animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
+                          animationFillMode: 'both' // Ensures the element stays visible after the animation ends 
+                        }}
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex md:ml-4">
+                    {array.map((item, index) => (
+                      <div
+                        key={index}
+                        ref={divRefs.current[index]}
+                        className="flex items-center font-bold text-red-800 justify-center flex-shrink-0 lg:w-14 md:12 w-10"
+                      >
+                        <div style={{ visibility: operationEleVisibility ? ((index == customIdx) ? 'visible' : 'hidden') : 'hidden'
+                        }}>
+                          {/* <p>New Element</p> */}
+                          {element}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+                <div className='p-1 text-white md:font-bold text-xs md:text-base bg-teal-700 rounded-r-md'>
+                    <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
+                </div>
+            </div>
+            <div className='flex flex-wrap justify-between'>
+                <button
+                onClick={deleteByIdx}
+                className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                >
+                  Delete by index
+                </button>
+                <button
+                  onClick={deleteByEle}
+                  className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                >
+                  Delete by element
+                </button>
+                <button
+                  onClick={removeArray}
+                  className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                >
+                  Delete array
+                </button>
+            </div>
+            
+          </div>
+          <div className=' w-full md:w-28p bg-black md:m-4 md:mr-0 md:ml-2p'>
+            <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
+                <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
             </div>
           </div>
-          <div className='p-1 text-white md:font-bold text-xs md:text-base bg-teal-700 rounded-r-md'>
-              <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
-          </div>
         </div>
-        <div className='flex flex-wrap justify-between'>
-            <button
-            onClick={deleteByIdx}
-            className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
-            >
-              Delete by index
-            </button>
-            <button
-              onClick={deleteByEle}
-              className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
-            >
-              Delete by element
-            </button>
-            <button
-              onClick={removeArray}
-              className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
-            >
-              Delete array
-            </button>
-        </div>
-        
-      </div>
-      <div className='min-h-full w-full md:w-28p bg-black md:m-4 md:mr-0 md:ml-2p'>
-        <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
-            <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
-        </div>
+      </details>
+      <div className='mt-6 dark:text-white'>
+        {/* Static Array Section */}
+        <details
+         className="bg-gray-100 rounded-lg shadow-md p-4 dark:bg-gray-600"
+         id='staticArrayEx'
+         onToggle={(e) => {handleToggle('staticArrayEx', e.target.open)}}
+         open={detailsState['staticArrayEx'] !== undefined ? detailsState['staticArrayEx'] : true }
+        >
+          <summary>
+            Real-life Example
+          </summary>
+          <p className="mt-2">
+            A <strong>Static Array</strong> is used when the amount of data is fixed and does not change over time. This means you know in advance how many elements you need to store.
+          </p>
+          <p className="mt-2">
+            Imagine you are creating a program to store the days of the week: "Monday, Tuesday, ..., Sunday." Since the number of days is always 7 and will not change, a static array is a good choice. 
+          </p>
+          <p className="mt-2">
+            Static arrays are simple to use but cannot be resized once created. If you try to store more elements than the fixed size, the program will run into an error. That's why they work well when you are sure about the size of your data.
+          </p>
+
+          <h3 className="text-xl font-semibold mt-4">Real-Life Example</h3>
+          <pre className="bg-gray-800 text-white p-4 rounded-md">
+            {`// Static Array Example
+        let daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        console.log(daysOfWeek[0]); // Output: "Monday"`}
+          </pre>
+        </details>
       </div>
     </div>
   );

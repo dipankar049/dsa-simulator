@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Heading Styles */
+/* h1 {
+  @apply text-3xl font-bold text-gray-900 dark:text-white;
+}
+
+h2 {
+  @apply text-2xl font-semibold text-gray-800 dark:text-gray-200;
+}
+
+button {
+  @apply px-4 py-2 rounded-md font-medium transition-colors;
+}
+
+button.primary {
+  @apply bg-blue-500 text-white hover:bg-blue-600;
+}
+
+button.secondary {
+  @apply bg-gray-300 text-black hover:bg-gray-400;
+} */
+
+summary {
+    @apply text-2xl font-bold cursor-pointer;
+}
+
+button {
+    @apply lg:font-bold px-4 py-2 transition ease-in-out delay-150 hover:-translate-y-1;
+}
