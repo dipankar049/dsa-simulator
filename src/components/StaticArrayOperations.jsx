@@ -2,25 +2,24 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import { DetailsStateContext } from '../context/DetailsContext';
 import { ThemeContext } from '../context/ThemeContext';
 import TopicCard from './TopicCard';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const StaticArrayOperations = () => {
-  const [array, setArray] = useState([15, 22, 12, 56, 24]);
-  const [element, setElement] = useState('');
-  const [arrayLength, setArrayLength] = useState('');
-  const [customIdx, setCustomIdx] = useState(''); 
-  const [arrExist, setArrExist] = useState(true);
+  const [array, setArray] = useState([15, 22, 12, 56, 24]);   // Default array elements
+  const [arrayInputs, setArrayInputs] = useState({    // To track inputs
+    arrayLength: array.length || '',
+    customIdx: '',
+    element: ''
+  });
+
   const divRefs = useRef([]);
   const [divs, setDivs] = useState([]);
-
-  const [emptyLength, setEmptyLength] = useState(false);
-  const [emptyElement, setEmptyElement] = useState(false);
-  const [emptyInex, setEmptyIndex] = useState(false);
 
   const[operationIdxVisibility, setOperationIdxVisibility] = useState(false);
   const[operationEleVisibility, setOperationEleVisibility] = useState(false);
 
   const {detailsState, updateState} = useContext(DetailsStateContext);
-  // const updateState = useDetailsDispatch();
 
   const handleToggle = (id, isOpen) => {
     updateState(id, isOpen); // Update context and persist state
@@ -30,18 +29,7 @@ const StaticArrayOperations = () => {
 
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  useEffect(() => {
-    setEmptyLength(false);
-  },[arrayLength]);
-
-  useEffect(() => {
-    setEmptyElement(false);
-  },[element]);
-
-  useEffect(() => {
-    setEmptyIndex(false);
-  },[customIdx]);
-
+  //  To create index div dynamically that will be visible with array as index number
   useEffect(() => {
     const newDivs = [];
     for (let i = 0; i < array.length; i++) {
@@ -49,7 +37,6 @@ const StaticArrayOperations = () => {
         <div
           key={i}
           className="flex items-center text-black justify-center flex-shrink-0 lg:w-14 md:12 w-10"
-          // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
         >
           {i}
         </div>
@@ -58,51 +45,50 @@ const StaticArrayOperations = () => {
     setDivs(newDivs); // Update the state with new divs
   },[array]);
 
+  //  Handle input field changes
+  const handleChange = (e) => {
+    setArrayInputs({
+      ...arrayInputs,
+      [e.target.name] : e.target.value
+    })
+  };
+
+  //  Create new array
   const createArray = async() => {
-    
-    if(arrayLength === '') {
-      console.log('empty length');
-      setEmptyLength(true);
+    //  validation of input value of array length
+    if(arrayInputs.arrayLength === '' || arrayInputs.arrayLength == 0) { 
+      toast.error("Enter Valid Length!");
       return;
     }
-    if(arrayLength == 0) {
-      console.log('zero length');
-      return;
-    }
-    setEmptyLength(false);
+
     setArray([]);
-    setArrExist(false);
     await delay(500);
-    setArray(Array(parseInt(arrayLength)).fill('NULL'));
-    setArrExist(true);
-    setArrayLength('');
+    setArray(Array(parseInt(arrayInputs.arrayLength)).fill('NULL'));  //  Fill array with NULL as default
   }; 
 
+  //  Insert element in array
   const arrayInsert = async() => {
-    if(!arrExist) {
+    if(arrayInputs.arrayLength == 0) {  // check if array exist
+      toast.error("First create an Array");
       return;
     };
     
-    if(element === '') {
-      console.log(customIdx);
-      if(customIdx === '') {
-        setEmptyIndex(true);
-      } else {
-        setEmptyIndex(false);
+    //  Validation of user given element and index value
+    if(arrayInputs.element === '') {
+      toast.error("Enter Element");
+      if(arrayInputs.customIdx === '') {
+        toast.error("Enter Index");
       }
-      console.log('empty length');
-      setEmptyElement(true);
       return;
     }
-    setEmptyElement(false);
-    if(customIdx === '') {
-      setEmptyIndex(true);
+    if(arrayInputs.customIdx === '') {
+      toast.error("Enter Index");
       return;
     }
-    setEmptyIndex(false);
 
-    if(parseInt(customIdx) >= array.length || parseInt(customIdx) < 0) {
-      console.log("Invalid index");
+    // Check if user given index is Out of Bounds
+    if(parseInt(arrayInputs.customIdx) >= array.length || parseInt(arrayInputs.customIdx) < 0) {
+      toast.error("Invalid Index");
       return;
     }
     await delay(500);
@@ -110,65 +96,75 @@ const StaticArrayOperations = () => {
     await delay(1000);
     setOperationEleVisibility(true);
     await delay(1000);
-    if(element) {
+
+    // Insert element in array
+    if(arrayInputs.element) {
         setArray(prevArray => 
-            prevArray.map((item, i) => (i === parseInt(customIdx) ? element : item))
+            prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? arrayInputs.element : item))
         );
     }
     setOperationIdxVisibility(false);
     setOperationEleVisibility(false);
-    setElement('');
-    setCustomIdx('');
-  }
+    setArrayInputs({...arrayInputs, element: ''});
+    setArrayInputs({...arrayInputs, customIdx: ''});
+  };
 
+  //  Delete an element by index value
   const deleteByIdx = async() => {
-    if(customIdx === '') {
-      setEmptyIndex(true);
+    //   Validation of user given index value
+    if(arrayInputs.customIdx === '') {
+      toast.error("Enter Index");
       return;
     }
-    setEmptyIndex(false);
-
-    if(parseInt(customIdx) >= array.length || parseInt(customIdx) < 0) {
-        console.log("Invalid index");
+    if(parseInt(arrayInputs.customIdx) >= array.length || parseInt(arrayInputs.customIdx) < 0) {
+        toast.error("Invalid Index");
         return;
     }
+
     await delay(500);
     setOperationIdxVisibility(true);
     await delay(1000);
+
+    // Set the element at the specified index to 'NULL'
     setArray(prevArray => 
-        prevArray.map((item, i) => (i === parseInt(customIdx) ? 'NULL' : item))
+        prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? 'NULL' : item))
     );
     setOperationIdxVisibility(false);
-    setCustomIdx('');
-  }
+    setArrayInputs({...arrayInputs, customIdx: ''});
+  };
 
+  //  Delete element by value
   const deleteByEle = async() => {
-    if(element === '') {
-      setEmptyElement(true);
+    if(arrayInputs.element === '') {
+      console.log("Empty element");
       return;
     }
-    setEmptyElement(false);
-    if(element) {
-      setArray(prevArray => 
-        prevArray.map((item, i) => (item == element ? 'NULL' : item))
-      );
-    }
-    setElement('');
-  }
 
+    // Replace the matching element with 'NULL' in the array
+    setArray(prevArray => 
+      prevArray.map((item, i) => (item == arrayInputs.element ? 'NULL' : item))
+    );
+    
+    setArrayInputs({...arrayInputs, element: ''});
+  };
+
+  //  Delete array
   const removeArray = () => {
     setArray([]);
-    setArrayLength('');
-    setArrExist(false);
-  }
+    setArrayInputs({
+      ...arrayInputs,
+      arrayLength: ''
+    });
+  };
 
   return (
     <div className='p-2p bg-white text-gray-700 
                     dark:bg-gray-700 dark:text-white 
                     md:text-base sm:text-sm text-xs'
       >
-      <TopicCard topicName="Array" />
-      <TopicCard topicName="Static Array" />
+        
+      <TopicCard topicName="Array" /> {/* Defination and Example of array */}
+      <TopicCard topicName="Static Array" />  {/* Defination and Example of static array */}
       <details 
        className="bg-gradient-to-l from-teal-200 h-fit w-full p-4 dark:from-gray-500 rounded-lg"
        id='staticArrayOp'
@@ -181,11 +177,14 @@ const StaticArrayOperations = () => {
               <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
                 <div className='mr-2'>
                   <input
+                    name='arrayLength'
                     type="number"
-                    value={arrayLength}
-                    onChange={(e) => setArrayLength(e.target.value)}
+                    value={arrayInputs.arrayLength}
+                    min={1}
+                    onChange={handleChange}
                     className=" md:p-2 p-1 h-fit w-40p rounded-l-md shadow-inner"
-                    style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    style={{border: '1px solid #d1d5db'}}
                     placeholder="Length"
                   />
                   <button
@@ -197,19 +196,23 @@ const StaticArrayOperations = () => {
                 </div>
                 <div className='flex flex-wrap justify-end text-black'>
                   <input
+                    name='element'
                     type="number"
-                    value={element}
-                    onChange={(e) => setElement(e.target.value)}
+                    value={arrayInputs.element}
+                    onChange={handleChange}
                     className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
-                    style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    // style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    style={{border: '1px solid #d1d5db'}}
                     placeholder="Enter element"
                   />
                   <input
+                    name='customIdx'
                     type="number"
-                    value={customIdx}
-                    onChange={(e) => setCustomIdx(e.target.value)}
+                    value={arrayInputs.customIdx}
+                    onChange={handleChange}
                     className="md:p-2 p-1 h-fit w-36p shadow-inner"
-                    style={{border: `${emptyInex ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    // style={{border: `${emptyInex ? '2px solid red' : '1px solid #d1d5db'}`}}
+                    style={{border: '1px solid #d1d5db'}}
                     placeholder="Enter index"
                   />
                   <button
@@ -223,7 +226,7 @@ const StaticArrayOperations = () => {
               </div>
               <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-300 dark:text-white border border-gray-300 shadow-xl rounded-md'>
                 <div className='w-full p-2 overflow-x-auto'>
-                  <p className='md:m-2 font-bold text-teal-800 dark:text-black'>{arrExist ? 'Array': ''}</p>
+                  <p className='md:m-2 font-bold text-teal-800 dark:text-black'>{array.length != 0 ? 'Array': ''}</p>
                   <div className="flex md:ml-4">
                     {divs}
                   </div>
@@ -237,8 +240,8 @@ const StaticArrayOperations = () => {
                         className="border border-black rounded-sm flex justify-center md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 flex-shrink-0 overflow-hidden whitespace-nowrap animate-fadeIn"
                         // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                         style={{
-                          color: operationIdxVisibility ? ((index == customIdx) ? 'red' : 'black') : 'black',
-                          backgroundColor: operationIdxVisibility ? ((index == customIdx) ? 'white' : '#6ee7b7') : '#6ee7b7',
+                          color: operationIdxVisibility ? ((index == arrayInputs.customIdx) ? 'red' : 'black') : 'black',
+                          backgroundColor: operationIdxVisibility ? ((index == arrayInputs.customIdx) ? 'white' : '#6ee7b7') : '#6ee7b7',
                           animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
                           animationFillMode: 'both' // Ensures the element stays visible after the animation ends 
                         }}
@@ -254,10 +257,10 @@ const StaticArrayOperations = () => {
                         ref={divRefs.current[index]}
                         className="flex items-center font-bold text-red-800 justify-center flex-shrink-0 lg:w-14 md:12 w-10"
                       >
-                        <div style={{ visibility: operationEleVisibility ? ((index == customIdx) ? 'visible' : 'hidden') : 'hidden'
+                        <div style={{ visibility: operationEleVisibility ? ((index == arrayInputs.customIdx) ? 'visible' : 'hidden') : 'hidden'
                         }}>
                           {/* <p>New Element</p> */}
-                          {element}
+                          {arrayInputs.element}
                         </div>
                       </div>
                     ))}
@@ -296,8 +299,7 @@ const StaticArrayOperations = () => {
           </div>
         </div>
       </details>
-      <TopicCard topicName="Real-life Use(Static Array)" />
-      
+      <TopicCard topicName="Real-life Use(Static Array)" /> {/* Real-life use and Example of static array */}
     </div>
   );
 };

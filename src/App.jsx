@@ -17,6 +17,7 @@ import HomePage from './components/HomePage';
 import Header from './Header';
 import { DetailsProvider } from './context/DetailsContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ToastContainer } from 'react-toastify';
 
 import "./components/styles/globals.css";
 
@@ -34,6 +35,10 @@ function App() {
     <ThemeProvider>
     <DetailsProvider>
     <BrowserRouter>
+      <ToastContainer 
+        limit={3}
+        autoClose={2000}
+      />
       <div className="w-full h-screen bg-blue-50">
         <Header changeLanguage={handleChangeLanguage}/>
 
