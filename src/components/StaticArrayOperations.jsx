@@ -56,7 +56,7 @@ const StaticArrayOperations = () => {
   //  Create new array
   const createArray = async() => {
     //  validation of input value of array length
-    if(arrayInputs.arrayLength === '' || arrayInputs.arrayLength == 0) { 
+    if(arrayInputs.arrayLength === '' || arrayInputs.arrayLength <= 0) { 
       toast.error("Enter Valid Length!");
       return;
     }
@@ -68,7 +68,7 @@ const StaticArrayOperations = () => {
 
   //  Insert element in array
   const arrayInsert = async() => {
-    if(arrayInputs.arrayLength == 0) {  // check if array exist
+    if(array.length == 0) {  // check if array exist
       toast.error("First create an Array");
       return;
     };
