@@ -16,36 +16,44 @@ export default function SinglyLinkedList() {
   const createList = () => {
     setList(Array(0).fill('Null'));
     setListExist(true);
-    toast.success("New list created");
+    toast.success("New linked list created");
   };
+
+  const isListExist = () => {
+    if(!listExist) {
+      toast.error("Please create a list first to append element");
+    };
+    return listExist;
+  }
 
   // Append element in list
   function listAppend() {
-    if(!listExist) {
-      toast.error("Please create a list to append element");
-      return;
-    };
+    if(!isListExist()) return;
+
     if(element === '') {
       toast.error("Please enter an element");
       return;
     }
 
     setList([...list, element]);
+    toast.success(`"${element}" successfully added at the end.`);
     setElement('');
   };
 
   function insertInListt() {
-    if(!listExist) {
-      toast.error("Please create a list");
+    if(!isListExist()) return;
+
+    if(list.length === 0) {
+      toast.error("Linked List is empty");
       return;
-    };
+    }
 
     if(element === '') {
       toast.error("Please enter an element");
       return;
     }
     if(customIdx == '' || customIdx < 0 || customIdx >= list.length) {
-      toast.error("Enter valid index");
+      toast.error(`Please enter an index between 0 and ${list.length - 1}.`);
       return;
     }
 
@@ -58,24 +66,33 @@ export default function SinglyLinkedList() {
       ];
       return newArray;
     });
-    toast.success("Element inserted successfully");
+    toast.success(`"${element}" inserted at index ${customIdx}`);
     setElement('');
     setCustomIdx('');
   }
 
-  //  Remove element from beginning
-  function removeFromBeg() {
+  //  Remove element from emd
+  function removeFromEnd() {
+    if(!isListExist()) return;
+
     if(list.length == 0) {
       toast.error("List is already empty");
       return;
     }
     setList(list.slice(0, -1));
-    toast.success("Element removed from beginning");
+    toast.success("Last element removed.");
   };
 
   const removeItemAtIndex = () => {
+    if(!isListExist()) return;
+
+    if(list.length === 0) {
+      toast.error("Linked List is empty");
+      return;
+    }
+
     if(customIdx == '' || customIdx < 0 || customIdx >= list.length) {
-      toast.error("Enter valid index");
+      toast.error(`Please enter an index between 0 and ${list.length - 1}.`);
       return;
     }
 
@@ -83,30 +100,36 @@ export default function SinglyLinkedList() {
       ...prevArray.slice(0, customIdx), // Elements before the index
       ...prevArray.slice(customIdx + 1)  // Elements after the index
     ]);
-    toast.success(`Element removed from index ${customIdx}`);
+    toast.success(`Element deleted from index ${customIdx}`);
     setCustomIdx('');
   };
 
   //  Remove user given element
   const removeByEle = () => {
-    const updatedList = list.filter(item => item !== element);
+    if(!isListExist()) return;
+
+    if(element === '') {
+      toast.error("Please enter an element");
+      return;
+    }
+
+    const updatedList = list.filter(item => item !== Number(element));
 
     if (updatedList.length < list.length) {
       setList(updatedList);
-      toast.success("Element removed successfully");
+      toast.success(`Element ${element} removed successfully.`);
     } else {
-      toast.info("Element not found");
+      toast.info(`Element ${element} not found in the list.`);
     }
   };
 
   const removeList = () => {
-    if(!listExist) {
-      toast.error("No list found");
-    } else {
-      setList([]);
-      setListExist(false);
-      toast.success("List deleted successfuly");
-    }
+    if(!isListExist()) return;
+
+    setList([]);
+    setListExist(false);
+    toast.success("List deleted successfuly");
+    
   };
 
   return (
@@ -139,7 +162,7 @@ export default function SinglyLinkedList() {
                 Insert at end
               </button>
               <button
-                onClick={removeFromBeg}
+                onClick={removeFromEnd}
                 className="bg-sky-600 hover:bg-sky-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 md:p-2 p-1 h-fit rounded-r-md"
               >
                 delete from end

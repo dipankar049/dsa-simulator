@@ -57,38 +57,59 @@ const StaticArrayOperations = () => {
   const createArray = async() => {
     //  validation of input value of array length
     if(arrayInputs.arrayLength === '' || arrayInputs.arrayLength <= 0) { 
-      toast.error("Enter Valid Length!");
+      toast.error("Array length must be greater than 0.");
       return;
     }
 
     setArray([]);
     await delay(500);
     setArray(Array(parseInt(arrayInputs.arrayLength)).fill('NULL'));  //  Fill array with NULL as default
-  }; 
+    toast.success("Array created successfully", {
+      position: 'top-center'
+    });
+  };
+
+  const isArrayExist = () => {
+    if(array.length === 0) {  // check if array exist
+      toast.error("Please create an array first.");
+      // toast(
+      //   <div>
+      //     <p>No Array exist, create one</p>
+      //     <button className='btn' onClick={createArray}>Create</button>
+      //   </div>,
+      //   {
+      //     autoClose: false
+      //   }
+      // );
+      
+      return false;
+    };
+    return true;
+  }
 
   //  Insert element in array
   const arrayInsert = async() => {
-    if(array.length == 0) {  // check if array exist
-      toast.error("First create an Array");
-      return;
-    };
-    
+    if(!isArrayExist()) return;
+
     //  Validation of user given element and index value
-    if(arrayInputs.element === '') {
-      toast.error("Enter Element");
-      if(arrayInputs.customIdx === '') {
-        toast.error("Enter Index");
-      }
+    if (arrayInputs.element === '' && arrayInputs.customIdx === '') {
+      toast.error("Please enter both element and index.");
       return;
     }
-    if(arrayInputs.customIdx === '') {
-      toast.error("Enter Index");
+    
+    if (arrayInputs.element === '') {
+      toast.error("Please enter an element.");
       return;
     }
+    
+    if (arrayInputs.customIdx === '') {
+      toast.error("Please enter an index.");
+      return;
+    }    
 
     // Check if user given index is Out of Bounds
     if(parseInt(arrayInputs.customIdx) >= array.length || parseInt(arrayInputs.customIdx) < 0) {
-      toast.error("Invalid Index");
+      toast.error(`Index must be between 0 and ${array.length - 1}.`);
       return;
     }
     await delay(500);
@@ -103,6 +124,7 @@ const StaticArrayOperations = () => {
             prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? arrayInputs.element : item))
         );
     }
+    toast.success(`"${arrayInputs.element}" inserted at index ${arrayInputs.customIdx}!`);
     setOperationIdxVisibility(false);
     setOperationEleVisibility(false);
     setArrayInputs({...arrayInputs, element: ''});
@@ -111,13 +133,15 @@ const StaticArrayOperations = () => {
 
   //  Delete an element by index value
   const deleteByIdx = async() => {
+    if(!isArrayExist()) return;
+
     //   Validation of user given index value
     if(arrayInputs.customIdx === '') {
-      toast.error("Enter Index");
+      toast.error("Please enter an index.");
       return;
     }
     if(parseInt(arrayInputs.customIdx) >= array.length || parseInt(arrayInputs.customIdx) < 0) {
-        toast.error("Invalid Index");
+        toast.error(`Please enter an index between 0 and ${array.length - 1}.`);
         return;
     }
 
@@ -129,28 +153,39 @@ const StaticArrayOperations = () => {
     setArray(prevArray => 
         prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? 'NULL' : item))
     );
+    toast.success(`Element deleted from index ${arrayInputs.customIdx}`);
     setOperationIdxVisibility(false);
     setArrayInputs({...arrayInputs, customIdx: ''});
   };
 
   //  Delete element by value
   const deleteByEle = async() => {
+    if(!isArrayExist()) return;
+
     if(arrayInputs.element === '') {
-      console.log("Empty element");
+      toast.error("Please enter an element.");
       return;
     }
 
+    if (!array.includes(Number(arrayInputs.element))) {
+      toast.error("Element not found.");
+      return; // Return the array unchanged
+    }
+
     // Replace the matching element with 'NULL' in the array
-    setArray(prevArray => 
-      prevArray.map((item, i) => (item == arrayInputs.element ? 'NULL' : item))
-    );
-    
+    setArray(prevArray => {
+      return prevArray.map((item) => (item === Number(arrayInputs.element) ? 'NULL' : item));
+    });
+    toast.success("Element deleted.");
     setArrayInputs({...arrayInputs, element: ''});
   };
 
   //  Delete array
   const removeArray = () => {
+    if(!isArrayExist()) return;
+
     setArray([]);
+    toast.success("Array has been successfully deleted.");
     setArrayInputs({
       ...arrayInputs,
       arrayLength: ''
@@ -172,8 +207,8 @@ const StaticArrayOperations = () => {
        open={detailsState['staticArrayOp'] !== undefined ? detailsState['staticArrayOp'] : true }
       >
       <summary className="mb-4">Static Array Operations</summary>
-        <div className='md:flex'>
-            <div className='md:w-70p w-full mb-2'>
+        <div className=''>
+            <div className='w-full mb-2'>
               <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
                 <div className='mr-2'>
                   <input
@@ -189,7 +224,7 @@ const StaticArrayOperations = () => {
                   />
                   <button
                     onClick={createArray}
-                    className="bg-teal-600 hover:bg-teal-700"
+                    className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
                   >
                     Create New array
                   </button>
@@ -208,6 +243,7 @@ const StaticArrayOperations = () => {
                   <input
                     name='customIdx'
                     type="number"
+                    min={0}
                     value={arrayInputs.customIdx}
                     onChange={handleChange}
                     className="md:p-2 p-1 h-fit w-36p shadow-inner"

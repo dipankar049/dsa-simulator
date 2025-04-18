@@ -1,41 +1,64 @@
 import React from 'react'
 import { useState, useRef, useEffect } from 'react';
 import TopicCard from './TopicCard';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function DoublyLinkedlistOperations() {
-    const [array, setArray] = useState([23, 52, 76, 18]);
+    const [list, setList] = useState([23, 52, 76, 18]);
     const [element, setElement] = useState('');
-    const [arrayLength, setArrayLength] = useState(0);
-    const [arrExist, setArrExist] = useState(true);
+    const [listExist, setListExist] = useState(true);
     const [customIdx, setCustomIdx] = useState('');
   
     const divRefs = useRef([]);
   
     const createList = () => {
-        setArray(Array(arrayLength).fill('Null'));
-        setArrExist(true);
+      setList(Array(0).fill('Null'));
+      setListExist(true);
+      toast.success("New linked list created");
     };
+
+    const isListExist = () => {
+      if(!listExist) {
+        toast.error("Please create a list first to append element");
+      };
+      return listExist;
+    }
   
     function listAppend() {
-      if(!arrExist) {
+      if(!isListExist()) return;
+      if(element === '') {
+        toast.error("Please enter an element");
         return;
-      };
-      if(element) {
-          setArray([...array, element]);
-        }
+      }
+      
+      setList([...list, element]);
+      toast.success(`"${element}" successfully added at the end.`);
       setElement('');
     };
   
-    function arrayInsert() {
-      if(!arrExist) {
+    function insertInList() {
+      if(!listExist) return;
+      if(list.length === 0) {
+        toast.error("Linked List is empty");
         return;
-      };
+      }
+      if(element === '') {
+        toast.error("Please enter an element");
+        return;
+      } else {
+
+      }
+      if(customIdx == '' || customIdx < 0 || customIdx >= list.length) {
+        toast.error(`Please enter an index between 0 and ${list.length - 1}.`);
+        return;
+      }
       if(element) {
-          if(customIdx > array.length) {
+          if(customIdx > list.length) {
             return;
           } else {
-            setArray(prevArray => {
-                // Create a new array with the element inserted at the specified index
+            setList(prevArray => {
+                // Create a new list with the element inserted at the specified index
                 const newArray = [
                   ...prevArray.slice(0, customIdx), // Elements before the index
                   element,                    // New element
@@ -44,34 +67,65 @@ export default function DoublyLinkedlistOperations() {
                 return newArray;
               });
           }
+          toast.success(`"${element}" inserted at index ${customIdx}`);
           setElement('');
         }
     }
 
-    function removeFromBeg() {
-      //   console.log(idx);
-        if(array.length < 0) {
-            // console.log("empty array, can't delete");
-            return;
-        }
-        setArray(array.slice(0, -1));
+    function removeFromEnd() {
+      if(!isListExist()) return;
+      if(list.length == 0) {
+        toast.error("List is already empty");
+        return;
+      }
+      setList(list.slice(0, -1));
+      toast.success("Last element removed.");
     }
   
-      const removeItemAtIndex = () => {
-        setArray(prevArray => [
-            ...prevArray.slice(0, customIdx), // Elements before the index
-            ...prevArray.slice(customIdx + 1)  // Elements after the index
-        ]);
-      };
-
-      const removeByEle = () => {
-        setArray(array.filter(item => item !== element));
-      };
-
-      const removeArray = () => {
-        setArray([]);
-        setArrExist(false);
+    const removeItemAtIndex = () => {
+      if(!isListExist()) return;
+      
+      if(list.length === 0) {
+        toast.error("Linked List is empty");
+        return;
       }
+  
+      if(customIdx == '' || customIdx < 0 || customIdx >= list.length) {
+        toast.error(`Please enter an index between 0 and ${list.length - 1}.`);
+        return;
+      }
+      setList(prevArray => [
+          ...prevArray.slice(0, customIdx), // Elements before the index
+          ...prevArray.slice(customIdx + 1)  // Elements after the index
+      ]);
+      toast.success(`Element deleted from index ${customIdx}`);
+    };
+
+    const removeByEle = () => {
+      if(!isListExist()) return;
+      
+      if(element === '') {
+        toast.error("Please enter an element");
+        return;
+      }
+  
+      const updatedList = list.filter(item => item !== Number(element));
+  
+      if (updatedList.length < list.length) {
+        setList(updatedList);
+        toast.success(`Element ${element} removed successfully.`);
+      } else {
+        toast.info(`Element ${element} not found in the list.`);
+      }
+    };
+
+    const removeList = () => {
+      if(!isListExist()) return;
+      
+      setList([]);
+      setListExist(false);
+      toast.success("List deleted successfuly");
+    }
   
   
     return (
@@ -104,7 +158,7 @@ export default function DoublyLinkedlistOperations() {
                   Insert at end
                 </button>
                 <button
-                  onClick={removeFromBeg}
+                  onClick={removeFromEnd}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
                 >
                   delete from end
@@ -114,14 +168,14 @@ export default function DoublyLinkedlistOperations() {
             </div>
             <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 roumded-md shadow-xl'>
               <div className='w-full p-2 overflow-x-auto'>
-                <p className='m-2 font-bold'>{arrExist ? 'Linkedlist': ''}</p>
+                <p className='m-2 font-bold'>{listExist ? 'Linkedlist': ''}</p>
                 <div className="flex xl:ml-2"
                 style={{
                   animationDelay: '0.2s', // Stagger the delay by 0.2s per item
                   animationFillMode: 'both' // Ensures the element stays visible after the animation ends
                 }}
                 >
-                  {array.map((item, index) => (
+                  {list.map((item, index) => (
                     <>
                     <div
                       id={item}
@@ -150,7 +204,7 @@ export default function DoublyLinkedlistOperations() {
                       animationDelay: '0.2s', // Stagger the delay by 0.2s per item
                       animationFillMode: 'both' // Ensures the element stays visible after the animation ends
                     }}
-                    >{index == array.length-1 ? 'Null': ''}</p>
+                    >{index == list.length-1 ? 'Null': ''}</p>
                     </>
                   ))}
                 </div>
@@ -169,7 +223,7 @@ export default function DoublyLinkedlistOperations() {
                   placeholder="Enter index"
                 />
                 <button
-                  onClick={arrayInsert}
+                  onClick={insertInList}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 md:m-0 my-1 h-fit rounded-r-md"
                 >
                   Insert
@@ -188,7 +242,7 @@ export default function DoublyLinkedlistOperations() {
                 delete by element
               </button>
               <button
-                onClick={removeArray}
+                onClick={removeList}
                 className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 xl:m-0 mt-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
               >
                 delete Linkedlist

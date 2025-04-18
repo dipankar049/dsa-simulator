@@ -16,12 +16,13 @@ import QuickSort from './components/QuickSort';
 import HomePage from './components/HomePage';
 import Header from './Header';
 import { DetailsProvider } from './context/DetailsContext';
-import { ThemeProvider } from './context/ThemeContext';
 import { ToastContainer } from 'react-toastify';
-
+import { ThemeContext } from './context/ThemeContext';
+import { useContext } from 'react';
 import "./components/styles/globals.css";
 
 function App() {
+  const { theme } = useContext(ThemeContext);
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("language") || "en";
   });
@@ -32,12 +33,16 @@ function App() {
   }
 
   return (
-    <ThemeProvider>
+    
     <DetailsProvider>
     <BrowserRouter>
       <ToastContainer 
         limit={3}
-        autoClose={2000}
+        autoClose={3000}
+        newestOnTop={true}
+        pauseOnHover
+        theme={theme}
+        pauseOnFocusLoss
       />
       <div className="w-full h-screen bg-blue-50">
         <Header changeLanguage={handleChangeLanguage}/>
@@ -62,7 +67,6 @@ function App() {
       </div>
     </BrowserRouter>
     </DetailsProvider>
-    </ThemeProvider>
   );
 }
 

@@ -50,7 +50,7 @@ export default function DynamicArrayOperations() {
   const createArray = async() => {
     //  validation of input value of array length
     if(arrayInputs.arrayLength === '' || arrayInputs.arrayLength <= 0) { 
-      toast.error("Enter Valid Length!");
+      toast.error("Array length must be greater than 0.");
       return;
     }
 
@@ -59,48 +59,49 @@ export default function DynamicArrayOperations() {
     setArray([]);
     await delay(500);
     setArray(Array(parseInt(arrayInputs.arrayLength)).fill('NULL'));
+    toast.success("Array created successfully", {position: 'top-center'});
   };
+
+  const isArrayExist = () => {
+    if(array.length === 0) {  // check if array exist
+      toast.error("Please create an array first.");
+      return false;
+    };
+    return true;
+  }
 
   //   Push element to array
   function arrayPushOperation() {
-    if(array.length == 0) {  // check if array exist
-      toast.error("First create an Array");
-      return;
-    };
+    if(!isArrayExist()) return;
 
     if(arrayInputs.element === '') {
       toast.error("Please enter an element");
       return;
     }
     setOldArray(true);
-
-    if(arrayInputs.element) {
-        setArray([...array, arrayInputs.element]);
-    }
+    setArray([...array, arrayInputs.element]);
+    toast.success("Element successfully pushed into the array.");
     setArrayInputs({...arrayInputs, element: ''});
   };
 
   //  Insert element to array
   const arrayInsert = async() => {
-    if(array.length == 0) {  // check if array exist
-      toast.error("First create an Array");
-      return;
-    };
+    if(!isArrayExist()) return;
 
     // Validation of element and index
-    if(arrayInputs.element === '') {
-      toast.error('Please enter an element');
-      if(arrayInputs.customIdx === '') {
-        toast.error('Please enter index');
-      }
+    if (arrayInputs.element === '' && arrayInputs.customIdx === '') {
+      toast.error("Please enter both element and index.");
+      return;
+    } else if (arrayInputs.element === '') {
+      toast.error("Please enter an element.");
+      return;
+    } else if (arrayInputs.customIdx === '') {
+      toast.error("Please enter an index.");
       return;
     }
-    if(arrayInputs.customIdx === '') {
-      toast.error('Please enter index');
-      return;
-    }
+
     if(parseInt(arrayInputs.customIdx) < 0) {
-      toast.error("Invalid index");
+      toast.error("Index must be greater than 0");
       return;
     }
 
@@ -130,6 +131,7 @@ export default function DynamicArrayOperations() {
         );
       }
     }
+    toast.success(`"${arrayInputs.element}" inserted at index ${arrayInputs.customIdx}`);
     setOperationIdxVisibility(false);
     setOperationEleVisibility(false);
     setArrayInputs({...arrayInputs, element: ''});
@@ -138,22 +140,23 @@ export default function DynamicArrayOperations() {
 
   //  Pop element from array
   function arrayPopOperation() {
-      if(array.length <= 0) {
-          console.log("empty array, can't delete");
-          return;
-      }
-      setArray(array.slice(0, -1));
+    if(!isArrayExist()) return;
+      
+    setArray(array.slice(0, -1));
+    toast.success("Element popped from the array.");
   }
 
   //  Delete element from given index
   const removeItemAtIndex = async() => {
+    if(!isArrayExist()) return;
+
     //  Validation of user given index
     if(arrayInputs.customIdx === '') {
-      toast.error("Please enter index");
+      toast.error("Please enter an index");
       return;
     }
     if(parseInt(arrayInputs.customIdx) >= array.length || parseInt(arrayInputs.customIdx) < 0) {
-      toast.error("Invalid index");
+      toast.error(`Index must be between 0 and ${array.length - 1}.`);
       return;
     }
 
@@ -161,25 +164,44 @@ export default function DynamicArrayOperations() {
     setOperationIdxVisibility(true);
     await delay(1000);
     setArray(array.filter((_, i) => i !== parseInt(arrayInputs.customIdx)));
+    toast.success(`Element deleted from index ${arrayInputs.customIdx}`);
     setOperationIdxVisibility(false);
     setArrayInputs({...arrayInputs, customIdx: ''});
   };
 
   //  Remove user given element
   const removeByEle = () => {
+    if(!isArrayExist()) return;
+
     if(arrayInputs.element === '') {
-      toast.error("Please enter element");
+      toast.error("Please enter an element.");
       return;
     }
 
-    setArray(array.filter(item => item !== arrayInputs.element));
+    if (!array.includes(Number(arrayInputs.element))) {
+      toast.error("Element not found.");
+      return; // Return the array unchanged
+    }
+
+    // Replace the matching element with 'NULL' in the array
+    setArray(prevArray => {
+      return prevArray.map((item) => (item === Number(arrayInputs.element) ? 'NULL' : item));
+    });
+    toast.success("Element deleted.");
     setArrayInputs({...arrayInputs, element: ''});
   };
 
   //  Delete array
   const removeArray = () => {
+    if(!isArrayExist()) return;
+
     setOldArray(false);
     setArray([]);
+    toast.success("Array has been successfully deleted.");
+    setArrayInputs({
+      ...arrayInputs,
+      arrayLength: ''
+    });
   }
   
   return (
