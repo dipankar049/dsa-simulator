@@ -56,7 +56,7 @@ const StaticArrayOperations = () => {
   //  Create new array
   const createArray = async() => {
     //  validation of input value of array length
-    if(arrayInputs.arrayLength === '' || arrayInputs.arrayLength <= 0) { 
+    if(arrayInputs.arrayLength === '' || parseInt(arrayInputs.arrayLength) <= 0) { 
       toast.error("Array length must be greater than 0.");
       return;
     }
@@ -121,7 +121,7 @@ const StaticArrayOperations = () => {
     // Insert element in array
     if(arrayInputs.element) {
         setArray(prevArray => 
-            prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? arrayInputs.element : item))
+            prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? Number(arrayInputs.element) : item))
         );
     }
     toast.success(`"${arrayInputs.element}" inserted at index ${arrayInputs.customIdx}!`);
@@ -276,8 +276,8 @@ const StaticArrayOperations = () => {
                         className="border border-black rounded-sm flex justify-center md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 flex-shrink-0 overflow-hidden whitespace-nowrap animate-fadeIn"
                         // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                         style={{
-                          color: operationIdxVisibility ? ((index == arrayInputs.customIdx) ? 'red' : 'black') : 'black',
-                          backgroundColor: operationIdxVisibility ? ((index == arrayInputs.customIdx) ? 'white' : '#6ee7b7') : '#6ee7b7',
+                          color: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'red' : 'black') : 'black',
+                          backgroundColor: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'white' : '#6ee7b7') : '#6ee7b7',
                           animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
                           animationFillMode: 'both' // Ensures the element stays visible after the animation ends 
                         }}
@@ -293,7 +293,7 @@ const StaticArrayOperations = () => {
                         ref={divRefs.current[index]}
                         className="flex items-center font-bold text-red-800 justify-center flex-shrink-0 lg:w-14 md:12 w-10"
                       >
-                        <div style={{ visibility: operationEleVisibility ? ((index == arrayInputs.customIdx) ? 'visible' : 'hidden') : 'hidden'
+                        <div style={{ visibility: operationEleVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'visible' : 'hidden') : 'hidden'
                         }}>
                           {/* <p>New Element</p> */}
                           {arrayInputs.element}

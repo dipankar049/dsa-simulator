@@ -147,7 +147,7 @@ export default function DoublyLinkedlistOperations() {
                 <input
                   type="number" 
                   value={element}
-                  onChange={(e) => setElement(e.target.value)}
+                  onChange={(e) => setElement(Number(e.target.value))}
                   className="border border-gray-300 md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
                   placeholder="Enter element"
                 />

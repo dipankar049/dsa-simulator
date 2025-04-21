@@ -35,7 +35,7 @@ export default function SinglyLinkedList() {
       return;
     }
 
-    setList([...list, element]);
+    setList([...list, Number(element)]);
     toast.success(`"${element}" successfully added at the end.`);
     setElement('');
   };
@@ -43,25 +43,32 @@ export default function SinglyLinkedList() {
   function insertInListt() {
     if(!isListExist()) return;
 
-    if(list.length === 0) {
-      toast.error("Linked List is empty");
-      return;
-    }
+    // if(list.length === 0) {
+    //   toast.error("Linked List is empty");
+    //   return;
+    // }
 
     if(element === '') {
       toast.error("Please enter an element");
       return;
     }
-    if(customIdx == '' || customIdx < 0 || customIdx >= list.length) {
-      toast.error(`Please enter an index between 0 and ${list.length - 1}.`);
-      return;
+    
+    if(customIdx === '' || parseInt(customIdx) < 0 || parseInt(customIdx) > list.length) {
+      console.log(customIdx === '');
+      if(list.length == 0 && parseInt(customIdx) !== 0) {
+        toast.error("Index must be 0 as linked list is empty");
+        return;
+      } else {
+        toast.error(`Please enter an index between 0 and ${list.length - 1}.`);
+        return;
+      }
     }
 
     setList(prevArray => {
       // Create a new list with the element inserted at the specified index
       const newArray = [
         ...prevArray.slice(0, customIdx), // Elements before the index
-        element,                    // New element
+        Number(element),                    // New element
         ...prevArray.slice(customIdx)      // Elements from the index onward
       ];
       return newArray;
@@ -91,7 +98,7 @@ export default function SinglyLinkedList() {
       return;
     }
 
-    if(customIdx == '' || customIdx < 0 || customIdx >= list.length) {
+    if(customIdx === '' || customIdx < 0 || customIdx >= list.length) {
       toast.error(`Please enter an index between 0 and ${list.length - 1}.`);
       return;
     }
@@ -129,7 +136,6 @@ export default function SinglyLinkedList() {
     setList([]);
     setListExist(false);
     toast.success("List deleted successfuly");
-    
   };
 
   return (
@@ -151,7 +157,7 @@ export default function SinglyLinkedList() {
               <input
                 type="number"
                 value={element}
-                onChange={(e) => setElement(e.target.value)}
+                onChange={(e) => setElement(Number(e.target.value))}
                 className="border border-gray-300 md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
                 placeholder="Enter element"
               />

@@ -49,7 +49,7 @@ export default function DynamicArrayOperations() {
   //  Create new array
   const createArray = async() => {
     //  validation of input value of array length
-    if(arrayInputs.arrayLength === '' || arrayInputs.arrayLength <= 0) { 
+    if(arrayInputs.arrayLength === '' || parseInt(arrayInputs.arrayLength) <= 0) { 
       toast.error("Array length must be greater than 0.");
       return;
     }
@@ -79,7 +79,7 @@ export default function DynamicArrayOperations() {
       return;
     }
     setOldArray(true);
-    setArray([...array, arrayInputs.element]);
+    setArray([...array, Number(arrayInputs.element)]);
     toast.success("Element successfully pushed into the array.");
     setArrayInputs({...arrayInputs, element: ''});
   };
@@ -116,7 +116,7 @@ export default function DynamicArrayOperations() {
           let newArray = [...array];
           while (temp > 0) {
               if (temp === 1) {
-                  newArray = [...newArray, arrayInputs.element]; // Add element to newArray
+                  newArray = [...newArray, Number(arrayInputs.element)]; // Add element to newArray
                   temp--;
               } else {
                   newArray = [...newArray, 'NULL']; // Add 'Null' to newArray
@@ -127,7 +127,7 @@ export default function DynamicArrayOperations() {
       } else {
         setArray(prevArray => 
         
-          prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? arrayInputs.element : item))
+          prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? Number(arrayInputs.element) : item))
         );
       }
     }
@@ -270,8 +270,8 @@ export default function DynamicArrayOperations() {
                       className="border border-black flex justify-center md:w-12 lg:w-14 w-10 flex-shrink-0 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap animate-fadeIn rounded-sm"
                       // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                       style={{
-                        color: operationIdxVisibility ? ((index == arrayInputs.customIdx) ? 'red' : 'black') : 'black',
-                        backgroundColor: operationIdxVisibility ? ((index == arrayInputs.customIdx) ? 'white' : '#22d3ee') : '#22d3ee',
+                        color: operationIdxVisibility ? ((index == parseInt(arrayInputs.customIdx)) ? 'red' : 'black') : 'black',
+                        backgroundColor: operationIdxVisibility ? ((index == parseInt(arrayInputs.customIdx)) ? 'white' : '#22d3ee') : '#22d3ee',
                         animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`, // Stagger the delay by 0.2s per item
                         animationFillMode: 'both' // Ensures the element stays visible after the animation ends
                       }}
@@ -287,7 +287,7 @@ export default function DynamicArrayOperations() {
                       ref={divRefs.current[index]}
                       className="flex items-center font-bold text-red-800 justify-center flex-shrink-0 lg:w-14 md:12 w-10"
                     >
-                      <div style={{ visibility: operationEleVisibility ? ((index == arrayInputs.customIdx) ? 'visible' : 'hidden') : 'hidden'
+                      <div style={{ visibility: operationEleVisibility ? ((index == parseInt(arrayInputs.customIdx)) ? 'visible' : 'hidden') : 'hidden'
                       }}>
                         {/* <p>New Element</p> */}
                         {arrayInputs.element}
