@@ -1,7 +1,6 @@
-// src/components/ArrayVisualizer.js
-
 import React, { useState, useRef, useEffect } from 'react';
-import TopicCard from './TopicCard';
+import TopicCard from '../components/TopicCard';
+import { toast } from 'react-toastify';
 
 const BinarySearch = () => {
     const [array, setArray] = useState([22, 25, 32, 48, 51, 57, 64, 73]);
@@ -9,8 +8,8 @@ const BinarySearch = () => {
     const [arrExist, setArrExist] = useState(true);
     const [isEqual, setIsEqual] = useState(false);
     const [searchEle, setSearchEle] = useState('');
-    const [idx, setIdx] = useState(0);
-    const [cancleFun, setCancleFun] = useState(false);
+    const abortRef = useRef(false);
+    const [isRunning, setIsRunning] = useState(false);
     const [low, setLow] = useState(0);
     const [high, setHigh] = useState(array.length - 1);
     const [mid, setMid] = useState(0);
@@ -19,6 +18,8 @@ const BinarySearch = () => {
     const [isFound, setIsFound] = useState('');
     const [iterations, setIterations] = useState(0);
     const divRefs = useRef([]);
+    const [arrayLength, setArrayLength] = useState('');
+    const [customIdx, setCustomIdx] = useState('');
 
     const [divs, setDivs] = useState([]);
 
@@ -37,15 +38,18 @@ const BinarySearch = () => {
     },[searchEle]);
 
     const binSearch = async () => {
-        if (array.length === 0) {
+        if (!arrExist) {
+            toast.error("Please create an array first.");
             return;
         }
-        if(searchEle === '') {
+        if (searchEle === '') {
+            toast.error("Please enter an search element.");
             setEmptySearchElement(true);
             return;
         }
+        abortRef.current = false;
+        setIsRunning(true);
         setEmptySearchElement(false);
-
         let currentLow = low;
         let currentHigh = high;
         setIsFound('');
@@ -54,12 +58,17 @@ const BinarySearch = () => {
         let i = 0;
 
         while (currentLow <= currentHigh) {
+            if (abortRef.current) {
+                setIsRunning(false);
+                toast.info("Search aborted.");
+                return;
+            }
             let midValue = Math.floor((currentLow + currentHigh) / 2);
             await new Promise((resolve) => setTimeout(resolve, 1000));
             setMid(midValue);
             setIsMidVisible(true);
             setIterations(++i);
-            // Wait for 1 second to simulate delay
+
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
             if (parseInt(searchEle) === array[midValue]) {
@@ -79,10 +88,13 @@ const BinarySearch = () => {
             // setIterations(iterations + 1);
         }
         if (localIsEqual) {
+            toast.info("Element found");
             setIsFound('Found');
         } else {
+            toast.info("Element not found");
             setIsFound('Not Found')
         }
+        setIsRunning(false);
     }
 
     useEffect(() => {
@@ -99,7 +111,7 @@ const BinarySearch = () => {
         setIsMidVisible(false);
         setIsFound('');
         setIterations(0);
-    }, [array, searchEle]);
+    }, [array, searchEle, abortRef.current]);
 
     useEffect(() => {
         const newDivs = [];
@@ -117,69 +129,180 @@ const BinarySearch = () => {
         setDivs(newDivs); // Update the state with new divs
     }, [array]);
 
+    const createArray = async () => {
+            //  validation of input value of array length
+            if (arrayLength === '' || parseInt(arrayLength) <= 0) {
+                toast.error("Array length must be greater than 0.");
+                return;
+            }
+    
+            await delay(200);
+            setOldArray(false);
+            setArray([]);
+            setArrExist(true);
+            await delay(500);
+            setArray(Array(parseInt(arrayLength)).fill('NULL'));
+            toast.success("Array created successfully", { position: 'top-center' });
+        };
+    
 
-    const createArray = () => {
-        setOldArray(false);
-        setArray([]);
-        setArrExist(true);
-        setIsMidVisible(false);
-    };
+    //  Insert element to array
+    const arrayInsert = async () => {
+        if (!arrExist) {
+            toast.error("Please create an array first.");
+            return;
+        }
+
+        // Validation of element and index
+        if (element === '' && customIdx === '') {
+            toast.error("Please enter both element and index.");
+            return;
+        } else if (element === '') {
+            toast.error("Please enter an element.");
+            return;
+        } else if (customIdx === '') {
+            toast.error("Please enter an index.");
+            return;
+        }
+
+        if (parseInt(customIdx) > array.length || parseInt(customIdx) < 0) {
+            toast.error(`Index must be between 0 and ${array.length}.`);
+            return;
+        }
+
+        if (parseInt(customIdx) !== 0 && parseInt(element) < array[parseInt(customIdx) - 1]) {
+            toast.info(`Value should be greater than or equal to ${array[parseInt(customIdx) - 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
+                autoClose: 12000
+              });              
+            return;
+        } else if(parseInt(customIdx) === 0 && parseInt(element) > array[1]) {
+            toast.info(`Value should be less than or equal to ${array[1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
+                autoClose: 12000
+            });
+            return;
+        }    
+
+        await delay(1000);
+
+        if (parseInt(customIdx) === array.length) {
+            let temp = parseInt(customIdx) - array.length + 1;
+            let newArray = [...array];
+            while (temp > 0) {
+                if (temp === 1) {
+                    newArray = [...newArray, parseInt(element)]; // Add element to newArray
+                    temp--;
+                } else {
+                    newArray = [...newArray, 'NULL']; // Add 'Null' to newArray
+                    temp--;
+                }
+            }
+            setArray(newArray);
+        } else {
+            setArray(prevArray =>
+
+                prevArray.map((item, i) => (i === parseInt(customIdx) ? parseInt(element) : item))
+            );
+        }
+
+        toast.success(`"${element}" inserted at index ${customIdx}`);
+        setElement('');
+        setCustomIdx('');
+    }
 
     function arrayPushOperation() {
         if (!arrExist) {
-            return;
-        };
-        if(element === '') {
-            setEmptyElement(true);
+            toast.error("Please create an array first.");
             return;
         }
+        if (element === '') {
+            toast.error("Please enter an element");
+            return;
+        }
+        if (array.length !== 0 && parseInt(element) < array[array.length - 1]) {
+            toast.info(`Value should be greater than or equal to ${array[parseInt(customIdx) - 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
+                autoClose: 12000
+              });              
+            return;
+        }        
         setEmptyElement(false);
         setOldArray(true);
-        if (element) {
-            setArray([...array, element]);
-        }
+        setArray([...array, parseInt(element)]);
+        toast.success("Element successfully pushed into the array.");
         setElement('');
-        // setCustomIdx(-1);
     };
 
     function arrayPopOperation() {
-        //   console.log(idx);
-        if (array.length <= 0) {
-            console.log("empty array, can't delete");
+        if (!arrExist) {
+            toast.error("Please create an array first.");
             return;
         }
         setArray(array.slice(0, -1));
+        toast.success("Element popped from the array.");
     }
 
     const removeByEle = () => {
-        if(element === '') {
+        if (!arrExist) {
+            toast.error("Please create an array first.");
+            return;
+        }
+
+        if (element === '') {
             setEmptyElement(true);
+            toast.error("Please enter an element.");
             return;
         }
         setEmptyElement(false);
-        
-        setArray(array.filter(item => item != element));
+        if (!array.includes(parseInt(element))) {
+            toast.error("Element not found.");
+            return; // Return the array unchanged
+        }
+
+        // Replace the matching element with 'NULL' in the array
+        setArray(prevArray => {
+            return prevArray.map((item) => (item === parseInt(element) ? 'NULL' : item));
+        });
+        toast.success("Element deleted.");
         setElement('');
     };
 
+    //  Delete array
     const removeArray = () => {
+        if (!arrExist) {
+            toast.error("Please create an array first.");
+            return;
+        }
+
         setOldArray(false);
         setArray([]);
         setArrExist(false);
-        setIsVisible(false);
+        toast.success("Array has been successfully deleted.");
+        setElement('');
+        setCustomIdx('');
     }
 
     return (
         <div className='p-2p'>
             <TopicCard topicName="Binary Search" />
             <div className="md:flex bg-gradient-to-tl from-purple-200 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
-                <div className='md:w-70p w-full mb-2'>
+                <div className='w-full mb-2'>
                     <h1 className="text-xl font-bold mb-4">Binary Search</h1>
                     <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
                         <div className=''>
+                        <input
+                                name='arrayLength'
+                                min={1}
+                                type="number"
+                                value={arrayLength}
+                                onChange={(e) => { setArrayLength(e.target.value) }}
+                                className="border border-gray-300 md:p-2 p-1 h-fit w-44p rounded-l-md shadow-inner"
+                                // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
+                                placeholder="Length"
+                                disabled={isRunning}
+                            />
                             <button
                                 onClick={createArray}
-                                className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-md"
+                                className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
+                                disabled={isRunning}
                             >
                                 Create New array
                             </button>
@@ -191,17 +314,24 @@ const BinarySearch = () => {
                                 onChange={(e) => setSearchEle(e.target.value)}
                                 className="md:p-2 p-1 h-fit w-50p rounded-l-md shadow-inner"
                                 style={{border: `${emptySearchElement ? '2px solid red' : '1px solid #d1d5db'}`}}
-                                placeholder="Enter element"
+                                placeholder="Search element"
+                                disabled={isRunning}
                             />
-                            <button
+                            {isRunning ? (<button
+                                onClick={() => abortRef.current = true}
+                                className="bg-red-500 hover:bg-red-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
+                            >
+                                Abort Search
+                            </button>)
+                            : (<button
                                 onClick={binSearch}
                                 className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
                             >
                                 Search
-                            </button>
+                            </button>)}
                         </div>
                     </div>
-                    <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md shadow-xl'>
+                    <div className='flex m-2 mx-0 mr-4 sm:mr-0 mb-6 bg-white border border-gray-300 rounded-md shadow-xl'>
                         <div className='w-full p-2'>
                             <div>
                                 <div className='flex justify-between'>
@@ -289,41 +419,65 @@ const BinarySearch = () => {
                                 className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
                                 style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
                                 placeholder="Enter element"
+                                disabled={isRunning}
                             />
                             <button
                                 onClick={arrayPushOperation}
                                 className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
+                                disabled={isRunning}
                             >
                                 Push
                             </button>
                             <button
                                 onClick={() => { arrayPopOperation() }}
                                 className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
+                                disabled={isRunning}
                             >
                                 Pop
                             </button>
                             <button
                                 onClick={removeByEle}
                                 className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
+                                disabled={isRunning}
                             >
                                 delete by element
                             </button>
                         </div>
-
+                        <div>
+                            <input
+                                name='customIdx'
+                                type="number"
+                                min={0}
+                                value={customIdx}
+                                onChange={(e) => { setCustomIdx(e.target.value) }}
+                                className="md:p-2 p-1 h-fit w-36p shadow-inner"
+                                style={{ border: '1px solid #d1d5db' }}
+                                placeholder="Enter index"
+                                disabled={isRunning}
+                            />
+                            <button
+                                onClick={arrayInsert}
+                                className="bg-purple-500 hover:bg-purple-600  lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                                disabled={isRunning}
+                            >
+                                Insert
+                            </button>
+                        </div>
                         <button
                             onClick={removeArray}
                             className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                            disabled={isRunning}
                         >
                             delete array
                         </button>
                     </div>
 
                 </div>
-                <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
+                {/* <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
                     <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
                         <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
                     </div>
-                </div>
+                </div> */}
             </div>
             <TopicCard topicName="Real-life Use (Binary Search)" />
         </div>

@@ -12,22 +12,28 @@ const TopicCard = ({ topicName }) => {
 
     return (
         <details
-        className={`my-6 p-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-100'} rounded-lg shadow-md`}
+          className={`my-6 p-4 sm:p-5 md:p-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-100'} rounded-lg shadow-md`}
         >
-        <summary>{topic.title}</summary>
-        <p
-            className="mt-2"
+          <summary className="text-base sm:text-lg md:text-xl font-semibold cursor-pointer">
+            {topic.title}
+          </summary>
+      
+          <p
+            className="mt-2 text-sm sm:text-base md:text-lg"
             dangerouslySetInnerHTML={{ __html: topic.definition }}
-        />
-
-        {/* {topic.diagram && <img src={topic.diagram} alt="Diagram" className="mt-4" />} */}
-
-        <h3 className="text-xl font-semibold mt-4">Example</h3>
-        <pre className="bg-gray-800 text-white p-4 rounded-md whitespace-pre-wrap">
+          />
+      
+          {/* Optional Diagram */}
+          {/* {topic.diagram && <img src={topic.diagram} alt="Diagram" className="mt-4" />} */}
+      
+          <h3 className="text-base sm:text-lg md:text-xl font-semibold mt-4">Example</h3>
+      
+          <pre className="bg-gray-800 text-white p-3 sm:p-4 text-xs sm:text-sm md:text-base rounded-md whitespace-pre-wrap mt-2">
             {topic.exampleCode}
-        </pre>
+          </pre>
         </details>
-    );
+      );
+      
 };
 
 export default TopicCard;
