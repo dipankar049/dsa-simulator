@@ -39,7 +39,7 @@ function App() {
 
   return (
     <DetailsProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/dsa-simulator">
         <ToastContainer
           limit={3}
           autoClose={3000}
