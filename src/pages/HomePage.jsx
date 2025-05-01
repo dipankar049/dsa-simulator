@@ -15,7 +15,7 @@ export default function HomePage({language}) {
       }`}> */}
       {/* Welcome Section */}
       <section className="w-4/5 max-w-4xl text-center py-10">
-        <h1 className="text-4xl font-bold text-blue-600">Welcome to DSA Visualizer</h1>
+        <h1 className="text-4xl font-bold text-blue-600">Welcome to DSA Visualizer "{ }"</h1>
         <p className="mt-4 text-lg">
           Experience the magic of learning Data Structures and Algorithms with intuitive visualizations, practical examples, and interactive tools.
         </p>
