@@ -112,8 +112,7 @@ const StaticArrayOperations = () => {
     toast.success(`"${arrayInputs.element}" inserted at index ${arrayInputs.customIdx}!`);
     setOperationIdxVisibility(false);
     setOperationEleVisibility(false);
-    setArrayInputs({ ...arrayInputs, element: '' });
-    setArrayInputs({ ...arrayInputs, customIdx: '' });
+    setArrayInputs({ ...arrayInputs, element: '', customIdx: '' });
   };
 
   //  Delete an element by index value
@@ -140,7 +139,7 @@ const StaticArrayOperations = () => {
     );
     toast.success(`Element deleted from index ${arrayInputs.customIdx}`);
     setOperationIdxVisibility(false);
-    setArrayInputs({ ...arrayInputs, customIdx: '' });
+    setArrayInputs({ ...arrayInputs, customIdx: ''});
   };
 
   //  Delete element by value
@@ -248,11 +247,11 @@ const StaticArrayOperations = () => {
             <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-300 dark:text-white border border-gray-300 shadow-xl rounded-md'>
               <div className='w-full p-2 overflow-x-auto'>
                 {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-black'>Array</p>}
-                <div className="flex md:ml-4">
+                <div className="flex">
                   {indexdivs}
                 </div>
 
-                <div className="flex md:ml-4">
+                <div className="flex">
                   {array.map((item, index) => (
                     <div
                       id={item}
@@ -264,7 +263,7 @@ const StaticArrayOperations = () => {
                         color: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'red' : 'black') : 'black',
                         backgroundColor: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'white' : '#6ee7b7') : '#6ee7b7',
                         animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
-                        animationFillMode: 'both' // Ensures the element stays visible after the animation ends 
+                        animationFillMode: 'both' // the element stays visible after the animation ends 
                       }}
                     >
                       {item}
