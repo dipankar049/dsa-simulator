@@ -15,7 +15,7 @@ export default function IndexDivs(length) {
             </div>
         );
         }
-        setDivs(newDivs); // Update the state with new divs
+        setDivs(newDivs);
     },[length]);
 
     return divs;

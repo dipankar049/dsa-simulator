@@ -208,7 +208,7 @@ const StaticArrayOperations = () => {
                 />
                 <button
                   onClick={createArray}
-                  className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                  className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
                 >
                   Create New array
                 </button>
@@ -237,7 +237,7 @@ const StaticArrayOperations = () => {
                 />
                 <button
                   onClick={arrayInsert}
-                  className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                  className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
                 >
                   Insert
                 </button>
@@ -294,19 +294,19 @@ const StaticArrayOperations = () => {
             <div className='flex flex-wrap justify-between'>
               <button
                 onClick={deleteByIdx}
-                className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md btnAnimate shadow-xl"
               >
                 Delete by index
               </button>
               <button
                 onClick={deleteByEle}
-                className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md btnAnimate shadow-xl"
               >
                 Delete by element
               </button>
               <button
                 onClick={removeArray}
-                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md btnAnimate shadow-xl"
               >
                 Delete array
               </button>

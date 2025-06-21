@@ -20,6 +20,7 @@ import { useContext } from 'react';
 import "./components/styles/globals.css";
 import LinearSearch from './pages/LinearSearch';
 import SinglyLinkedList from './pages/LinkedlistOperations2';
+import './App.css';
 
 function App() {
   const { theme } = useContext(ThemeContext);

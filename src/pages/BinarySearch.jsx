@@ -170,8 +170,13 @@ const BinarySearch = () => {
             return;
         }
 
-        if (parseInt(customIdx) !== 0 && parseInt(element) < array[parseInt(customIdx) - 1]) {
+        if (parseInt(customIdx) !== 0 && parseInt(element) < array[parseInt(customIdx) - 1]) {  // check if inserted element is less than previous element
             toast.info(`Value should be greater than or equal to ${array[parseInt(customIdx) - 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
+                autoClose: 12000
+              });              
+            return;
+        } else if ((parseInt(customIdx) !== 0 && (parseInt(customIdx) !== array.length - 1)) && parseInt(element) > array[parseInt(customIdx) + 1]) {  // check if inserted element is greater than next element
+            toast.info(`Value should be less than or equal to ${array[parseInt(customIdx) + 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
                 autoClose: 12000
               });              
             return;
@@ -218,8 +223,8 @@ const BinarySearch = () => {
             toast.error("Please enter an element");
             return;
         }
-        if (array.length !== 0 && parseInt(element) < array[array.length - 1]) {
-            toast.info(`Value should be greater than or equal to ${array[parseInt(customIdx) - 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
+        if (array.length !== 0 && parseInt(element) < array[array.length - 1]) {    // check if pushed element is less than last element
+            toast.info(`Value should be greater than or equal to ${array[array.length - 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
                 autoClose: 12000
               });              
             return;

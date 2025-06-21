@@ -33,7 +33,7 @@ export default function HomePage({language}) {
           <Link
             key={index}
             to={item.path}
-            className="p-4 border rounded-lg bg-blue-50 hover:bg-blue-200 text-blue-600 hover:text-blue-800 transition duration-200"
+            className="p-4 border rounded-lg bg-blue-50 hover:bg-blue-200 text-blue-600 hover:text-blue-800 transition divAnimate"
           >
             <h3 className="text-xl font-semibold">{item.title}</h3>
           </Link>
@@ -47,7 +47,7 @@ export default function HomePage({language}) {
         </p>
         <Link
           to="/arrayOp"
-          className="inline-block mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-800 transition duration-200"
+          className="inline-block mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg btnAnimate"
         >
           Get Started
         </Link>

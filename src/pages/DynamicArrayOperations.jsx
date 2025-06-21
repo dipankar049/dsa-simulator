@@ -207,7 +207,7 @@ export default function DynamicArrayOperations() {
                 />
                 <button
                   onClick={createArray}
-                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
                 >
                   Create New array
                 </button>
@@ -224,13 +224,13 @@ export default function DynamicArrayOperations() {
                 />
                 <button
                   onClick={arrayPushOperation}
-                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit transition ease-in delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit btnAnimate shadow-xl"
                 >
                   Push
                 </button>
                 <button
                   onClick={() => { arrayPopOperation() }}
-                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
                 >
                   Pop
                 </button>
@@ -296,26 +296,26 @@ export default function DynamicArrayOperations() {
                 />
                 <button
                   onClick={arrayInsert}
-                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
                 >
                   Insert
                 </button>
               </div>
               <button
                 onClick={removeItemAtIndex}
-                className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-md btnAnimate shadow-xl"
               >
                 delete by index
               </button>
               <button
                 onClick={removeByEle}
-                className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-md btnAnimate shadow-xl"
               >
                 delete by element
               </button>
               <button
                 onClick={removeArray}
-                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md btnAnimate shadow-xl"
               >
                 delete array
               </button>
