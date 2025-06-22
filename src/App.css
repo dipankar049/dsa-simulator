@@ -1,25 +1,62 @@
 
-@keyframes scaleUp105 {
+/* Buttons for operations */
+.opBtn {
+  color: white;
+  padding: 0.25rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  height: fit-content;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Input fields for operations */
+.opInput {
+  padding: 0.25rem;
+  height: fit-content;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* medium to larger screen */
+@media (min-width: 768px) {
+  .opBtn {
+    padding: 0.5rem;
+    margin: 0; 
+  }
+  .opInput {
+    padding: 0.5rem;
+  }
+}
+
+/* large screen */
+@media (min-width: 1024px) {
+  .opBtn {
+    font-weight: bold;
+  }
+}
+
+/* Scale up by 1.05 */
+/* @keyframes scaleUp105 {
   from {
     transform: scale(1);
   }
+
   to {
     transform: scale(1.05);
   }
-}
+} */
 
+/* scale up btn while hovering */
 .btnAnimate {
   transition: transform 0.03s ease-in-out;
 }
-
 .btnAnimate:hover {
   transform: scale(1.07);
 }
 
+/* scale up div while hovering */
 .divAnimate {
   transition: transform 0.2s ease-in-out;
 }
-
 .divAnimate:hover {
   transform: scale(1.05);
 }

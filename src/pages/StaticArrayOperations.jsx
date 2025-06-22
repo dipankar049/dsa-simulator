@@ -201,14 +201,14 @@ const StaticArrayOperations = () => {
                   value={arrayInputs.arrayLength}
                   min={1}
                   onChange={handleChange}
-                  className=" md:p-2 p-1 h-fit w-40p rounded-l-md shadow-inner"
+                  className="opInput w-40p rounded-l-md"
                   // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
                   style={{ border: '1px solid #d1d5db' }}
                   placeholder="Length"
                 />
                 <button
                   onClick={createArray}
-                  className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
+                  className="opBtn bg-teal-600 hover:bg-teal-700 rounded-r-md btnAnimate"
                 >
                   Create New array
                 </button>
@@ -219,7 +219,7 @@ const StaticArrayOperations = () => {
                   type="number"
                   value={arrayInputs.element}
                   onChange={handleChange}
-                  className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
+                  className="opInput w-36p rounded-l-md"
                   // style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
                   style={{ border: '1px solid #d1d5db' }}
                   placeholder="Enter element"
@@ -230,14 +230,14 @@ const StaticArrayOperations = () => {
                   min={0}
                   value={arrayInputs.customIdx}
                   onChange={handleChange}
-                  className="md:p-2 p-1 h-fit w-36p shadow-inner"
+                  className="opInput w-36p"
                   // style={{border: `${emptyInex ? '2px solid red' : '1px solid #d1d5db'}`}}
                   style={{ border: '1px solid #d1d5db' }}
                   placeholder="Enter index"
                 />
                 <button
                   onClick={arrayInsert}
-                  className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
+                  className="opBtn bg-teal-600 hover:bg-teal-700 rounded-r-md btnAnimate"
                 >
                   Insert
                 </button>
@@ -294,13 +294,13 @@ const StaticArrayOperations = () => {
             <div className='flex flex-wrap justify-between'>
               <button
                 onClick={deleteByIdx}
-                className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md btnAnimate shadow-xl"
+                className="opBtn bg-teal-600 hover:bg-teal-700 rounded-md btnAnimate"
               >
                 Delete by index
               </button>
               <button
                 onClick={deleteByEle}
-                className="bg-teal-600 hover:bg-teal-700 text-white lg:font-bold md:p-2 p-1 md:m-0 my-1 h-fit rounded-md btnAnimate shadow-xl"
+                className="opBtn bg-teal-600 hover:bg-teal-700 rounded-md btnAnimate shadow-xl"
               >
                 Delete by element
               </button>

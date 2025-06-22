@@ -201,13 +201,13 @@ export default function DynamicArrayOperations() {
                   type="number"
                   value={arrayInputs.arrayLength}
                   onChange={handleChange}
-                  className="border border-gray-300 md:p-2 p-1 h-fit w-44p rounded-l-md shadow-inner"
+                  className="opInput w-44p rounded-l-md"
                   // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
                   placeholder="Length"
                 />
                 <button
                   onClick={createArray}
-                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
+                  className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-r-md btnAnimate"
                 >
                   Create New array
                 </button>
@@ -218,25 +218,25 @@ export default function DynamicArrayOperations() {
                   type="number"
                   value={arrayInputs.element}
                   onChange={handleChange}
-                  className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
+                  className="opInput w-36p rounded-l-md"
                   style={{ border: '1px solid #d1d5db' }}
                   placeholder="Enter element"
                 />
                 <button
                   onClick={arrayPushOperation}
-                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit btnAnimate shadow-xl"
+                  className="bg-cyan-700 hover:bg-cyan-800 opBtn btnAnimate"
                 >
                   Push
                 </button>
                 <button
                   onClick={() => { arrayPopOperation() }}
-                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
+                  className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-r-md btnAnimate"
                 >
                   Pop
                 </button>
               </div>
             </div>
-            <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md shadow-xl'>
+            <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
               <div className='w-full p-2 overflow-x-auto'>
                 {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-black'>Array</p>}
                 <div className="flex md:ml-4">
@@ -290,26 +290,26 @@ export default function DynamicArrayOperations() {
                   min={0}
                   value={arrayInputs.customIdx}
                   onChange={handleChange}
-                  className="md:p-2 p-1 h-fit w-36p shadow-inner"
+                  className="opInput w-36p"
                   style={{ border: '1px solid #d1d5db' }}
                   placeholder="Enter index"
                 />
                 <button
                   onClick={arrayInsert}
-                  className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md btnAnimate shadow-xl"
+                  className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-r-md btnAnimate"
                 >
                   Insert
                 </button>
               </div>
               <button
                 onClick={removeItemAtIndex}
-                className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-md btnAnimate shadow-xl"
+                className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-md btnAnimate"
               >
                 delete by index
               </button>
               <button
                 onClick={removeByEle}
-                className="bg-cyan-700 hover:bg-cyan-800 lg:font-bold text-white md:p-2 p-1 h-fit rounded-md btnAnimate shadow-xl"
+                className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-md btnAnimate"
               >
                 delete by element
               </button>
