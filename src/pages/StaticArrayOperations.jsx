@@ -177,8 +177,11 @@ const StaticArrayOperations = () => {
   };
 
   return (
-    <div className='p-2p bg-white text-gray-700 
-                    dark:bg-gray-700 dark:text-white 
+    // <div className='p-2p bg-white text-gray-700 
+    //                 dark:bg-gray-700 dark:text-white 
+    //                 md:text-base sm:text-sm text-xs'
+    // >
+    <div className='p-2p bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 
                     md:text-base sm:text-sm text-xs'
     >
 

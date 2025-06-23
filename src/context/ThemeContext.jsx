@@ -4,12 +4,12 @@ const ThemeContext = createContext();
 
 const ThemeProvider = ({children}) => {
     const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('theme') || 
+        return localStorage.getItem('dsa-simulator-theme') || 
             (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     });    
 
     useEffect(() => {
-        const storedTheme = localStorage.getItem('theme') || 'light';
+        const storedTheme = localStorage.getItem('dsa-simulator-theme') || 'light';
         if (storedTheme !== theme) {
             updateTheme(storedTheme);
         }
@@ -27,7 +27,7 @@ const ThemeProvider = ({children}) => {
         try {
             if (['light', 'dark'].includes(newTheme)) {
                 setTheme(newTheme);
-                localStorage.setItem('theme', newTheme);
+                localStorage.setItem('dsa-simulator-theme', newTheme);
             } else {
                 console.warn('Invalid theme:', newTheme);
             }

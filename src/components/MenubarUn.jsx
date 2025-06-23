@@ -45,7 +45,7 @@ const MenuItem = ({ label, to, onClick }) => (
   <>
     <Link
       to={to}
-      className="block w-full p-2 pl-4 text-gray-800 rounded-r-3xl rounded-l-md hover:text-xl hover:font-bold hover:text-blue-600 dark:hover:text-blue-600 transition-all duration-200 ease-in-out"
+      className="block w-full p-2 pl-4 text-gray-800 dark:text-white rounded-r-3xl rounded-l-md hover:text-xl hover:font-bold hover:text-blue-600 dark:hover:text-blue-600 transition-all duration-200 ease-in-out"
       onClick={onClick}
     >
       {label}
