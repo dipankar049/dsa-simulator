@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useState, useRef, useEffect } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import IndexDivs from '../components/IndexDivs';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function DynamicArrayOperations() {
   const [array, setArray] = useState([15, 22, 12, 56, 24]);   // Default array elements
@@ -13,6 +14,7 @@ export default function DynamicArrayOperations() {
     element: ''
   });
   const [oldArray, setOldArray] = useState(false);
+  const {theme} = useContext(ThemeContext);
 
   const divRefs = useRef([]);
   const indexDivs = IndexDivs(array.length);
@@ -188,7 +190,7 @@ export default function DynamicArrayOperations() {
   return (
     <div className='p-2p'>
       <TopicCard topicName="Dynamic Array" />
-      <details className="bg-gradient-to-r from-cyan-200 h-fit w-full p-2p md:text-base sm:text-sm text-xs" open>
+      <details className={`${theme === 'light' ? 'bg-gradient-to-r from-cyan-200' : 'bg-gray-800'} h-fit w-full p-2p md:text-base sm:text-sm text-xs`} open>
         <summary className="text-xl font-bold mb-4">Dynamic array oprations</summary>
         <div className='md:flex'>
           <div className='w-full mb-2'>
@@ -219,7 +221,7 @@ export default function DynamicArrayOperations() {
                   value={arrayInputs.element}
                   onChange={handleChange}
                   className="opInput w-36p rounded-l-md"
-                  style={{ border: '1px solid #d1d5db' }}
+                  
                   placeholder="Enter element"
                 />
                 <button
@@ -291,7 +293,7 @@ export default function DynamicArrayOperations() {
                   value={arrayInputs.customIdx}
                   onChange={handleChange}
                   className="opInput w-36p"
-                  style={{ border: '1px solid #d1d5db' }}
+                  
                   placeholder="Enter index"
                 />
                 <button

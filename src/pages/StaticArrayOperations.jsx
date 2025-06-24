@@ -139,7 +139,7 @@ const StaticArrayOperations = () => {
     );
     toast.success(`Element deleted from index ${arrayInputs.customIdx}`);
     setOperationIdxVisibility(false);
-    setArrayInputs({ ...arrayInputs, customIdx: ''});
+    setArrayInputs({ ...arrayInputs, customIdx: '' });
   };
 
   //  Delete element by value
@@ -177,18 +177,13 @@ const StaticArrayOperations = () => {
   };
 
   return (
-    // <div className='p-2p bg-white text-gray-700 
-    //                 dark:bg-gray-700 dark:text-white 
-    //                 md:text-base sm:text-sm text-xs'
-    // >
     <div className='p-2p bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 
                     md:text-base sm:text-sm text-xs'
     >
-
       <TopicCard topicName="Array" /> {/* Defination and Example of array */}
       <TopicCard topicName="Static Array" />  {/* Defination and Example of static array */}
       <details
-        className="bg-gradient-to-l from-teal-200 h-fit w-full p-4 dark:from-gray-500 rounded-lg"
+        className={`w-full h-fit p-4 rounded-lg ${theme === 'light' ? 'bg-gradient-to-r from-teal-200' : 'bg-gray-800'} `}
         id='staticArrayOp'
         onToggle={(e) => { handleToggle('staticArrayOp', e.target.open) }}
         open={detailsState['staticArrayOp'] !== undefined ? detailsState['staticArrayOp'] : true}
@@ -206,12 +201,12 @@ const StaticArrayOperations = () => {
                   onChange={handleChange}
                   className="opInput w-40p rounded-l-md"
                   // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
-                  style={{ border: '1px solid #d1d5db' }}
+                  // 
                   placeholder="Length"
                 />
                 <button
                   onClick={createArray}
-                  className="opBtn bg-teal-600 hover:bg-teal-700 rounded-r-md btnAnimate"
+                  className="opBtn bg-teal-600 hover:bg-teal-700 dark-btn rounded-r-md btnAnimate"
                 >
                   Create New array
                 </button>
@@ -224,7 +219,7 @@ const StaticArrayOperations = () => {
                   onChange={handleChange}
                   className="opInput w-36p rounded-l-md"
                   // style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
-                  style={{ border: '1px solid #d1d5db' }}
+                  
                   placeholder="Enter element"
                 />
                 <input
@@ -235,7 +230,7 @@ const StaticArrayOperations = () => {
                   onChange={handleChange}
                   className="opInput w-36p"
                   // style={{border: `${emptyInex ? '2px solid red' : '1px solid #d1d5db'}`}}
-                  style={{ border: '1px solid #d1d5db' }}
+                  
                   placeholder="Enter index"
                 />
                 <button

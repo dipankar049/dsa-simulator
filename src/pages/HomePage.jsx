@@ -10,12 +10,9 @@ export default function HomePage({language}) {
 
   return (
     <div className="w-full h-[92vh] flex flex-col items-center justify-center bg-white text-gray-800 dark:bg-gray-700 dark:text-white">
-    {/* <div className={`w-full h-full flex flex-col items-center justify-center ${
-        theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-800"
-      }`}> */}
       {/* Welcome Section */}
       <section className="w-4/5 max-w-4xl text-center py-10">
-        <h1 className="text-4xl font-bold text-blue-600">Welcome to DSA Visualizer {"{ }"} </h1>
+        <h1 className="text-4xl font-bold text-blue-500">Welcome to DSA Visualizer {"{ }"} </h1>
         <p className="mt-4 text-lg">
           Experience the magic of learning Data Structures and Algorithms with intuitive visualizations, practical examples, and interactive tools.
         </p>
@@ -33,7 +30,7 @@ export default function HomePage({language}) {
           <Link
             key={index}
             to={item.path}
-            className="p-4 border rounded-lg bg-blue-50 hover:bg-blue-200 text-blue-600 hover:text-blue-800 transition divAnimate"
+            className="p-4 border rounded-lg bg-blue-50 hover:bg-blue-200 text-blue-600 hover:text-blue-800 dark:bg-gray-800 dark:text-white transition divAnimate"
           >
             <h3 className="text-xl font-semibold">{item.title}</h3>
           </Link>
