@@ -188,9 +188,9 @@ export default function DynamicArrayOperations() {
   }
 
   return (
-    <div className='p-2p'>
+    <div>
       <TopicCard topicName="Dynamic Array" />
-      <details className={`${theme === 'light' ? 'bg-gradient-to-r from-cyan-200' : 'bg-gray-800'} h-fit w-full p-2p md:text-base sm:text-sm text-xs`} open>
+      <details className={`${theme === 'light' ? 'bg-gradient-to-r from-cyan-200' : 'bg-gray-800'} h-fit w-full p-2p`} open>
         <summary className="text-xl font-bold mb-4">Dynamic array oprations</summary>
         <div className='md:flex'>
           <div className='w-full mb-2'>

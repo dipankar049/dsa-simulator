@@ -1,14 +1,16 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useState, useRef, useEffect } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function DoublyLinkedlistOperations() {
   const [list, setList] = useState([23, 52, 76, 18]);
   const [element, setElement] = useState('');
   const [listExist, setListExist] = useState(true);
   const [customIdx, setCustomIdx] = useState('');
+  const { theme } = useContext(ThemeContext);
 
   const divRefs = useRef([]);
 
@@ -129,16 +131,16 @@ export default function DoublyLinkedlistOperations() {
 
 
   return (
-    <div className='p-2p'>
+    <div>
       <TopicCard topicName="Doubly Linked List" />
-      <div className="md:flex bg-gradient-to-tr from-emerald-100 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
+      <div className={`${theme === 'light' ? 'bg-gradient-to-tr from-emerald-100' : 'bg-gray-800'} h-fit w-full p-2p`}>
         <div className='w-full mb-2'>
           <h1 className="text-xl font-bold mb-4">Doubly Linkedlist oprations</h1>
           <div className="flex justify-between mb-4 w-full">
             <div className='mr-2'>
               <button
                 onClick={createList}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl rounded-r-md md:p-2 p-1"
+                className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate rounded-r-md md:p-2 p-1"
               >
                 Create Linkedlist
               </button>
@@ -148,18 +150,18 @@ export default function DoublyLinkedlistOperations() {
                 type="number"
                 value={element}
                 onChange={(e) => setElement(Number(e.target.value))}
-                className="border border-gray-300 md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
+                className="opInput w-36p rounded-l-md"
                 placeholder="Enter element"
               />
               <button
                 onClick={listAppend}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
+                className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate h-fit"
               >
                 Insert at end
               </button>
               <button
                 onClick={removeFromEnd}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
+                className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate h-fit rounded-r-md"
               >
                 delete from end
               </button>
@@ -219,25 +221,25 @@ export default function DoublyLinkedlistOperations() {
                 type="number"
                 value={customIdx}
                 onChange={(e) => setCustomIdx(parseInt(e.target.value))}
-                className="border border-gray-300 md:p-2 p-1 md:m-0 my-1 h-fit w-48p shadow-inner"
+                className="opInput h-fit w-48p"
                 placeholder="Enter index"
               />
               <button
                 onClick={insertInList}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 md:m-0 my-1 h-fit rounded-r-md"
+                className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate md:m-0 my-1 h-fit rounded-r-md"
               >
                 Insert
               </button>
             </div>
             <button
               onClick={removeItemAtIndex}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
+              className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate md:m-0 my-1 h-fit rounded-md"
             >
               delete by index
             </button>
             <button
               onClick={removeByEle}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 md:m-0 my-1 h-fit rounded-md"
+              className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate md:m-0 my-1 h-fit rounded-md"
             >
               delete by element
             </button>

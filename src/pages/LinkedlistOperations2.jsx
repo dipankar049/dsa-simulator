@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useState, useRef, useEffect } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function SinglyLinkedList() {
   const [list, setList] = useState([23, 52, 76, 18]);
@@ -11,6 +12,7 @@ export default function SinglyLinkedList() {
   const [customIdx, setCustomIdx] = useState('');
 
   const divRefs = useRef([]);
+  const { theme } = useContext(ThemeContext);
 
   // Create new list
   const createList = () => {
@@ -139,16 +141,16 @@ export default function SinglyLinkedList() {
   };
 
   return (
-    <div className='p-2p'>
+    <div>
       <TopicCard topicName="Singly Linked List" />
-      <div className="md:flex bg-gradient-to-tl from-sky-200 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
+      <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-sky-200' : 'bg-gray-800'} h-fit w-full p-2p`}>
         <div className='w-full mb-2'>
           <h1 className="text-xl font-bold mb-4">Singly Linkedlist oprations</h1>
           <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
             <div className='mr-2'>
               <button
                 onClick={createList}
-                className="bg-sky-600 hover:bg-sky-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 md:p-2 p-1 h-fit rounded-r-md shadow-xl"
+                className="bg-sky-600 hover:bg-sky-700 opBtn btnAnimate rounded-r-md"
               >
                 Create New Linkedlist
               </button>
@@ -158,18 +160,18 @@ export default function SinglyLinkedList() {
                 type="number"
                 value={element}
                 onChange={(e) => setElement(Number(e.target.value))}
-                className="border border-gray-300 md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
+                className="opInput w-36p rounded-l-md"
                 placeholder="Enter element"
               />
               <button
                 onClick={listAppend}
-                className="bg-sky-600 hover:bg-sky-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 md:p-2 p-1 h-fit"
+                className="bg-sky-600 hover:bg-sky-700 opBtn btnAnimate"
               >
                 Insert at end
               </button>
               <button
                 onClick={removeFromEnd}
-                className="bg-sky-600 hover:bg-sky-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 md:p-2 p-1 h-fit rounded-r-md"
+                className="bg-sky-600 hover:bg-sky-700 opBtn btnAnimate rounded-r-md"
               >
                 delete from end
               </button>
@@ -220,25 +222,25 @@ export default function SinglyLinkedList() {
                 type="number"
                 value={customIdx}
                 onChange={(e) => setCustomIdx(parseInt(e.target.value))}
-                className="border border-gray-300 md:p-2 p-1 md:m-0 my-1 h-fit w-48p shadow-inner"
+                className="opInput w-48p"
                 placeholder="Enter index"
               />
               <button
                 onClick={insertInListt}
-                className="bg-sky-600 hover:bg-sky-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 md:p-2 p-1 md:m-0 my-1 h-fit rounded-r-md shadow-xl"
+                className="bg-sky-600 hover:bg-sky-700 opBtn btnAnimate rounded-r-md"
               >
                 Insert
               </button>
             </div>
             <button
               onClick={removeItemAtIndex}
-              className="bg-sky-600 hover:bg-sky-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 md:p-2 p-1 md:m-0 my-1 h-fit rounded-r-md shadow-xl"
+              className="bg-sky-600 hover:bg-sky-700 opBtn btnAnimate rounded-r-md"
             >
               delete by index
             </button>
             <button
               onClick={removeByEle}
-              className="bg-sky-600 hover:bg-sky-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 md:p-2 p-1 md:m-0 my-1 h-fit rounded-r-md shadow-xl"
+              className="bg-sky-600 hover:bg-sky-700 opBtn btnAnimate rounded-r-md"
             >
               delete by element
             </button>

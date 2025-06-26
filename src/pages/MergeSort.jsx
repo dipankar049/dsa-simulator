@@ -1,10 +1,11 @@
 // src/components/ArrayVisualizer.js
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
+import { ThemeContext } from '../context/ThemeContext';
 
 const MergeSort = () => {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ const MergeSort = () => {
     const [iterations, setIterations] = useState(0);
     const [comparisons, setComparisons] = useState(0);
     const divRefs = useRef([]);
+    const { theme } = useContext(ThemeContext);
 
     const [isGreater, setIsGreater] = useState(false);
     const [firstEle, setFirstEle] = useState(-1);

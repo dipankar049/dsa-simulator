@@ -177,19 +177,17 @@ const StaticArrayOperations = () => {
   };
 
   return (
-    <div className='p-2p bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 
-                    md:text-base sm:text-sm text-xs'
-    >
+    <div>
       <TopicCard topicName="Array" /> {/* Defination and Example of array */}
       <TopicCard topicName="Static Array" />  {/* Defination and Example of static array */}
       <details
-        className={`w-full h-fit p-4 rounded-lg ${theme === 'light' ? 'bg-gradient-to-r from-teal-200' : 'bg-gray-800'} `}
+        className={`w-full h-fit p-2p rounded-lg ${theme === 'light' ? 'bg-gradient-to-r from-teal-200' : 'bg-gray-800'} `}
         id='staticArrayOp'
         onToggle={(e) => { handleToggle('staticArrayOp', e.target.open) }}
         open={detailsState['staticArrayOp'] !== undefined ? detailsState['staticArrayOp'] : true}
       >
         <summary className="mb-4">Static Array Operations</summary>
-        <div className=''>
+        <div>
           <div className='w-full mb-2'>
             <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
               <div className='mr-2'>
@@ -206,7 +204,7 @@ const StaticArrayOperations = () => {
                 />
                 <button
                   onClick={createArray}
-                  className="opBtn bg-teal-600 hover:bg-teal-700 dark-btn rounded-r-md btnAnimate"
+                  className="bg-teal-600 hover:bg-teal-700 rounded-r-md opBtn btnAnimate"
                 >
                   Create New array
                 </button>

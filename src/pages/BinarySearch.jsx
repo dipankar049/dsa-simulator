@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
+import { ThemeContext } from '../context/ThemeContext';
 
 const BinarySearch = () => {
     const [array, setArray] = useState([22, 25, 32, 48, 51, 57, 64, 73]);
@@ -20,6 +21,7 @@ const BinarySearch = () => {
     const divRefs = useRef([]);
     const [arrayLength, setArrayLength] = useState('');
     const [customIdx, setCustomIdx] = useState('');
+    const { theme } = useContext(ThemeContext);
 
     const [divs, setDivs] = useState([]);
 
@@ -286,9 +288,9 @@ const BinarySearch = () => {
     }
 
     return (
-        <div className='p-2p'>
+        <div>
             <TopicCard topicName="Binary Search" />
-            <div className="md:flex bg-gradient-to-tl from-purple-200 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
+            <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-purple-200' : 'bg-gray-800'} h-fit w-full p-2p`}>
                 <div className='w-full mb-2'>
                     <h1 className="text-xl font-bold mb-4">Binary Search</h1>
                     <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
@@ -299,14 +301,14 @@ const BinarySearch = () => {
                                 type="number"
                                 value={arrayLength}
                                 onChange={(e) => { setArrayLength(e.target.value) }}
-                                className="border border-gray-300 md:p-2 p-1 h-fit w-44p rounded-l-md shadow-inner"
+                                className="opInput w-44p rounded-l-md"
                                 // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
                                 placeholder="Length"
                                 disabled={isRunning}
                             />
                             <button
                                 onClick={createArray}
-                                className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
+                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate rounded-r-md"
                                 disabled={isRunning}
                             >
                                 Create New array
@@ -317,20 +319,19 @@ const BinarySearch = () => {
                                 type="number"
                                 value={searchEle}
                                 onChange={(e) => setSearchEle(e.target.value)}
-                                className="md:p-2 p-1 h-fit w-50p rounded-l-md shadow-inner"
-                                style={{border: `${emptySearchElement ? '2px solid red' : '1px solid #d1d5db'}`}}
+                                className="opInput w-50p rounded-l-md"
                                 placeholder="Search element"
                                 disabled={isRunning}
                             />
                             {isRunning ? (<button
                                 onClick={() => abortRef.current = true}
-                                className="bg-red-500 hover:bg-red-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
+                                className="bg-red-500 hover:bg-red-600 opBtn btnAnimate rounded-r-md"
                             >
                                 Abort Search
                             </button>)
                             : (<button
                                 onClick={binSearch}
-                                className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
+                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate rounded-r-md"
                             >
                                 Search
                             </button>)}
@@ -421,28 +422,27 @@ const BinarySearch = () => {
                                 type="number"
                                 value={element}
                                 onChange={(e) => setElement(e.target.value)}
-                                className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
-                                style={{border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}`}}
+                                className="opInput w-36p rounded-l-md"
                                 placeholder="Enter element"
                                 disabled={isRunning}
                             />
                             <button
                                 onClick={arrayPushOperation}
-                                className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
+                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate"
                                 disabled={isRunning}
                             >
                                 Push
                             </button>
                             <button
                                 onClick={() => { arrayPopOperation() }}
-                                className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
+                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate"
                                 disabled={isRunning}
                             >
                                 Pop
                             </button>
                             <button
                                 onClick={removeByEle}
-                                className="bg-purple-500 hover:bg-purple-600 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
+                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate rounded-r-md"
                                 disabled={isRunning}
                             >
                                 delete by element
@@ -455,14 +455,13 @@ const BinarySearch = () => {
                                 min={0}
                                 value={customIdx}
                                 onChange={(e) => { setCustomIdx(e.target.value) }}
-                                className="md:p-2 p-1 h-fit w-36p shadow-inner"
-                                style={{ border: '1px solid #d1d5db' }}
+                                className="opInput w-36p"
                                 placeholder="Enter index"
                                 disabled={isRunning}
                             />
                             <button
                                 onClick={arrayInsert}
-                                className="bg-purple-500 hover:bg-purple-600  lg:font-bold text-white md:p-2 p-1 h-fit rounded-r-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                                className="bg-purple-500 hover:bg-purple-600 lg:font-bold rounded-r-md opBtn btnAnimate"
                                 disabled={isRunning}
                             >
                                 Insert
