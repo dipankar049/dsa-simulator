@@ -21,4 +21,4 @@ A web-based simulator to help users learn and visualize core data structure and 
 - **Frontend**: ReactJS, TailwindCSS, CSS3
 - **Routing**: React Router
 - **Notifications**: React Toastify
-- **Deployment**: Vercel / Netlify (recommended)
+- **Deployment**: Vercel
