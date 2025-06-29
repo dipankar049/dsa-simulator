@@ -24,7 +24,7 @@
 
 /* === Custom dark theme button === */
 .dark .opBtn {
-  @apply bg-gray-700 hover:bg-gray-600 text-gray-200;
+  @apply bg-gray-700 hover:bg-gray-600 text-gray-300;
 }
 
 /* === Custom dark theme input === */

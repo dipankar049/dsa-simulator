@@ -55,7 +55,7 @@ function App() {
           <div className="w-full flex pt-16 sm:pt-12 lg:pt-16">
             <MenubarUn isOpen={sidebarOpen} closeSidebar={closeSidebar} />
 
-            <div className="w-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2p md:text-base sm:text-sm text-xs md:ml-[20%]">
+            <div className="relative w-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2p md:text-base sm:text-sm text-xs md:ml-[20%]">
               <Routes>
                 <Route path="/" element={<HomePage language={language} />} />
                 <Route path="/arrayOp" element={<><StaticArrayOperations /><DynamicArrayOperations /></>} />

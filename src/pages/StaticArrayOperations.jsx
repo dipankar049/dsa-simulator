@@ -240,9 +240,9 @@ const StaticArrayOperations = () => {
               </div>
 
             </div>
-            <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-300 dark:text-white border border-gray-300 shadow-xl rounded-md'>
+            <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 shadow-xl rounded-md'>
               <div className='w-full p-2 overflow-x-auto'>
-                {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-black'>Array</p>}
+                {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-teal-200'>Array</p>}
                 <div className="flex">
                   {indexdivs}
                 </div>
@@ -271,7 +271,7 @@ const StaticArrayOperations = () => {
                     <div
                       key={index}
                       ref={divRefs.current[index]}
-                      className="flex items-center font-bold text-red-800 justify-center flex-shrink-0 lg:w-14 md:12 w-10"
+                      className={`flex items-center font-bold ${theme === 'light' ? 'text-red-500' : 'text-white'} justify-center flex-shrink-0 lg:w-14 md:12 w-10`}
                     >
                       <div style={{
                         visibility: operationEleVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'visible' : 'hidden') : 'hidden'

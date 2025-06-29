@@ -19,7 +19,7 @@ export default function MenubarUn({ isOpen, closeSidebar }) {
   return (
     <>
       {/* Desktop sidebar */}
-      <div className="hidden md:text-lg md:block fixed w-1/5 h-screen bg-white pt-4 pl-3 border-r-2 border-gray-300 drop-shadow-sm dark:bg-gray-800 dark:text-white">
+      <div className="hidden overflow-y-auto md:text-lg md:block fixed w-1/5 h-screen bg-white pt-4 pl-3 border-r-2 border-gray-300 drop-shadow-sm dark:bg-gray-800 dark:text-white">
         <div className="p-2 space-y-1">
           {menuItems.map(({ label, to }) => (
             <MenuItem key={to} label={label} to={to} />

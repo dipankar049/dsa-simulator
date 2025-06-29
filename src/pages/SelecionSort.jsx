@@ -280,14 +280,14 @@ const SelectionSort = () => {
                             </button>}
                         </div>
                     </div>
-                    <div className='flex m-2 mx-0 mr-4 sm:mr-0 mb-6 bg-white border border-gray-300 rounded-md shadow-xl'>
+                    <div className='flex m-2 mx-0 mr-4 sm:mr-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md shadow-xl'>
                         <div className='w-full p-2'>
 
                             <div className='flex justify-between'>
                                 <p className='pl-4 font-bold'>Comparisons = {comparisons}</p>
                                 <p className='font-bold'>Iterations = {iterations}</p>
                             </div>
-                            <p className='m-2 font-bold'>{arrExist ? 'Arr' : ''}</p>
+                            <p className='m-2 font-bold text-violet-600 dark:text-violet-200'>{arrExist ? 'Array' : ''}</p>
                             <div className='overflow-x-auto'>
                                 <div className="flex md:ml-4">
                                     {divs}

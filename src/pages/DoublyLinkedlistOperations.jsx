@@ -168,7 +168,7 @@ export default function DoublyLinkedlistOperations() {
             </div>
 
           </div>
-          <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 roumded-md shadow-xl'>
+          <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md shadow-xl'>
             <div className='w-full p-2 overflow-x-auto'>
               <p className='m-2 font-bold'>{listExist ? 'Linkedlist' : ''}</p>
               <div className="flex xl:ml-2"
@@ -183,7 +183,7 @@ export default function DoublyLinkedlistOperations() {
                       id={item}
                       key={index}
                       ref={divRefs.current[index]}
-                      className="flex justify-center border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2 animate-fadeIn"
+                      className="flex justify-center text-black border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2 animate-fadeIn"
                     //   style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                     >
                       {item}

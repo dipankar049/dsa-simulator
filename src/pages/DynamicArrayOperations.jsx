@@ -238,9 +238,9 @@ export default function DynamicArrayOperations() {
                 </button>
               </div>
             </div>
-            <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md'>
+            <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md'>
               <div className='w-full p-2 overflow-x-auto'>
-                {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-black'>Array</p>}
+                {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-teal-300'>Array</p>}
                 <div className="flex md:ml-4">
                   {indexDivs}
                 </div>

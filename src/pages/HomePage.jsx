@@ -9,10 +9,10 @@ export default function HomePage({language}) {
   const { theme } = useContext(ThemeContext);
 
   return (
-    <div className="w-full h-[92vh] flex flex-col items-center justify-center bg-white text-gray-800 dark:bg-gray-700 dark:text-white">
+    <div className="absolute inset-0 w-full h-[92vh] flex flex-col items-center justify-center bg-white text-gray-800 dark:bg-gray-700 dark:text-white">
       {/* Welcome Section */}
-      <section className="w-4/5 max-w-4xl text-center py-10">
-        <h1 className="text-4xl font-bold text-blue-500">Welcome to DSA Visualizer {"{ }"} </h1>
+      <section className="w-4/5 max-w-4xl text-center py-10 mt-4">
+        <h1 className="text-4xl font-bold text-blue-500 dark:text-cyan-300">Welcome to DSA Simulator {"{ }"} </h1>
         <p className="mt-4 text-lg">
           Experience the magic of learning Data Structures and Algorithms with intuitive visualizations, practical examples, and interactive tools.
         </p>

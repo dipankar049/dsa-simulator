@@ -178,9 +178,9 @@ export default function SinglyLinkedList() {
             </div>
 
           </div>
-          <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md shadow-xl'>
+          <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md shadow-xl'>
             <div className='w-full p-2 overflow-x-auto'>
-              {listExist && (<p className='m-2 font-bold'>Linkedlist</p>)}
+              {listExist && (<p className='m-2 font-bold dark:text-green-300'>Linkedlist</p>)}
               <div className="flex xl:ml-2">
                 {list.map((item, index) => (
                   <div key={index} className='flex'>
@@ -188,7 +188,7 @@ export default function SinglyLinkedList() {
                       id={item}
                       key={index}
                       ref={divRefs.current[index]}
-                      className="flex justify-center border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2 animate-fadeIn"
+                      className="flex justify-center text-black border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2 animate-fadeIn"
                       style={{
                         animationDelay: '0.2s', // Stagger the delay by 0.2s per item
                         animationFillMode: 'both' // Ensures the element stays visible after the animation ends

@@ -337,14 +337,14 @@ const BinarySearch = () => {
                             </button>)}
                         </div>
                     </div>
-                    <div className='flex m-2 mx-0 mr-4 sm:mr-0 mb-6 bg-white border border-gray-300 rounded-md shadow-xl'>
+                    <div className='flex m-2 mx-0 mr-4 sm:mr-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md shadow-xl'>
                         <div className='w-full p-2'>
                             <div>
                                 <div className='flex justify-between'>
                                     <p className='pl-4 font-bold'>Search element = {searchEle}</p>
                                     <p className='font-bold'>Iterations = {iterations}</p>
                                 </div>
-                                <p className='m-2 font-bold'>{arrExist ? 'Arr' : ''}</p>
+                                <p className='m-2 font-bold text-purple-700 dark:text-purple-300'>{arrExist ? 'Array' : ''}</p>
                                 <div className='overflow-x-auto'>
                                     <div className="flex md:ml-4">
                                         {array.map((item, index) => (
@@ -369,7 +369,7 @@ const BinarySearch = () => {
                                                 // id={item}
                                                 key={index}
 
-                                                className='flex text-purple-900 justify-center items-center flex-shrink-0 lg:w-14 md:12 w-10'
+                                                className='flex text-purple-900 dark:text-purple-300 justify-center items-center flex-shrink-0 lg:w-14 md:12 w-10'
                                                 // style={{ color: `${isEqual ? 'blue' : 'blue'}`, }}
                                             // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                             >

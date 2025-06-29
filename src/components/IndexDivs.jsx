@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function IndexDivs(length) {
     const [divs, setDivs] = useState([]);
@@ -9,7 +9,7 @@ export default function IndexDivs(length) {
         newDivs.push(
             <div
             key={i}
-            className="flex items-center text-black justify-center flex-shrink-0 lg:w-14 md:12 w-10"
+            className="flex items-center dark:text-white justify-center flex-shrink-0 lg:w-14 md:12 w-10"
             >
             {i}
             </div>
