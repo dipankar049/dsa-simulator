@@ -133,7 +133,7 @@ export default function DoublyLinkedlistOperations() {
   return (
     <div>
       <TopicCard topicName="Doubly Linked List" />
-      <div className={`${theme === 'light' ? 'bg-gradient-to-tr from-emerald-100' : 'bg-gray-800'} h-fit w-full p-2p`}>
+      <div className={`${theme === 'light' ? 'bg-gradient-to-tr from-emerald-100' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
         <div className='w-full mb-2'>
           <h1 className="text-xl font-bold mb-4">Doubly Linkedlist oprations</h1>
           <div className="flex justify-between mb-4 w-full">

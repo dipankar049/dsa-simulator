@@ -16,7 +16,7 @@ const TopicCard = ({ topicName }) => {
   return (
     <details
       // className={`my-6 p-4 sm:p-5 md:p-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-100'} rounded-lg shadow-md`}
-      className={`my-6 p-4 sm:p-5 md:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-md`}
+      className={`my-4 sm:my-6 p-4 sm:p-5 md:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-md`}
     >
       <summary className="text-base sm:text-lg md:text-xl font-semibold cursor-pointer">
         {topic.title}

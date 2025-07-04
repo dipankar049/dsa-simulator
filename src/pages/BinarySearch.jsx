@@ -290,7 +290,7 @@ const BinarySearch = () => {
     return (
         <div>
             <TopicCard topicName="Binary Search" />
-            <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-purple-200' : 'bg-gray-800'} h-fit w-full p-2p`}>
+            <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-purple-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
                 <div className='w-full mb-2'>
                     <h1 className="text-xl font-bold mb-4">Binary Search</h1>
                     <div className="flex justify-between mb-4 w-full sm:text-base text-sm">

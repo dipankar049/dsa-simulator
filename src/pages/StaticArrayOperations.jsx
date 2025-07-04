@@ -181,7 +181,7 @@ const StaticArrayOperations = () => {
       <TopicCard topicName="Array" /> {/* Defination and Example of array */}
       <TopicCard topicName="Static Array" />  {/* Defination and Example of static array */}
       <details
-        className={`w-full h-fit p-2p rounded-lg ${theme === 'light' ? 'bg-gradient-to-r from-teal-200' : 'bg-gray-800'} `}
+        className={`w-full h-fit p-4 rounded-lg ${theme === 'light' ? 'bg-gradient-to-r from-teal-200' : 'bg-gray-800'} `}
         id='staticArrayOp'
         onToggle={(e) => { handleToggle('staticArrayOp', e.target.open) }}
         open={detailsState['staticArrayOp'] !== undefined ? detailsState['staticArrayOp'] : true}

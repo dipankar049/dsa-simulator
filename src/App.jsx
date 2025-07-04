@@ -4,7 +4,6 @@ import DynamicArrayOperations from './pages/DynamicArrayOperations'
 import MenubarUn from './components/MenubarUn'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DoublyLinkedlistOperations from './pages/DoublyLinkedlistOperations';
-// import LinearSearch from './pages/LinearSearch2';
 import BinarySearch from './pages/BinarySearch';
 import Respon from './components/Respon';
 import BubbleSort from './pages/BubbleSort';
@@ -39,8 +38,9 @@ function App() {
   };
 
   return (
-    <DetailsProvider>
+    <DetailsProvider>   {/* To track if different summery tags are open or closed by user */}
       <BrowserRouter>
+        {/* configure React toastify container */}
         <ToastContainer
           limit={3}
           autoClose={3000}
@@ -52,16 +52,19 @@ function App() {
         <div className="w-full h-screen bg-blue-50">
           <Header toggleSidebar={toggleSidebar} isSidebarOpen={sidebarOpen} changeLanguage={handleChangeLanguage} />
 
-          <div className="w-full flex pt-16 sm:pt-12 lg:pt-16">
+          <div className="w-full flex pt-16">
             <MenubarUn isOpen={sidebarOpen} closeSidebar={closeSidebar} />
 
-            <div className="relative w-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2p md:text-base sm:text-sm text-xs md:ml-[20%]">
+            <div className="relative w-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 md:text-base sm:text-sm text-xs md:ml-[20%]">
               <Routes>
                 <Route path="/" element={<HomePage language={language} />} />
+
                 <Route path="/arrayOp" element={<><StaticArrayOperations /><DynamicArrayOperations /></>} />
                 <Route path="/listOp" element={<><SinglyLinkedList /><DoublyLinkedlistOperations /></>} />
+
                 <Route path="/linSearch" element={<LinearSearch />} />
                 <Route path="/binSearch" element={<BinarySearch />} />
+
                 <Route path="/bubbleSort" element={<BubbleSort />} />
                 <Route path="/mergeSort" element={<MergeSort />} />
                 <Route path="/quickSort" element={<QuickSort />} />

@@ -237,7 +237,7 @@ const BubbleSort = () => {
     return (
         <div>
             <TopicCard topicName="Bubble Sort" />
-            <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-emerald-200' : 'bg-gray-800'} h-fit w-full p-2p`}>
+            <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-emerald-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
                 <div className='w-full mb-2'>
                     <h1 className="text-xl font-bold mb-4">Bubble Sort</h1>
                     <div className="flex justify-between mb-4 w-full sm:text-base text-sm">

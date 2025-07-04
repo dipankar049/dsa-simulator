@@ -321,7 +321,7 @@ const MergeSort = () => {
         <div className="relative h-screen w-full">
             <div className='p-2p'>
                 <TopicCard topicName="Merge Sort" />
-                <div className="md:flex bg-gradient-to-tl from-cyan-200 h-fit w-full p-2p md:text-base sm:text-sm text-xs">
+                <div className="md:flex bg-gradient-to-tl from-cyan-200 h-fit w-full p-4 rounded-lg md:text-base sm:text-sm text-xs">
                     <div className='w-full mb-2'>
                         <h1 className="text-xl font-bold mb-4">Merge Sort</h1>
                         <div className="flex justify-between mb-4 w-full sm:text-base text-sm">

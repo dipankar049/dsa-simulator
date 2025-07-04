@@ -9,9 +9,9 @@ export default function HomePage({language}) {
   const { theme } = useContext(ThemeContext);
 
   return (
-    <div className="absolute inset-0 w-full h-[92vh] flex flex-col items-center justify-center bg-white text-gray-800 dark:bg-gray-700 dark:text-white">
+    <div className="absolute inset-0 w-full min-h-[92vh] pt-[200px] sm:pt-16 flex flex-col items-center justify-center bg-white text-gray-800 dark:bg-gray-700 dark:text-white">
       {/* Welcome Section */}
-      <section className="w-4/5 max-w-4xl text-center py-10 mt-4">
+      <section className="px-[10%] text-center py-4">
         <h1 className="text-4xl font-bold text-blue-500 dark:text-cyan-300">Welcome to DSA Simulator {"{ }"} </h1>
         <p className="mt-4 text-lg">
           Experience the magic of learning Data Structures and Algorithms with intuitive visualizations, practical examples, and interactive tools.
@@ -20,7 +20,7 @@ export default function HomePage({language}) {
       </section>
 
       {/* Features Section */}
-      <section className="w-4/5 max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+      <section className="w-full px-[10%] grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
         {[
           { title: "Array Operations", path: "/arrayOp" },
           { title: "Linked List Operations", path: "/listOp" },
@@ -38,7 +38,7 @@ export default function HomePage({language}) {
       </section>
 
       {/* Call-to-Action */}
-      <section className="w-4/5 max-w-4xl text-center py-10">
+      <section className="px-[10%] text-center bg-gray-700 py-4 sm:my-10">
         <p className="text-lg">
           Ready to sharpen your skills? Explore our collection of interactive DSA tools and master algorithms like never before!
         </p>
