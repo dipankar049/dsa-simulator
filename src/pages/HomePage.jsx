@@ -38,7 +38,7 @@ export default function HomePage({language}) {
       </section>
 
       {/* Call-to-Action */}
-      <section className="px-[10%] text-center bg-gray-700 py-4 sm:my-10">
+      <section className="px-[10%]  bg-white dark:bg-gray-700 text-center py-4 sm:my-10">
         <p className="text-lg">
           Ready to sharpen your skills? Explore our collection of interactive DSA tools and master algorithms like never before!
         </p>
