@@ -49,7 +49,7 @@ function App() {
           theme={theme}
           pauseOnFocusLoss
         />
-        <div className="w-full h-screen bg-blue-50">
+        <div className="w-full h-[100vh] bg-gray-100 dark:bg-gray-900">
           <Header toggleSidebar={toggleSidebar} isSidebarOpen={sidebarOpen} changeLanguage={handleChangeLanguage} />
 
           <div className="w-full flex pt-16">

@@ -145,8 +145,8 @@ export default function SinglyLinkedList() {
       <TopicCard topicName="Singly Linked List" />
       <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-sky-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
         <div className='w-full mb-2'>
-          <h1 className="text-xl font-bold mb-4">Singly Linkedlist oprations</h1>
-          <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
+          <h1 className="sm:mb-2 text-base sm:text-lg md:text-xl font-bold">Singly Linkedlist oprations</h1>
+          <div className="flex justify-between mb-4 pt-2 w-full sm:text-base text-sm">
             <div className='mr-2'>
               <button
                 onClick={createList}
@@ -196,6 +196,7 @@ export default function SinglyLinkedList() {
                     >
                       {item}
                     </div>
+                    <div className='flex justify-center font-bold text-2xl border border-black bg-green-300 flex-shrink-0 md:px2 p-1 mt-2 animate-fadeIn'>*</div>
                     <p className='mt-3 md:mt-4 animate-fadeIn'
                       style={{
                         animationDelay: '0.2s', // Stagger the delay by 0.2s per item

@@ -370,8 +370,8 @@ const QuickSort = () => {
                 <TopicCard topicName="Quick Sort" />
                 <div className="md:flex bg-gradient-to-tl from-cyan-200 h-fit w-full p-4 rounded-lg md:text-base sm:text-sm text-xs">
                     <div className='w-full mb-2'>
-                        <h1 className="text-xl font-bold mb-4">Quick Sort</h1>
-                        <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
+                        <h1 className="sm:mb-2 text-base sm:text-lg md:text-xl font-bold">Quick Sort</h1>
+                        <div className="flex justify-between mb-4 pt-2 w-full sm:text-base text-sm">
                             <div className=''>
                                 <button
                                     onClick={createArray}

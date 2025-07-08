@@ -292,8 +292,8 @@ const BinarySearch = () => {
             <TopicCard topicName="Binary Search" />
             <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-purple-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
                 <div className='w-full mb-2'>
-                    <h1 className="text-xl font-bold mb-4">Binary Search</h1>
-                    <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
+                    <h1 className="sm:mb-2 text-base sm:text-lg md:text-xl font-bold">Binary Search</h1>
+                    <div className="flex justify-between mb-4 pt-2 w-full sm:text-base text-sm">
                         <div className=''>
                         <input
                                 name='arrayLength'

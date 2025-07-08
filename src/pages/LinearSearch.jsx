@@ -245,8 +245,8 @@ const LinearSearch = () => {
             <TopicCard topicName="Linear Search" />
             <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-indigo-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
                 <div className='w-full mb-2'>
-                    <h1 className="text-xl font-bold mb-4">Linear Search</h1>
-                    <div className="flex justify-between mb-4 w-full">
+                    <h1 className="sm:mb-2 text-base sm:text-lg md:text-xl font-bold">Linear Search</h1>
+                    <div className="flex justify-between mb-4 pt-2 w-full">
                         <div className='mr-2'>
                             <input
                                 name='arrayLength'

@@ -12,7 +12,7 @@ export default function HomePage({language}) {
     <div className="absolute inset-0 w-full min-h-[92vh] pt-[200px] sm:pt-16 flex flex-col items-center justify-center bg-white text-gray-800 dark:bg-gray-700 dark:text-white">
       {/* Welcome Section */}
       <section className="px-[10%] text-center py-4">
-        <h1 className="text-4xl font-bold text-blue-500 dark:text-cyan-300">Welcome to DSA Simulator {"{ }"} </h1>
+        <h1 className="text-3xl sm:text-4xl font-semibold sm:font-bold text-blue-500 dark:text-cyan-300">Welcome to DSA Simulator {"{ }"} </h1>
         <p className="mt-4 text-lg">
           Experience the magic of learning Data Structures and Algorithms with intuitive visualizations, practical examples, and interactive tools.
         </p>
@@ -30,21 +30,21 @@ export default function HomePage({language}) {
           <Link
             key={index}
             to={item.path}
-            className="p-4 border rounded-lg bg-blue-50 hover:bg-blue-200 text-blue-600 hover:text-blue-800 dark:bg-gray-800 dark:text-white transition divAnimate"
+            className="p-4 flex justify-center border rounded-lg bg-blue-50 hover:bg-blue-200 text-blue-600 hover:text-blue-800 dark:bg-gray-800 dark:text-white transition divAnimate"
           >
-            <h3 className="text-xl font-semibold">{item.title}</h3>
+            <h3 className="text-lg sm:text-xl font-semibold">{item.title}</h3>
           </Link>
         ))}
       </section>
 
       {/* Call-to-Action */}
-      <section className="px-[10%]  bg-white dark:bg-gray-700 text-center py-4 sm:my-10">
+      <section className="px-[10%] bg-white dark:bg-gray-700 text-center py-4 sm:my-10">
         <p className="text-lg">
           Ready to sharpen your skills? Explore our collection of interactive DSA tools and master algorithms like never before!
         </p>
         <Link
           to="/arrayOp"
-          className="inline-block mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg btnAnimate"
+          className="text-base inline-block mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg btnAnimate"
         >
           Get Started
         </Link>

@@ -186,9 +186,9 @@ const StaticArrayOperations = () => {
         onToggle={(e) => { handleToggle('staticArrayOp', e.target.open) }}
         open={detailsState['staticArrayOp'] !== undefined ? detailsState['staticArrayOp'] : true}
       >
-        <summary className="mb-4">Static Array Operations</summary>
+        <summary className="sm:mb-2 text-base sm:text-lg md:text-xl">Static Array Operations</summary>
         <div>
-          <div className='w-full mb-2'>
+          <div className='w-full mb-2 pt-2'>
             <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
               <div className='mr-2'>
                 <input
