@@ -471,9 +471,9 @@ const MergeSort = () => {
 
             {/* Overlay with "Coming Soon" message */}
             <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
-                <div className="bg-white p-8 rounded-md text-center shadow-lg m-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Coming Soon</h2>
-                    <p className="text-lg text-gray-600 mt-2">This page is still under construction. Stay tuned!</p>
+                <div className="bg-white dark:bg-gray-800 p-8 rounded-md text-center shadow-lg m-6">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Coming Soon</h2>
+                    <p className="text-lg text-gray-600 dark:text-white mt-2">This page is still under construction. Stay tuned!</p>
                     <button
                         onClick={() => { navigate("/") }}
                         className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"

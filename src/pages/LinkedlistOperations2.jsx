@@ -188,7 +188,7 @@ export default function SinglyLinkedList() {
                       id={item}
                       key={index}
                       ref={divRefs.current[index]}
-                      className="flex justify-center text-black border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2 animate-fadeIn"
+                      className="flex justify-center rounded-l-sm text-black border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2 animate-fadeIn"
                       style={{
                         animationDelay: '0.2s', // Stagger the delay by 0.2s per item
                         animationFillMode: 'both' // Ensures the element stays visible after the animation ends
@@ -196,7 +196,9 @@ export default function SinglyLinkedList() {
                     >
                       {item}
                     </div>
-                    <div className='flex justify-center font-bold text-2xl border border-black bg-green-300 flex-shrink-0 md:px2 p-1 mt-2 animate-fadeIn'>*</div>
+                    <div 
+                      className='flex justify-center rounded-r-sm text-black md:font-bold text-2xl border border-black bg-green-300 flex-shrink-0 md:px-2 px-1 md:py-1 py-0 mt-2 animate-fadeIn'
+                    >*</div>
                     <p className='mt-3 md:mt-4 animate-fadeIn'
                       style={{
                         animationDelay: '0.2s', // Stagger the delay by 0.2s per item
