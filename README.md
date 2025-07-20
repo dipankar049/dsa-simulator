@@ -54,7 +54,7 @@ It includes interactive visualizations for arrays, linked lists, sorting, and se
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/dsa-simulator.git
+git clone https://github.com/dipankar049/dsa-simulator.git
 cd dsa-simulator
 
 # 2. Install dependencies
@@ -75,8 +75,4 @@ npm run dev
 - Great for self-learners, CS students, or instructors explaining DSA visually.
 
 ---
-
-## 📄 License
-
-This project is open-source and free to use for learning, teaching, and academic demonstration.
 

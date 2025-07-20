@@ -4,8 +4,7 @@ import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/solid";
 import { ThemeContext } from "../context/ThemeContext";
 
-export default function Header({ toggleSidebar, isSidebarOpen }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+export default function Header({ toggleSidebar }) {
   const { theme, updateTheme } = useContext(ThemeContext);
   const toggleTheme = () => {
     updateTheme(theme === "light" ? "dark" : "light");

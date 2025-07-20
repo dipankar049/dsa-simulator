@@ -22,6 +22,25 @@
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.arrayDiv {
+  border-radius: 0.125rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Medium screen (768px and up): override px */
+@media (min-width: 768px) {
+  .arrayDiv {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
 /* === Custom dark theme button === */
 .dark .opBtn {
   @apply bg-gray-700 hover:bg-gray-600 text-gray-300;

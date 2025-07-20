@@ -240,41 +240,41 @@ export default function DynamicArrayOperations() {
             </div>
             <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md'>
               <div className='w-full p-2 overflow-x-auto'>
-                {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-teal-300'>Array</p>}
-                <div className="flex md:ml-4">
-                  {indexDivs}
-                </div>
-                <div className="flex md:ml-4">
+                {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-teal-200'>Array</p>}
+                <div
+                  className={`grid grid-rows-3 w-fit`}
+                  style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
+                >
+
+                  {/* ------------------------------- index divs ------------------------------- */}
+                  {array.map((ele, index) =>
+                    <div key={index} className='arrayDiv'>{index}</div>
+                  )}
+
+                  {/* ------------------------------- array element divs ------------------------------- */}
                   {array.map((item, index) => (
                     <div
                       id={item}
                       key={index}
                       ref={divRefs.current[index]}
-                      className="border border-black flex justify-center md:w-12 lg:w-14 w-10 flex-shrink-0 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap animate-fadeIn rounded-sm"
-                      // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
+                      className="border border-black arrayDiv animate-fadeIn"
                       style={{
-                        color: operationIdxVisibility ? ((index == parseInt(arrayInputs.customIdx)) ? 'red' : 'black') : 'black',
-                        backgroundColor: operationIdxVisibility ? ((index == parseInt(arrayInputs.customIdx)) ? 'white' : '#22d3ee') : '#22d3ee',
-                        animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`, // Stagger the delay by 0.2s per item
-                        animationFillMode: 'both' // Ensures the element stays visible after the animation ends
+                        color: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'red' : 'black') : 'black',
+                        backgroundColor: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'white' : '#6ee7b7') : '#6ee7b7',
+                        animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
                       }}
-                    >
-                      {item}
-                    </div>
+                    >{item}</div>
                   ))}
-                </div>
-                <div className="flex md:ml-4">
+
+                  {/* ------------------------------- operation divs ------------------------------- */}
                   {array.map((item, index) => (
                     <div
                       key={index}
                       ref={divRefs.current[index]}
-                      className="flex items-center font-bold text-red-800 justify-center flex-shrink-0 lg:w-14 md:12 w-10"
+                      className={`arrayDiv font-bold text-red-500 dark:text-white`}
                     >
-                      <div style={{
-                        visibility: operationEleVisibility ? ((index == parseInt(arrayInputs.customIdx)) ? 'visible' : 'hidden') : 'hidden'
-                      }}>
-                        {/* <p>New Element</p> */}
-                        {arrayInputs.element}
+                      <div style={{ display: operationEleVisibility ? 'block' : 'none' }}>
+                        {index === parseInt(arrayInputs.customIdx) && arrayInputs.element}
                       </div>
                     </div>
                   ))}
