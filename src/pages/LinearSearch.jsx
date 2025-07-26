@@ -71,7 +71,6 @@ const LinearSearch = () => {
                 }
             }
             await delay(1000);
-            console.log(i);
         }
         if (localIsEqual) {
             toast.info("Element found");
@@ -255,7 +254,6 @@ const LinearSearch = () => {
                                 value={arrayLength}
                                 onChange={(e) => { setArrayLength(e.target.value) }}
                                 className="opInput w-44p rounded-l-md"
-                                // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
                                 placeholder="Length"
                                 disabled={isRunning}
                             />
@@ -273,7 +271,6 @@ const LinearSearch = () => {
                                 value={searchEle}
                                 onChange={(e) => setSearchEle(e.target.value)}
                                 className="opInput w-50p rounded-l-md"
-                                // style={{ border: `${emptySearchElement ? '2px solid red' : '1px solid #d1d5db'}` }}
                                 placeholder="Search element"
                                 disabled={isRunning}
                             />
@@ -293,39 +290,39 @@ const LinearSearch = () => {
                         </div>
                     </div>
                     <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md shadow-xl'>
+
                         <div className='w-full p-2'>
-                            <p className='m-2 font-bold text-indigo-700 dark:text-indigo-200'>{arrExist ? 'Array' : ''}</p>
+                            {arrExist && <p className='m-2 font-bold text-indigo-700 dark:text-indigo-200'>Array</p>}
                             <div className=''>
-                                <div className='overflow-x-auto'>
-                                    <div className="flex md:ml-4">
+                                <div className='w-full p-2 overflow-x-auto'>
+                                    <div
+                                        className={`grid grid-rows-3 w-fit`}
+                                        style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
+                                    >
+                                        {/* ------------------------------- highlighted index divs ------------------------------- */}
                                         {array.map((item, index) => (
                                             <div
-                                                // id={item}
                                                 key={index}
 
-                                                className='flex items-center justify-center flex-shrink-0 lg:w-14 md:12 w-10'
+                                                className='arrayDiv'
                                                 style={{ color: `${isEqual ? 'red' : 'blue'}`, }}
-                                            // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                             >
-                                                {/* <p ref={SearchEleRef} 
-                                                style={{ color: `${isEqual ? 'blue' : 'red'}`, }}>  */}
                                                 {`${index === idx ? searchEle : ''}`}
-                                                {/* </p> */}
                                             </div>
                                         ))}
-                                    </div>
-                                    <div className="flex md:ml-4">
-                                        {divs}
-                                    </div>
-                                    <div className="flex md:ml-4">
 
+                                        {/* ------------------------------- index divs ------------------------------- */}
+                                        {array.map((ele, index) =>
+                                            <div key={index} className='arrayDiv'>{index}</div>
+                                        )}
+
+                                        {/* ------------------------------- array element divs ------------------------------- */}
                                         {array.map((item, index) => (
                                             <div
                                                 id={item}
                                                 key={index}
                                                 ref={divRefs.current[index]}
-                                                className="border border-black bg-indigo-300 flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap animate-fadeIn rounded-sm"
-                                                // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
+                                                className="border border-black bg-indigo-300 arrayDiv animate-fadeIn"
                                                 style={{
                                                     color: `${index === idx ? (isEqual ? 'red' : 'black') : 'black'}`,
                                                     fontSize: `${index === idx ? (isEqual ? 'medium' : '') : ''}`,
@@ -333,14 +330,14 @@ const LinearSearch = () => {
                                                     animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`, // Stagger the delay by 0.2s per item
                                                     animationFillMode: 'both' // Ensures the element stays visible after the animation ends
                                                 }}
-                                            // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                             >
                                                 {item}
                                             </div>
                                         ))}
-                                        <p className='m-2 font-bold text-green-500'>{isFound}</p>
                                     </div>
                                 </div>
+                                
+                                {/* ------------------------------- comparison ------------------------------- */}
                                 <div className='p-4'>
                                     <p className='font-bold' style={{ visibility: `${isVisible ? 'visible' : 'hidden'}` }}>
                                         {searchEle} == Arr[{idx}]({array[idx]})
@@ -350,11 +347,13 @@ const LinearSearch = () => {
                                     </p>
                                 </div>
                             </div>
+                            <p className='m-2 font-bold text-green-500'>{isFound}</p>
                         </div>
                         <div className='p-1 text-white md:font-bold text-xs md:text-base bg-indigo-800 rounded-r-md'>
                             <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p><p>I</p><p>Z</p><p>E</p><p>D</p><p>S</p><p>A</p>
                         </div>
                     </div>
+
                     <div className='flex flex-wrap justify-between'>
                         <div className=''>
                             <input
@@ -362,7 +361,6 @@ const LinearSearch = () => {
                                 value={element}
                                 onChange={(e) => setElement(e.target.value)}
                                 className="opInput w-36p rounded-l-md"
-                                // style={{ border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}` }}
                                 placeholder="Enter element"
                                 disabled={isRunning}
                             />
@@ -396,7 +394,6 @@ const LinearSearch = () => {
                                 value={customIdx}
                                 onChange={(e) => { setCustomIdx(e.target.value) }}
                                 className="opInput w-36p shadow-inner"
-                                // style={{ border: '1px solid #d1d5db' }}
                                 placeholder="Enter index"
                                 disabled={isRunning}
                             />
@@ -415,7 +412,6 @@ const LinearSearch = () => {
                             delete array
                         </button>
                     </div>
-
                 </div>
             </div>
             <TopicCard topicName="Real-life Use (Linear Search)" />

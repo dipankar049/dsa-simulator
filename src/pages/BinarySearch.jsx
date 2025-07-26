@@ -345,65 +345,56 @@ const BinarySearch = () => {
                                     <p className='font-bold'>Iterations = {iterations}</p>
                                 </div>
                                 <p className='m-2 font-bold text-purple-700 dark:text-purple-300'>{arrExist ? 'Array' : ''}</p>
-                                <div className='overflow-x-auto'>
-                                    <div className="flex md:ml-4">
+                                <div className='w-full p-2 overflow-x-auto'>
+                                    <div
+                                        className={`grid grid-rows-3 w-fit`}
+                                        style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
+                                    >
+                                        {/* ------------------------------- mid position ------------------------------- */}
                                         {array.map((item, index) => (
                                             <div
-                                                // id={item}
                                                 key={index}
-
                                                 className='flex justify-center pb-2 flex-shrink-0 lg:w-14 md:12 w-10'
                                                 style={{ color: `${isEqual ? 'red' : 'blue'}`, }}
-                                            // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                             >
-                                                {/* <p ref={SearchEleRef} 
-                                                    style={{ color: `${isEqual ? 'blue' : 'red'}`, }}>  */}
                                                 {`${index === mid ? (isMidVisible ? 'Mid' : '') : ''}`}
-                                                {/* </p> */}
                                             </div>
                                         ))}
-                                    </div>
-                                    <div className="flex md:ml-4">
+
+                                        {/* ------------------------------- left-right position ------------------------------- */}
                                         {array.map((item, index) => (
                                             <div
-                                                // id={item}
                                                 key={index}
-
                                                 className='flex text-purple-900 dark:text-purple-300 justify-center items-center flex-shrink-0 lg:w-14 md:12 w-10'
-                                                // style={{ color: `${isEqual ? 'blue' : 'blue'}`, }}
-                                            // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                             >
-                                                {/* <p ref={SearchEleRef} 
-                                                    style={{ color: `${isEqual ? 'blue' : 'red'}`, }}>  */}
                                                 {`${index === low ? 'Low' : (index === high ? 'High' : '')}`}
-                                                {/* </p> */}
                                             </div>
                                         ))}
-                                    </div>
-                                    <div className="flex md:ml-4">
-                                        {divs}
-                                    </div>
-                                    <div className="flex md:ml-4">
+
+                                        {/* ------------------------------- index divs ------------------------------- */}
+                                        {array.map((ele, index) =>
+                                            <div key={index} className='arrayDiv'>{index}</div>
+                                        )}
+
+                                        {/* ------------------------------- array element divs ------------------------------- */}
                                         {array.map((item, index) => (
                                             <div
                                                 id={item}
                                                 key={index}
                                                 ref={divRefs.current[index]}
-                                                className="border border-black bg-purple-300 flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap animate-fadeIn rounded-sm"
-                                                // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
+                                                className="border border-black bg-purple-300 arrayDiv animate-fadeIn"
                                                 style={{
                                                     color: `${index === mid ? (isEqual ? 'red' : 'black') : 'black'}`,
                                                     fontWeight: `${index === mid ? 'bold' : ''}`,
                                                     animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`, // Stagger the delay by 0.2s per item
                                                     animationFillMode: 'both' // Ensures the element stays visible after the animation ends
                                                 }}
-                                            // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
                                             >
                                                 {item}
                                             </div>
                                         ))}
-                                        <p className='m-2 font-bold text-green-500'>{isFound}</p>
                                     </div>
+                                    <p className='m-2 font-bold text-green-500'>{isFound}</p>
                                 </div>
                             </div>
                             <div className='p-4 font-bold' style={{ visibility: `${isVisible ? 'visible' : 'hidden'}` }}>
@@ -477,11 +468,6 @@ const BinarySearch = () => {
                     </div>
 
                 </div>
-                {/* <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
-                    <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
-                        <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
-                    </div>
-                </div> */}
             </div>
             <TopicCard topicName="Real-life Use (Binary Search)" />
         </div>

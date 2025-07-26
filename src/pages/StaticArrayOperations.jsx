@@ -57,16 +57,6 @@ const StaticArrayOperations = () => {
   const isArrayExist = () => {
     if (array.length === 0) {  // check if array exist
       toast.error("Please create an array first.");
-      // toast(
-      //   <div>
-      //     <p>No Array exist, create one</p>
-      //     <button className='btn' onClick={createArray}>Create</button>
-      //   </div>,
-      //   {
-      //     autoClose: false
-      //   }
-      // );
-
       return false;
     };
     return true;
@@ -300,13 +290,7 @@ const StaticArrayOperations = () => {
                 Delete array
               </button>
             </div>
-
           </div>
-          {/* <div className=' w-full md:w-28p bg-black md:m-4 md:mr-0 md:ml-2p'>
-            <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
-              <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
-            </div>
-          </div> */}
         </div>
       </details>
       <TopicCard topicName="Real-life Use(Static Array)" /> {/* Real-life use and Example of static array */}

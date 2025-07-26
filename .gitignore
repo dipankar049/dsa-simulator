@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+src/pages/StaticArrayNew.jsx
+src/pages/StaticArrayOperations2.jsx
+src/pages/LinearSearch2.jsx

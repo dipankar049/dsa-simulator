@@ -38,9 +38,9 @@ function App() {
   };
 
   return (
-    <DetailsProvider>   {/* To track if different summery tags are open or closed by user */}
+    <DetailsProvider>   {/* To track summery elements state */}
       <BrowserRouter>
-        {/* configure React toastify container */}
+        {/* setup React toastify container */}
         <ToastContainer
           limit={3}
           autoClose={3000}
