@@ -76,3 +76,38 @@ npm run dev
 
 ---
 
+## 📷 Screenshots
+
+## 🏠 Homepage
+![Homepage](https://github.com/user-attachments/assets/ecfa6a22-020f-4d31-ac20-1a2b1b3aa87a)
+
+---
+
+## 🔢 Array Operations
+![Array Operations](https://github.com/user-attachments/assets/a0259f9a-59f1-430f-b270-0ec72dd01958)
+
+---
+
+## 🔗 Linked List Operations
+![Linked List](https://github.com/user-attachments/assets/5f07e2ac-fc3c-4f45-b819-8349045482ec)
+
+---
+
+## 🔍 Binary Search
+![Binary Search](https://github.com/user-attachments/assets/555bdfd3-5bd3-4586-bd3a-e29b81ac9ffe)
+
+---
+
+## 🔁 Bubble Sort
+![Bubble Sort](https://github.com/user-attachments/assets/94688844-ce8f-45db-9ff9-c10af1c87c60)
+
+---
+
+## 📱 Mobile View (Side by Side)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8f0098fb-5c6c-48b8-92be-b2cf6f2a2fb3" width="200"/>
+  <img src="https://github.com/user-attachments/assets/528c0ed1-f1c9-448a-b3b6-df12ca8f880f" width="200"/>
+</p>
+
+---
