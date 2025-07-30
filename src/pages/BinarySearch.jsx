@@ -344,7 +344,10 @@ const BinarySearch = () => {
                                     <p className='pl-4 font-bold'>Search element = {searchEle}</p>
                                     <p className='font-bold'>Iterations = {iterations}</p>
                                 </div>
-                                <p className='m-2 font-bold text-purple-700 dark:text-purple-300'>{arrExist ? 'Array' : ''}</p>
+                                <div className='flex justify-between'>
+                                    <p className='m-2 font-bold text-purple-700 dark:text-purple-300'>{arrExist ? 'Array' : ''}</p>
+                                    <p className='m-2 font-bold text-purple-700 dark:text-purple-300'>{"Mid = left + ( high - left) / 2"}</p>
+                                </div>
                                 <div className='w-full p-2 overflow-x-auto'>
                                     <div
                                         className={`grid grid-rows-3 w-fit`}
