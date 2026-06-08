@@ -4,12 +4,12 @@ const ThemeContext = createContext();
 
 const ThemeProvider = ({children}) => {
     const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('dsa-simulator-theme') || 
-            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        return localStorage.getItem('dsa-simulator-theme') || 'dark';
+            // (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     });    
 
     useEffect(() => {
-        const storedTheme = localStorage.getItem('dsa-simulator-theme') || 'light';
+        const storedTheme = localStorage.getItem('dsa-simulator-theme') || 'dark';
         if (storedTheme !== theme) {
             updateTheme(storedTheme);
         }

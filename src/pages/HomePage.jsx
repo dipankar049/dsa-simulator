@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link } from "react-router-dom";
 import { useTranslate } from '../assets/TranslationObj';
 import { ThemeContext } from '../context/ThemeContext';
+import AnimatedCard from '../components/card/AnimatedCard';
 
 export default function HomePage({language}) {
 
@@ -9,15 +10,16 @@ export default function HomePage({language}) {
   const { theme } = useContext(ThemeContext);
 
   return (
-    <div className="absolute inset-0 w-full min-h-[92vh] pt-[200px] sm:pt-16 flex flex-col items-center justify-center bg-white text-gray-800 dark:bg-gray-700 dark:text-white">
+    <div className="absolute inset-0 w-full min-h-[92vh] pt-[200px] sm:pt-16 flex flex-col items-center justify-center text-gray-800 bg-theme-gradient dark:text-white">
       {/* Welcome Section */}
       <section className="px-[10%] text-center py-4">
-        <h1 className="text-3xl sm:text-4xl font-semibold sm:font-bold text-blue-500 dark:text-cyan-300">Welcome to DSA Simulator {"{ }"} </h1>
+        <p className="text-3xl [text-shadow:2px_4px_6px_rgba(0,0,0,0.2)] sm:text-4xl font-semibold sm:font-bold text-blue-500 dark:text-cyan-300">Welcome to DSA Simulator {"{ }"} </p>
         <p className="mt-4 text-lg">
           Experience the magic of learning Data Structures and Algorithms with intuitive visualizations, practical examples, and interactive tools.
         </p>
         {/* {translate && <p>{translate.greeting}</p>} */}
       </section>
+      {/* <AnimatedCard /> */}
 
       {/* Features Section */}
       <section className="w-full px-[10%] grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
@@ -30,7 +32,7 @@ export default function HomePage({language}) {
           <Link
             key={index}
             to={item.path}
-            className="p-4 flex justify-center border rounded-lg bg-blue-50 hover:bg-blue-200 text-blue-600 hover:text-blue-800 dark:bg-gray-800 dark:text-white transition divAnimate"
+            className="p-4 flex justify-center border rounded-lg bg-blue-200 hover:bg-blue-200 text-blue-800 hover:text-blue-800 dark:bg-gray-800 dark:text-white shadow-xl transition divAnimate"
           >
             <h3 className="text-lg sm:text-xl font-semibold">{item.title}</h3>
           </Link>
@@ -38,7 +40,7 @@ export default function HomePage({language}) {
       </section>
 
       {/* Call-to-Action */}
-      <section className="px-[10%] bg-white dark:bg-gray-700 text-center py-4 sm:my-10">
+      <section className="px-[10%] text-center py-4 sm:my-10">
         <p className="text-lg">
           Ready to sharpen your skills? Explore our collection of interactive DSA tools and master algorithms like never before!
         </p>

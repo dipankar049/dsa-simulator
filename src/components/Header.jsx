@@ -11,7 +11,7 @@ export default function Header({ toggleSidebar }) {
   };
 
   return (
-    <header className="fixed w-full h-16 bg-blue-600 dark:bg-blue-950 text-white flex items-center px-6 shadow-md z-20">
+    <header className="fixed w-full h-16 bg-blue-600 dark:bg-blue-950 text-white flex items-center px-6 shadow-lg z-20">
       {/* Hamburger menu - visible on small screens */}
       <button
         className="md:hidden mr-4 text-2xl"

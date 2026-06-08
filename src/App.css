@@ -4,6 +4,25 @@
   box-sizing: border-box;
 }
 
+/* .bg-theme-gradient {
+  background-image: linear-gradient(
+    to bottom right,
+    #f0f9ff 0%,
+    #ffffff 50%,
+    #f0f9ff 100% 
+  );
+} */
+
+/* Dark mode */
+.dark .bg-theme-gradient {
+  background-image: linear-gradient(
+    to bottom right,
+    #1f2937,
+    #374151,
+    #111827
+  );
+}
+
 /* Buttons for operations */
 .opBtn {
   color: white;
