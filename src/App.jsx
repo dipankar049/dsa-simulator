@@ -19,7 +19,7 @@ import "./components/styles/globals.css";
 import LinearSearch from './pages/LinearSearch';
 import SinglyLinkedList from './pages/LinkedlistOperations2';
 import './App.css';
-import StaticArrayNew from './pages/StaticArrayNew';
+// import StaticArrayNew from './pages/StaticArrayNew';
 import { HelmetProvider } from 'react-helmet-async';
 
 function App() {
@@ -76,7 +76,7 @@ function App() {
                   <Route path="/selection-sort" element={<SelectionSort />} />
 
                   {/* ------------------------------- others ------------------------------- */}
-                  <Route path="/staticArray2.0" element={<StaticArrayNew />} />
+                  {/* <Route path="/staticArray2.0" element={<StaticArrayNew />} /> */}
                 </Routes>
               </div>
             </div>
