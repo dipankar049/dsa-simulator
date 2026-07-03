@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import { ThemeContext } from '../context/ThemeContext';
+import { Helmet } from 'react-helmet-async';
 
 const LinearSearch = () => {
     const [array, setArray] = useState([22, 54, 33, 12098, 9733, 44]);
@@ -241,6 +242,11 @@ const LinearSearch = () => {
 
     return (
         <div>
+            <Helmet>
+                <title>Linear Search Algorithm Simulator | DSA Simulator</title>
+                <meta name="description" content="Watch how linear search checks unsorted lists sequentially element-by-element. Understand O(n) search time complexity." />
+                <meta name="keywords" content="linear search animation, sequential search tool, linear search visualizer" />
+            </Helmet>
             <TopicCard topicName="Linear Search" />
             <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-indigo-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
                 <div className='w-full mb-2'>

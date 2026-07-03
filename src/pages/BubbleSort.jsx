@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import { ThemeContext } from '../context/ThemeContext';
+import { Helmet } from 'react-helmet-async';
 
 const BubbleSort = () => {
     const [array, setArray] = useState([220, 148, 132, 101, 95, 87, 64, 53, 8]);
@@ -226,6 +227,11 @@ const BubbleSort = () => {
 
     return (
         <div>
+            <Helmet>
+                <title>Bubble Sort Visualizer | Interactive Sorting Simulator</title>
+                <meta name="description" content="Simulate the bubble sort algorithm swapping adjacent elements step-by-step. Perfect visual aid for learning O(n²) sorting mechanics." />
+                <meta name="keywords" content="bubble sort simulator, interactive sorting visualizer, adjacent element swapping" />
+            </Helmet>
             <TopicCard topicName="Bubble Sort" />
             <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-emerald-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
                 <div className='w-full mb-2'>

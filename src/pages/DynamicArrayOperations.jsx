@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import IndexDivs from '../components/IndexDivs';
 import { ThemeContext } from '../context/ThemeContext';
+import { Helmet } from 'react-helmet-async';
 
 export default function DynamicArrayOperations() {
   const [array, setArray] = useState([15, 22, 12, 56, 24]);   // Default array elements
@@ -189,6 +190,11 @@ export default function DynamicArrayOperations() {
 
   return (
     <div>
+      <Helmet>
+        <title>Static & Dynamic Array Operations Simulator | DSA Simulator</title>
+        <meta name="description" content="Learn how fixed-size static arrays and auto-resizing dynamic arrays work. Explore memory overflow and array allocations visually." />
+        <meta name="keywords" content="dynamic array simulator, dynamic array visualizer, array data structure tool, memory overflow simulation" />
+      </Helmet>
       <TopicCard topicName="Dynamic Array" />
       <details className={`${theme === 'light' ? 'bg-gradient-to-r from-cyan-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`} open>
         <summary className="sm:mb-2 text-base sm:text-lg md:text-xl">Dynamic array oprations</summary>

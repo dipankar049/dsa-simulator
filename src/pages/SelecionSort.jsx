@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import { ThemeContext } from '../context/ThemeContext';
+import { Helmet } from 'react-helmet-async';
 
 const SelectionSort = () => {
     const [array, setArray] = useState([20, 64, 132, 101, 95, 7, 64, 153, 80]);
@@ -239,6 +240,11 @@ const SelectionSort = () => {
 
     return (
         <div>
+            <Helmet>
+                <title>Selection Sort Visualizer | Minimum Element Swapping Simulator</title>
+                <meta name="description" content="See how Selection Sort scans for the minimum element in an unsorted list and brings it to the front step-by-step." />
+                <meta name="keywords" content="selection sort simulator, unsorted array scan animation, linear sorting tool" />
+            </Helmet>
             <TopicCard topicName="Selection Sort" />
             <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-violet-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
                 <div className='w-full mb-2'>

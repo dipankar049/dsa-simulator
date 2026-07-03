@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import { ThemeContext } from '../context/ThemeContext';
+import { Helmet } from 'react-helmet-async';
 
 const BinarySearch = () => {
     const [array, setArray] = useState([22, 25, 32, 48, 51, 57, 64, 73]);
@@ -289,6 +290,11 @@ const BinarySearch = () => {
 
     return (
         <div>
+            <Helmet>
+                <title>Binary Search Algorithm Simulator | DSA Simulator</title>
+                <meta name="description" content="Visualize how binary search divides sorted arrays in half recursively. Learn log(n) divide-and-conquer search concepts interactively." />
+                <meta name="keywords" content="binary search visualizer, log n algorithm simulation, sorted array search tool" />
+            </Helmet>
             <TopicCard topicName="Binary Search" />
             <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-purple-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
                 <div className='w-full mb-2'>

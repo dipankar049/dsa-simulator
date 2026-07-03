@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://dsa-simulator-three.vercel.app/</loc><priority>1.0</priority></url>
+  <url><loc>https://dsa-simulator-three.vercel.app/array-operations</loc><priority>0.8</priority></url>
+  <url><loc>https://dsa-simulator-three.vercel.app/linked-list-operations</loc><priority>0.8</priority></url>
+  <url><loc>https://dsa-simulator-three.vercel.app/linear-search</loc><priority>0.8</priority></url>
+  <url><loc>https://dsa-simulator-three.vercel.app/binary-search</loc><priority>0.8</priority></url>
+  <url><loc>https://dsa-simulator-three.vercel.app/bubble-sort</loc><priority>0.8</priority></url>
+  <url><loc>https://dsa-simulator-three.vercel.app/merge-sort</loc><priority>0.8</priority></url>
+  <url><loc>https://dsa-simulator-three.vercel.app/quick-sort</loc><priority>0.8</priority></url>
+  <url><loc>https://dsa-simulator-three.vercel.app/selection-sort</loc><priority>0.8</priority></url>
+</urlset>

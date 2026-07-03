@@ -5,6 +5,7 @@ import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import IndexDivs from '../components/IndexDivs';
+import { Helmet } from 'react-helmet-async';
 
 const StaticArrayOperations = () => {
   const [array, setArray] = useState([15, 22, 12, 56, 24]);   // Default array elements
@@ -168,6 +169,11 @@ const StaticArrayOperations = () => {
 
   return (
     <div>
+      <Helmet>
+        <title>Static & Dynamic Array Operations Simulator | DSA Simulator</title>
+        <meta name="description" content="Learn how fixed-size static arrays and auto-resizing dynamic arrays work. Explore memory overflow and array allocations visually." />
+        <meta name="keywords" content="static array simulator, dynamic array visualizer, array data structure tool, memory overflow simulation" />
+      </Helmet>
       <TopicCard topicName="Array" /> {/* Defination and Example of array */}
       <TopicCard topicName="Static Array" />  {/* Defination and Example of static array */}
       <details

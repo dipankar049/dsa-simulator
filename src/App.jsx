@@ -20,6 +20,7 @@ import LinearSearch from './pages/LinearSearch';
 import SinglyLinkedList from './pages/LinkedlistOperations2';
 import './App.css';
 import StaticArrayNew from './pages/StaticArrayNew';
+import { HelmetProvider } from 'react-helmet-async';
 
 function App() {
   const { theme } = useContext(ThemeContext);
@@ -38,49 +39,51 @@ function App() {
   };
 
   return (
-    <DetailsProvider>   {/* To track summery elements state */}
-      <BrowserRouter>
-        {/* setup React toastify container */}
-        <ToastContainer
-          limit={3}
-          autoClose={3000}
-          newestOnTop={true}
-          pauseOnHover
-          theme={theme}
-          pauseOnFocusLoss
-        />
-        <div className="w-full h-[100vh] bg-gray-100 dark:bg-gray-900">
-          <Header toggleSidebar={toggleSidebar} changeLanguage={handleChangeLanguage} />
+    <HelmetProvider>
+      <DetailsProvider>   {/* To track summery elements state */}
+        <BrowserRouter>
+          {/* setup React toastify container */}
+          <ToastContainer
+            limit={3}
+            autoClose={3000}
+            newestOnTop={true}
+            pauseOnHover
+            theme={theme}
+            pauseOnFocusLoss
+          />
+          <div className="w-full h-[100vh] bg-gray-100 dark:bg-gray-900">
+            <Header toggleSidebar={toggleSidebar} changeLanguage={handleChangeLanguage} />
 
-          <div className="w-full flex pt-16">
-            <MenubarUn isOpen={sidebarOpen} closeSidebar={closeSidebar} />  {/* Left Menubar */}
+            <div className="w-full flex pt-16">
+              <MenubarUn isOpen={sidebarOpen} closeSidebar={closeSidebar} />  {/* Left Menubar */}
 
-            <div className="relative w-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 md:text-base sm:text-sm text-xs md:ml-[20%]">
-              <Routes>
-                <Route path="/" element={<HomePage language={language} />} />
+              <div className="relative w-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 md:text-base sm:text-sm text-xs md:ml-[20%]">
+                <Routes>
+                  <Route path="/" element={<HomePage language={language} />} />
 
-                {/* ------------------------------- Array & Linkedlist operations ------------------------------- */}
-                <Route path="/arrayOp" element={<><StaticArrayOperations /><DynamicArrayOperations /></>} />
-                <Route path="/listOp" element={<><SinglyLinkedList /><DoublyLinkedlistOperations /></>} />
+                  {/* ------------------------------- Array & Linkedlist operations ------------------------------- */}
+                  <Route path="/array-operations" element={<><StaticArrayOperations /><DynamicArrayOperations /></>} />
+                  <Route path="/linked-list-operations" element={<><SinglyLinkedList /><DoublyLinkedlistOperations /></>} />
 
-                {/* ------------------------------- Searching operations ------------------------------- */}
-                <Route path="/linSearch" element={<LinearSearch />} />
-                <Route path="/binSearch" element={<BinarySearch />} />
+                  {/* ------------------------------- Searching operations ------------------------------- */}
+                  <Route path="/linear-search" element={<LinearSearch />} />
+                  <Route path="/binary-search" element={<BinarySearch />} />
 
-                {/* ------------------------------- Sorting operations ------------------------------- */}
-                <Route path="/bubbleSort" element={<BubbleSort />} />
-                <Route path="/mergeSort" element={<MergeSort />} />
-                <Route path="/quickSort" element={<QuickSort />} />
-                <Route path="/selecionSort" element={<SelectionSort />} />
+                  {/* ------------------------------- Sorting operations ------------------------------- */}
+                  <Route path="/bubble-sort" element={<BubbleSort />} />
+                  <Route path="/merge-sort" element={<MergeSort />} />
+                  <Route path="/quick-sort" element={<QuickSort />} />
+                  <Route path="/selection-sort" element={<SelectionSort />} />
 
-                {/* ------------------------------- others ------------------------------- */}
-                <Route path="/staticArray2.0" element={<StaticArrayNew />} />
-              </Routes>
+                  {/* ------------------------------- others ------------------------------- */}
+                  <Route path="/staticArray2.0" element={<StaticArrayNew />} />
+                </Routes>
+              </div>
             </div>
           </div>
-        </div>
-      </BrowserRouter>
-    </DetailsProvider>
+        </BrowserRouter>
+      </DetailsProvider>
+    </HelmetProvider>
   );
 }
 

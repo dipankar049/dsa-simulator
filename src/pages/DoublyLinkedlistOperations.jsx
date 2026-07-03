@@ -4,6 +4,7 @@ import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeContext } from '../context/ThemeContext';
+import { Helmet } from 'react-helmet-async';
 
 export default function DoublyLinkedlistOperations() {
   const [list, setList] = useState([23, 52, 76, 18]);
@@ -132,6 +133,11 @@ export default function DoublyLinkedlistOperations() {
 
   return (
     <div>
+      <Helmet>
+        <title>Singly & Doubly Linked List Visualizer | DSA Simulator</title>
+        <meta name="description" content="Simulate pointers, head nodes, node deletion, and insertion in singly and doubly linked lists. Visualize browser history and playlists." />
+        <meta name="keywords" content="linked list simulator, doubly linked list animation, node traversal tool, pointer visualization" />
+      </Helmet>
       <TopicCard topicName="Doubly Linked List" />
       <div className={`${theme === 'light' ? 'bg-gradient-to-tr from-emerald-100' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
         <div className='w-full mb-2'>

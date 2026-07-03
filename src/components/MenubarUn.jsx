@@ -6,14 +6,14 @@ export default function MenubarUn({ isOpen, closeSidebar }) {
 
   const menuItems = [
     { label: "Home", to: "/" },
-    { label: "Array", to: "/arrayOp" },
-    { label: "Linked List", to: "/listOp" },
-    { label: "Linear Search", to: "/linSearch" },
-    { label: "Binary Search", to: "/binSearch" },
-    { label: "Bubble Sort", to: "/bubbleSort" },
-    { label: "Merge Sort", to: "/mergeSort" },
-    { label: "Quick Sort", to: "/quickSort" },
-    { label: "Selection Sort", to: "/selecionSort" },
+    { label: "Array", to: "/array-operations" },
+    { label: "Linked List", to: "/linked-list-operations" },
+    { label: "Linear Search", to: "/linear-search" },
+    { label: "Binary Search", to: "/binary-search" },
+    { label: "Bubble Sort", to: "/bubble-sort" },
+    { label: "Merge Sort", to: "/merge-sort" },
+    { label: "Quick Sort", to: "/quick-sort" },
+    { label: "Selection Sort", to: "/selection-sort" },
   ];
 
   return (
