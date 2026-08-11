@@ -177,15 +177,15 @@ const StaticArrayOperations = () => {
       <TopicCard topicName="Array" /> {/* Defination and Example of array */}
       <TopicCard topicName="Static Array" />  {/* Defination and Example of static array */}
       <details
-        className={`w-full h-fit p-4 rounded-lg ${theme === 'light' ? 'bg-gradient-to-r from-teal-200' : 'bg-gray-800'} `}
+        className="opSection w-full h-fit p-4 mb-4"
         id='staticArrayOp'
         onToggle={(e) => { handleToggle('staticArrayOp', e.target.open) }}
         open={detailsState['staticArrayOp'] !== undefined ? detailsState['staticArrayOp'] : true}
       >
-        <summary className="sm:mb-2 text-base sm:text-lg md:text-xl">Static Array Operations</summary>
+        <summary className="sm:mb-2 text-base sm:text-lg md:text-xl font-semibold text-ink cursor-pointer">Static Array Operations</summary>
         <div>
           <div className='w-full mb-2 pt-2'>
-            <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
+            <div className="flex flex-wrap justify-between gap-y-2 mb-4 w-full sm:text-base text-sm">
               <div className='mr-2'>
                 <input
                   name='arrayLength'
@@ -198,12 +198,12 @@ const StaticArrayOperations = () => {
                 />
                 <button
                   onClick={createArray}
-                  className="bg-teal-600 hover:bg-teal-700 rounded-r-md opBtn btnAnimate"
+                  className="opBtn btnAnimate rounded-r-md"
                 >
                   Create New array
                 </button>
               </div>
-              <div className='flex flex-wrap justify-end text-black'>
+              <div className='flex flex-wrap justify-end'>
                 <input
                   name='element'
                   type="number"
@@ -223,16 +223,16 @@ const StaticArrayOperations = () => {
                 />
                 <button
                   onClick={arrayInsert}
-                  className="opBtn bg-teal-600 hover:bg-teal-700 rounded-r-md btnAnimate"
+                  className="opBtn btnAnimate rounded-r-md"
                 >
                   Insert
                 </button>
               </div>
 
             </div>
-            <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 shadow-xl rounded-md'>
+            <div className='vizCard flex m-2 mx-0 mb-6'>
               <div className='w-full p-2 overflow-x-auto'>
-                {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-teal-200'>Array</p>}
+                {(array.length != 0) && <p className='md:m-2 font-semibold text-accent'>Array</p>}
                 <div
                   className={`grid grid-rows-3 w-fit`}
                   style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
@@ -249,10 +249,15 @@ const StaticArrayOperations = () => {
                       id={item}
                       key={index}
                       ref={divRefs.current[index]}
-                      className="border border-black arrayDiv animate-fadeIn"
+                      className="cell arrayDiv animate-fadeIn"
                       style={{
-                        color: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'red' : 'black') : 'black',
-                        backgroundColor: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'white' : '#6ee7b7') : '#6ee7b7',
+                        color: operationIdxVisibility && index === parseInt(arrayInputs.customIdx)
+                          ? '#fff'
+                          : 'rgb(var(--color-text-primary))',
+                        backgroundColor: operationIdxVisibility && index === parseInt(arrayInputs.customIdx)
+                          ? 'rgb(var(--color-frontier))'
+                          : 'rgb(var(--color-element))',
+                        borderColor: 'rgb(var(--color-element-border))',
                         animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
                       }}
                     >{item}</div>
@@ -263,7 +268,7 @@ const StaticArrayOperations = () => {
                     <div
                       key={index}
                       ref={divRefs.current[index]}
-                      className={`arrayDiv font-bold text-red-500 dark:text-white`}
+                      className="arrayDiv font-bold text-accent"
                     >
                       <div style={{ display: operationEleVisibility ? 'block' : 'none' }}>
                         {index === parseInt(arrayInputs.customIdx) && arrayInputs.element}
@@ -272,26 +277,26 @@ const StaticArrayOperations = () => {
                   ))}
                 </div>
               </div>
-              <div className='p-1 text-white md:font-bold text-xs md:text-base bg-teal-700 rounded-r-md'>
+              <div className='visualTag'>
                 <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
               </div>
             </div>
-            <div className='flex flex-wrap justify-between'>
+            <div className='flex flex-wrap justify-between gap-y-1'>
               <button
                 onClick={deleteByIdx}
-                className="opBtn bg-teal-600 hover:bg-teal-700 rounded-md btnAnimate"
+                className="opBtn btnAnimate rounded-md"
               >
                 Delete by index
               </button>
               <button
                 onClick={deleteByEle}
-                className="opBtn bg-teal-600 hover:bg-teal-700 rounded-md btnAnimate shadow-xl"
+                className="opBtn btnAnimate rounded-md"
               >
                 Delete by element
               </button>
               <button
                 onClick={removeArray}
-                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md btnAnimate shadow-xl"
+                className="opBtn-danger btnAnimate"
               >
                 Delete array
               </button>

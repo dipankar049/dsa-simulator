@@ -1,55 +1,98 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import {
+  HomeIcon,
+  Squares2X2Icon,
+  LinkIcon,
+  MagnifyingGlassIcon,
+  ArrowsUpDownIcon,
+} from '@heroicons/react/24/outline';
+
+const sections = [
+  {
+    label: 'Overview',
+    items: [{ label: 'Home', to: '/', icon: HomeIcon }],
+  },
+  {
+    label: 'Data Structures',
+    items: [
+      { label: 'Array', to: '/array-operations', icon: Squares2X2Icon },
+      { label: 'Linked List', to: '/linked-list-operations', icon: LinkIcon },
+    ],
+  },
+  {
+    label: 'Searching',
+    items: [
+      { label: 'Linear Search', to: '/linear-search', icon: MagnifyingGlassIcon },
+      { label: 'Binary Search', to: '/binary-search', icon: MagnifyingGlassIcon },
+    ],
+  },
+  {
+    label: 'Sorting',
+    items: [
+      { label: 'Bubble Sort', to: '/bubble-sort', icon: ArrowsUpDownIcon },
+      { label: 'Merge Sort', to: '/merge-sort', icon: ArrowsUpDownIcon },
+      { label: 'Quick Sort', to: '/quick-sort', icon: ArrowsUpDownIcon },
+      { label: 'Selection Sort', to: '/selection-sort', icon: ArrowsUpDownIcon },
+    ],
+  },
+];
 
 export default function MenubarUn({ isOpen, closeSidebar }) {
   const location = useLocation();
 
-  const menuItems = [
-    { label: "Home", to: "/" },
-    { label: "Array", to: "/array-operations" },
-    { label: "Linked List", to: "/linked-list-operations" },
-    { label: "Linear Search", to: "/linear-search" },
-    { label: "Binary Search", to: "/binary-search" },
-    { label: "Bubble Sort", to: "/bubble-sort" },
-    { label: "Merge Sort", to: "/merge-sort" },
-    { label: "Quick Sort", to: "/quick-sort" },
-    { label: "Selection Sort", to: "/selection-sort" },
-  ];
-
   return (
     <>
       {/* Desktop sidebar */}
-      <div className="hidden overflow-y-auto md:text-lg md:block fixed w-1/5 h-screen bg-white pt-4 pl-3 border-r-2 border-gray-300 drop-shadow-lg dark:bg-gray-800 dark:text-white">
-        <div className="p-2 space-y-1">
-          {menuItems.map(({ label, to }) => (
-            <MenuItem key={to} label={label} to={to} />
-          ))}
-        </div>
+      <div className="hidden md:block fixed w-1/5 h-[calc(100vh-4rem)] top-16 overflow-y-auto bg-surface border-r border-border">
+        <SidebarContent pathname={location.pathname} />
       </div>
 
       {/* Mobile sidebar */}
       {isOpen && (
-        <div className="fixed z-40 top-16 left-0 w-4/5 max-w-xs h-full bg-white border-r border-gray-300 shadow-lg md:hidden dark:bg-gray-800 dark:text-white transition-all">
-          <div className="p-2 space-y-1">
-            {menuItems.map(({ label, to }) => (
-              <MenuItem key={to} label={label} to={to} onClick={closeSidebar} />
-            ))}
+        <>
+          <div
+            className="fixed inset-0 top-16 bg-black/30 z-30 md:hidden"
+            onClick={closeSidebar}
+          />
+          <div className="fixed z-40 top-16 left-0 w-4/5 max-w-xs h-[calc(100vh-4rem)] overflow-y-auto bg-surface border-r border-border shadow-lg md:hidden">
+            <SidebarContent pathname={location.pathname} onNavigate={closeSidebar} />
           </div>
-        </div>
+        </>
       )}
     </>
   );
 }
 
-const MenuItem = ({ label, to, onClick }) => (
-  <>
-    <Link
-      to={to}
-      className="block w-full p-2 pl-4 text-gray-800 dark:text-white rounded-r-3xl rounded-l-md hover:text-xl hover:font-bold hover:text-blue-600 dark:hover:text-blue-600 transition-all duration-200 ease-in-out"
-      onClick={onClick}
-    >
-      {label}
-    </Link>
-    <hr className="border-gray-300 mx-3 my-1" />
-  </>
-);
+function SidebarContent({ pathname, onNavigate }) {
+  return (
+    <div className="p-3 space-y-5">
+      {sections.map((section) => (
+        <div key={section.label}>
+          <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+            {section.label}
+          </p>
+          <div className="space-y-0.5">
+            {section.items.map(({ label, to, icon: Icon }) => {
+              const active = pathname === to;
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={onNavigate}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${active
+                      ? 'bg-accent/10 text-accent font-semibold'
+                      : 'text-ink-secondary hover:bg-element hover:text-ink'
+                    }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-accent' : 'text-ink-muted'}`} />
+                  <span className="truncate">{label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

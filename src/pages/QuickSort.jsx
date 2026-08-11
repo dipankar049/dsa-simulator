@@ -1,8 +1,10 @@
-// src/components/ArrayVisualizer.js
+// src/pages/QuickSort.jsx
 
 import React, { useState, useRef, useEffect } from 'react';
 import TopicCard from '../components/TopicCard';
+import StateLegend from '../components/Statelegend';
 import { useNavigate } from "react-router-dom";
+import { Helmet } from 'react-helmet-async';
 
 const QuickSort = () => {
     const navigate = useNavigate();
@@ -13,10 +15,6 @@ const QuickSort = () => {
     const [comparisons, setComparisons] = useState(0);
     const divRefs = useRef([]);
 
-
-    const [firstEle, setFirstEle] = useState(-1);
-    const [seacondEle, setSeacondEle] = useState(-1);
-
     const [subArrayInfo, setSubArrayInfo] = useState([{ left: 0, right: array.length - 1 }]);
     const [pivotEle, setPivotEle] = useState(-1);
     const [leftEle, setLefttEle] = useState(-1);
@@ -24,28 +22,18 @@ const QuickSort = () => {
     const [isGreater, setIsGreater] = useState(false);
     const [isSmaller, setIsSmaller] = useState(false);
 
-    const [midArray, setMidArray] = useState([]);
-    const [currentArray, setCurrentArray] = useState(0);
     const [queue, setQueue] = useState([0]);
     const [queuePointer, setQueuePointer] = useState(0);
 
     const [divs, setDivs] = useState([]);
     const [dividedArrays, setDividedArrays] = useState([[]]);
-    const [emptyElement, setEmptyElement] = useState(false);
     const [oldArray, setOldArray] = useState(false);
 
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    useEffect(() => {
-        setEmptyElement(false);
-    }, [element]);
-
     let singleDiv = 0;
     let noOfMultiDiv = 0;
     const divide = async (localQueue, localQueuePointer, newSubArrayInfo) => {
-        // if (singleDiv != (localQueue.length - localQueuePointer)) {
-        //     return;
-        // }
         let i = localQueuePointer;
         singleDiv = 0;
         noOfMultiDiv = 0;
@@ -56,7 +44,6 @@ const QuickSort = () => {
         await delay(1000);
 
         while (i < localQueue.length) {
-
             if (newSubArrayInfo[i].left === newSubArrayInfo[i].right) {
                 singleDiv++;
                 newSubArrayInfo.push(
@@ -70,7 +57,6 @@ const QuickSort = () => {
             let pivot = newSubArrayInfo[i].left;
             let m = newSubArrayInfo[i].left + 1;
             let n = newSubArrayInfo[i].right;
-            console.log("Before ----> pivot: ", pivot, "leftEle: ", m, "rightEle: ", n);
             setPivotEle(pivot);
             setLefttEle(m);
             setRightEle(n);
@@ -80,12 +66,8 @@ const QuickSort = () => {
                 continue;
             }
             await delay(1000);
-            // console.log(array[m], array[pivot], array[n]);
             while (m <= n) {
-
-                // console.log("yeah 0");
                 while (array[m] <= array[pivot] || array[n] > array[pivot]) {
-                    // console.log("yeah 1");
                     if (array[m] > array[pivot]) {
                         setIsGreater(true);
                     } else {
@@ -93,18 +75,11 @@ const QuickSort = () => {
                             m++;
                             await delay(1000);
                             setLefttEle(m);
-                            if (m >= n) {
-                                break;
-                            }
+                            if (m >= n) break;
                             if (array[m] > array[pivot]) {
-
                                 setIsGreater(true);
-                                console.log("greater");
-                                // setLefttEle(m);
                                 break;
-                                // await delay(500);
                             }
-
                         }
                     }
 
@@ -119,27 +94,19 @@ const QuickSort = () => {
                                 await delay(1000);
                                 setRightEle(n);
                                 if (m >= n) {
-                                    if (n > newSubArrayInfo[i].left) {
-                                        n--;
-                                    }
+                                    if (n > newSubArrayInfo[i].left) n--;
                                     break;
                                 }
                                 if (array[n] <= array[pivot]) {
                                     setIsSmaller(true);
                                     break;
-                                    // await delay(500);
                                 }
                             }
                         }
-
                     } else {
                         break;
                     }
-                    console.log("Inside ----> pivot: ", pivot, "leftEle: ", m, "rightEle: ", n);
-                    // setLefttEle(m);
-                    // setRightEle(n);
                     await delay(1000);
-
                 }
 
                 if (m < n) {
@@ -167,43 +134,39 @@ const QuickSort = () => {
                 setIsSmaller(false);
                 setIsGreater(false);
             }
-            console.log("After ----> pivot: ", pivot, "leftEle: ", m, "rightEle: ", n);
+
             if (newSubArrayInfo[i].left === newSubArrayInfo[i].right) {
                 singleDiv++;
                 newSubArrayInfo.push(
                     { left: newSubArrayInfo[i].left, right: newSubArrayInfo[i].right }
                 );
             } else {
-
                 multiDiv = true;
-                // mid = Math.floor((newSubArrayInfo[i].left + newSubArrayInfo[i].right) / 2);
                 if (newSubArrayInfo[i].left + 1 === newSubArrayInfo[i].right) {
                     noOfMultiDiv = 2;
                     newSubArrayInfo.push(
                         { left: newSubArrayInfo[i].left, right: newSubArrayInfo[i].left },
                         { left: newSubArrayInfo[i].right, right: newSubArrayInfo[i].right }
                     );
+                } else if (mid >= newSubArrayInfo[i].right) {
+                    noOfMultiDiv = 2;
+                    newSubArrayInfo.push(
+                        { left: newSubArrayInfo[i].left, right: mid - 1 },
+                        { left: mid, right: newSubArrayInfo[i].right }
+                    );
+                } else if (mid <= newSubArrayInfo[i].left) {
+                    noOfMultiDiv = 2;
+                    newSubArrayInfo.push(
+                        { left: newSubArrayInfo[i].left, right: mid },
+                        { left: mid + 1, right: newSubArrayInfo[i].right }
+                    );
                 } else {
-                    if (mid >= newSubArrayInfo[i].right) {
-                        noOfMultiDiv = 2;
-                        newSubArrayInfo.push(
-                            { left: newSubArrayInfo[i].left, right: mid - 1 },
-                            { left: mid, right: newSubArrayInfo[i].right }
-                        );
-                    } else if (mid <= newSubArrayInfo[i].left) {
-                        noOfMultiDiv = 2;
-                        newSubArrayInfo.push(
-                            { left: newSubArrayInfo[i].left, right: mid },
-                            { left: mid + 1, right: newSubArrayInfo[i].right }
-                        );
-                    } else {
-                        noOfMultiDiv = 3;
-                        newSubArrayInfo.push(
-                            { left: newSubArrayInfo[i].left, right: mid - 1 },
-                            { left: mid, right: mid },
-                            { left: mid + 1, right: newSubArrayInfo[i].right }
-                        );
-                    }
+                    noOfMultiDiv = 3;
+                    newSubArrayInfo.push(
+                        { left: newSubArrayInfo[i].left, right: mid - 1 },
+                        { left: mid, right: mid },
+                        { left: mid + 1, right: newSubArrayInfo[i].right }
+                    );
                 }
             }
             i++;
@@ -217,88 +180,48 @@ const QuickSort = () => {
             j--;
         }
 
-        // Update state after processing this iteration
         setSubArrayInfo(newSubArrayInfo);
         setQueue(localQueue);
         setQueuePointer(k);
 
-        // Continue recursion if there are further divisions needed
         if (multiDiv) {
-            // console.log('no of singlediv', singleDiv);
-            multiDiv = false;
             await delay(1000);
-            divide([...localQueue], k, [...newSubArrayInfo]); // Pass copies for safety
+            divide([...localQueue], k, [...newSubArrayInfo]);
         }
     };
 
-    const QuickSort = () => {
-        if (array.length === 0) {
-            return;
-        }
-
+    const runQuickSort = () => {
+        if (array.length === 0) return;
         const localQueue = [...queue];
         const localQueuePointer = queuePointer;
         const newSubArrayInfo = [...subArrayInfo];
-
         divide(localQueue, localQueuePointer, newSubArrayInfo);
     };
-
-    const getSpacingX = () => {
-        const screenWidth = window.innerWidth;
-
-        if (screenWidth >= 1024) {
-            // Large screens (e.g., desktops)
-            return 25; // Custom padding for large screens
-        } else if (screenWidth >= 768) {
-            // Medium screens (e.g., tablets)
-            return 20; // Custom padding for medium screens
-        } else {
-            // Small screens (e.g., mobile)
-            return 15; // Custom padding for small screens
-        }
-    };
-    //   console.log(getSpacingX());
 
     useEffect(() => {
         setSubArrayInfo([{ left: 0, right: array.length - 1 }])
         setDividedArrays([[]]);
         setQueue([0]);
         setQueuePointer(0);
-        // setIsGreater(false);
-        // setIterations(0);
-        // setComparisons(0);
-        // setFirstEle(-1);
-        // setSeacondEle(-1);
     }, [array]);
 
     useEffect(() => {
         const newDivs = [];
         for (let i = 0; i < array.length; i++) {
-            newDivs.push(
-                <div
-                    key={i}
-                    className="flex items-center justify-center flex-shrink-0 lg:w-14 md:12 w-10"
-                // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
-                >
-                    {i}
-                </div>
-            );
+            newDivs.push(<div key={i} className='arrayDiv'>{i}</div>);
         }
-        setDivs(newDivs); // Update the state with new divs
+        setDivs(newDivs);
     }, [array]);
 
-    // const makeDivs = () => {
     useEffect(() => {
         if (queuePointer > 0) {
             const newDivs = [];
-            let k = 0;
-            for (let j = queuePointer; j < queue.length; j++, k++) {
-                // console.log(j, queuePointer, queue);
+            for (let j = queuePointer; j < queue.length; j++) {
                 for (let i = subArrayInfo[j].left; i <= subArrayInfo[j].right; i++) {
                     newDivs.push(
                         <div
                             key={i}
-                            className="border border-black bg-green-200 flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap"
+                            className="cell arrayDiv"
                             style={{ marginRight: `${i === subArrayInfo[j]?.right ? (i === subArrayInfo[queue.length - 1]?.right ? '0' : `20`) : '0'}px` }}
                         >
                             {array[i]}
@@ -309,49 +232,27 @@ const QuickSort = () => {
             setDividedArrays([...dividedArrays, newDivs]);
         }
     }, [queuePointer]);
-    // }
-
 
     const createArray = () => {
         setOldArray(false);
         setArray([]);
         setArrExist(true);
-        setIsMidVisible(false);
-        // setDividedArrays([[]]);
     };
 
-    function arrayPushOperation() {
-        if (!arrExist) {
-            return;
-        };
-        if (element === '') {
-            setEmptyElement(true);
-            return;
-        }
-        setEmptyElement(false);
+    const arrayPushOperation = () => {
+        if (!arrExist || element === '') return;
         setOldArray(true);
-        if (element) {
-            setArray([...array, element]);
-        }
+        setArray([...array, element]);
         setElement('');
-        // setCustomIdx(-1);
     };
 
-    function arrayPopOperation() {
-        //   console.log(idx);
-        if (array.length <= 0) {
-            // console.log("empty array, can't delete");
-            return;
-        }
+    const arrayPopOperation = () => {
+        if (array.length <= 0) return;
         setArray(array.slice(0, -1));
     }
 
     const removeByEle = () => {
-        if (element === '') {
-            setEmptyElement(true);
-            return;
-        }
-        setEmptyElement(false);
+        if (element === '') return;
         setArray(array.filter(item => item != element));
         setElement('');
     };
@@ -360,171 +261,130 @@ const QuickSort = () => {
         setOldArray(false);
         setArray([]);
         setArrExist(false);
-        setIsVisible(false);
-        // setDividedArrays([[]]);
     }
 
+    const cellStyle = (index) => {
+        if (index === pivotEle) {
+            return {
+                backgroundColor: 'rgb(var(--color-pivot))',
+                borderColor: 'rgb(var(--color-pivot))',
+                color: '#fff',
+            };
+        }
+        if (index === leftEle) {
+            return {
+                backgroundColor: isGreater ? 'rgb(var(--color-swapping))' : 'rgb(var(--color-comparing))',
+                borderColor: isGreater ? 'rgb(var(--color-swapping))' : 'rgb(var(--color-comparing))',
+                color: '#fff',
+            };
+        }
+        if (index === rightEle) {
+            return {
+                backgroundColor: isSmaller ? 'rgb(var(--color-swapping))' : 'rgb(var(--color-comparing))',
+                borderColor: isSmaller ? 'rgb(var(--color-swapping))' : 'rgb(var(--color-comparing))',
+                color: '#fff',
+            };
+        }
+        return {};
+    };
+
     return (
-        <div className="relative h-screen w-full">
-            <div className='p-2p'>
-                <TopicCard topicName="Quick Sort" />
-                <div className="md:flex bg-gradient-to-tl from-cyan-200 h-fit w-full p-4 rounded-lg md:text-base sm:text-sm text-xs">
-                    <div className='w-full mb-2'>
-                        <h1 className="sm:mb-2 text-base sm:text-lg md:text-xl font-bold">Quick Sort</h1>
-                        <div className="flex justify-between mb-4 pt-2 w-full sm:text-base text-sm">
-                            <div className=''>
-                                <button
-                                    onClick={createArray}
-                                    className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-md"
-                                >
-                                    Create New array
-                                </button>
-                            </div>
-                            <div className='flex flex-wrap justify-end'>
-                                <button
-                                    onClick={QuickSort}
-                                    className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:px-4 p-2 h-fit rounded-md"
-                                >
-                                    Sort
-                                </button>
-                            </div>
-                        </div>
-                        <div className='flex m-2 mx-0 mb-6 bg-white border border-gray-300 rounded-md shadow-xl'>
-                            <div className='w-full p-2'>
-                                <div>
-                                    <div className='flex justify-between'>
-                                        <p className='pl-4 font-bold'>Comparisons = {comparisons}</p>
-                                        <p className='font-bold'>Iterations = {iterations}</p>
-                                    </div>
-                                    <p className='m-2 font-bold'>{arrExist ? 'Arr' : ''}</p>
-                                    <div className='flex'>
-                                        <div className='overflow-x-auto grid place-items-center'>
-                                            <div className="flex md:ml-12 m-4">
-                                                {divs}
-                                            </div>
-                                            <div className="flex md:ml-12 m-4 my-0">
-                                                {array.map((item, index) => (
-                                                    <div
-                                                        id={item}
-                                                        key={index}
-                                                        ref={divRefs.current[index]}
-                                                        className="border border-black flex justify-center flex-shrink-0 md:w-12 lg:w-14 w-10 md:px-2 px-1 py-1 mt-1 overflow-hidden whitespace-nowrap animate-fadeIn rounded-sm"
-                                                        // style={{ color: `${index === idx ? 'blue' : 'black'}`, }}
-                                                        style={{
-                                                            color: `${index === leftEle ? (isGreater ? 'red' : 'blue') : (index === rightEle ? (isSmaller ? 'red' : 'blue') : 'black')}`,
-                                                            backgroundColor: `${index === pivotEle ? 'white' : '#67e8f9'}`,
-                                                            fontWeight: `${index === leftEle ? 'bold' : (index === rightEle ? 'bold' : '')}`,
-                                                            animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`, // Stagger the delay by 0.2s per item
-                                                            animationFillMode: 'both' // Ensures the element stays visible after the animation ends
-                                                        }}
-                                                    // style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
-                                                    >
-                                                        {item}
-                                                    </div>
-                                                ))}
-                                            </div>
+        <div className="relative w-full">
+            <Helmet>
+                <title>Quick Sort Visualizer | Pivot Partitioning Simulator</title>
+                <meta name="description" content="See how Quick Sort picks a pivot and partitions the array around it, recursively, until the array is sorted." />
+                <meta name="keywords" content="quick sort simulator, pivot partitioning visualizer, recursive sorting tool" />
+            </Helmet>
+            <TopicCard topicName="Quick Sort" />
 
-                                            <div className="md:ml-7 grid place-items-center">
-
-                                                {/* <div className="inline-block"> */}
-                                                {dividedArrays.map((item, index) => (
-                                                    <div
-                                                        // id={item}
-                                                        key={index}
-                                                        className='flex mt-3'
-                                                    // style={{marginLeft: `${(35 - (index * 5))}px`}}
-                                                    // style={{marginLeft: `${15 - (index * 5)}px`}}
-                                                    >
-                                                        {item}
-                                                    </div>
-                                                ))}
-                                                {/* {dividedArrays.map((row, rowIndex) => (
-                                                    <div key={rowIndex} className="flex">
-                                                    {row.map((cell, colIndex) => (
-                                                        <div key={colIndex} >
-                                                        {cell}
-                                                        </div>
-                                                    ))}
-                                                    </div>
-                                                ))} */}
-                                                {/* </div> */}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        pivot element = {array[pivotEle]}, {pivotEle}, {leftEle}, {rightEle}
-                                        {/* {subArrayInfo.map((item, index) => (
-                                        <div
-                                            // id={item}
-                                            key={index}
-                                            // className='flex'
-                                            // style={{marginLeft: `${(29 - (index * 4))}px`}}
-                                        >
-                                            index-{index} {item.left}{item.right} {queue} {queuePointer}
-                                        </div>
-                                    ))} */}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='p-1 text-white md:font-bold text-xs md:text-base bg-cyan-800 rounded-r-md'>
-                                <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p><p>I</p><p>Z</p><p>E</p><p>D</p><p>S</p><p>A</p>
-                            </div>
-                        </div>
-                        <div className='flex flex-wrap justify-between'>
-                            <div className=''>
-                                <input
-                                    type="number"
-                                    value={element}
-                                    onChange={(e) => setElement(e.target.value)}
-                                    className="md:p-2 p-1 h-fit w-36p rounded-l-md shadow-inner"
-                                    style={{ border: `${emptyElement ? '2px solid red' : '1px solid #d1d5db'}` }}
-                                    placeholder="Enter element"
-                                />
-                                <button
-                                    onClick={arrayPushOperation}
-                                    className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
-                                >
-                                    Push
-                                </button>
-                                <button
-                                    onClick={() => { arrayPopOperation() }}
-                                    className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit"
-                                >
-                                    Pop
-                                </button>
-                                <button
-                                    onClick={removeByEle}
-                                    className="bg-cyan-600 hover:bg-cyan-700 text-white lg:font-bold transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl md:p-2 p-1 h-fit rounded-r-md"
-                                >
-                                    delete by element
-                                </button>
-                            </div>
-
-                            <button
-                                onClick={removeArray}
-                                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
-                            >
-                                delete array
-                            </button>
-                        </div>
-
+            <div className="opSection w-full h-fit p-4 mb-4">
+                <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+                    <h2 className="text-base sm:text-lg md:text-xl font-semibold text-ink">Quick Sort</h2>
+                    <div className="flex gap-4 text-xs sm:text-sm text-secondary">
+                        <span>Pass <b className="text-accent font-semibold">{iterations}</b></span>
+                        <span>Comparisons <b className="text-accent font-semibold">{comparisons}</b></span>
                     </div>
-                    {/* <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
-                    <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
+                </div>
+
+                <div className="flex flex-wrap justify-between gap-y-2 mb-4 w-full sm:text-base text-sm">
+                    <button onClick={createArray} className="opBtn btnAnimate rounded-md">
+                        Create New array
+                    </button>
+                    <button onClick={runQuickSort} className="opBtn btnAnimate rounded-md">
+                        Sort
+                    </button>
+                </div>
+
+                <div className='vizCard flex m-2 mx-0 mb-2'>
+                    <div className='w-full p-2 overflow-x-auto'>
+                        {arrExist && array.length > 0 && <p className='md:m-2 font-semibold text-accent'>Array</p>}
+                        <div className="flex flex-col items-start gap-3">
+                            <div className="flex gap-1">{divs}</div>
+                            <div className="flex gap-1">
+                                {array.map((item, index) => (
+                                    <div
+                                        id={item}
+                                        key={index}
+                                        ref={divRefs.current[index]}
+                                        className="cell arrayDiv animate-fadeIn"
+                                        style={{
+                                            ...cellStyle(index),
+                                            animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`,
+                                            animationFillMode: 'both',
+                                        }}
+                                    >
+                                        {item}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                {dividedArrays.map((row, index) => (
+                                    <div key={index} className='flex gap-1'>{row}</div>
+                                ))}
+                            </div>
+                        </div>
+                        <p className="text-sm text-secondary mt-3">
+                            Pivot = <b className="text-ink">{array[pivotEle]}</b>
+                        </p>
+                    </div>
+                    <div className='visualTag'>
                         <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
                     </div>
-                </div> */}
                 </div>
-                <TopicCard topicName="Real-life Use (Quick Sort)" />
+
+                <StateLegend items={[
+                    { token: 'pivot', label: 'Pivot' },
+                    { token: 'comparing', label: 'Scanning' },
+                    { token: 'swapping', label: 'Swapping' },
+                ]} />
+
+                <div className='flex flex-wrap justify-between gap-y-1'>
+                    <div>
+                        <input
+                            type="number"
+                            value={element}
+                            onChange={(e) => setElement(e.target.value)}
+                            className="opInput w-36p rounded-l-md"
+                            placeholder="Enter element"
+                        />
+                        <button onClick={arrayPushOperation} className="opBtn btnAnimate">Push</button>
+                        <button onClick={arrayPopOperation} className="opBtn btnAnimate">Pop</button>
+                        <button onClick={removeByEle} className="opBtn btnAnimate rounded-r-md">Delete by element</button>
+                    </div>
+                    <button onClick={removeArray} className="opBtn-danger btnAnimate">Delete array</button>
+                </div>
             </div>
-            {/* Overlay with "Coming Soon" message */}
-            <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
-                <div className="bg-white dark:bg-gray-800 p-8 rounded-md text-center shadow-lg m-6">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Coming Soon</h2>
-                    <p className="text-lg text-gray-600 dark:text-gray-100 mt-2">This page is still under construction. Stay tuned!</p>
+
+            <TopicCard topicName="Real-life Use (Quick Sort)" />
+
+            {/* Overlay — algorithm walkthrough still in progress */}
+            <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center z-50" style={{ background: 'rgb(0 0 0 / 0.5)' }}>
+                <div className="vizCard text-center shadow-lg m-6 p-8 max-w-sm">
+                    <h2 className="text-xl font-semibold text-ink">Coming Soon</h2>
+                    <p className="text-sm text-secondary mt-2">This visualizer is still under construction. Stay tuned!</p>
                     <button
                         onClick={() => { navigate("/") }}
-                        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                        className="opBtn btnAnimate rounded-md mt-6"
                     >
                         Return to Homepage
                     </button>

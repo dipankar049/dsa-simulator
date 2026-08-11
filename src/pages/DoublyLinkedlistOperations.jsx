@@ -1,5 +1,6 @@
 import React, { useContext } from 'react'
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
+import { DetailsStateContext } from '../context/DetailsContext';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,8 +13,13 @@ export default function DoublyLinkedlistOperations() {
   const [listExist, setListExist] = useState(true);
   const [customIdx, setCustomIdx] = useState('');
   const { theme } = useContext(ThemeContext);
+  const { detailsState, updateState } = useContext(DetailsStateContext);
 
   const divRefs = useRef([]);
+
+  const handleToggle = (id, isOpen) => {
+    updateState(id, isOpen);
+  };
 
   const createList = () => {
     setList(Array(0).fill('Null'));
@@ -49,8 +55,6 @@ export default function DoublyLinkedlistOperations() {
     if (element === '') {
       toast.error("Please enter an element");
       return;
-    } else {
-
     }
     if (customIdx == '' || customIdx < 0 || customIdx >= list.length) {
       toast.error(`Please enter an index between 0 and ${list.length - 1}.`);
@@ -61,11 +65,10 @@ export default function DoublyLinkedlistOperations() {
         return;
       } else {
         setList(prevArray => {
-          // Create a new list with the element inserted at the specified index
           const newArray = [
-            ...prevArray.slice(0, customIdx), // Elements before the index
-            element,                    // New element
-            ...prevArray.slice(customIdx)      // Elements from the index onward
+            ...prevArray.slice(0, customIdx),
+            element,
+            ...prevArray.slice(customIdx)
           ];
           return newArray;
         });
@@ -98,8 +101,8 @@ export default function DoublyLinkedlistOperations() {
       return;
     }
     setList(prevArray => [
-      ...prevArray.slice(0, customIdx), // Elements before the index
-      ...prevArray.slice(customIdx + 1)  // Elements after the index
+      ...prevArray.slice(0, customIdx),
+      ...prevArray.slice(customIdx + 1)
     ]);
     toast.success(`Element deleted from index ${customIdx}`);
   };
@@ -130,7 +133,6 @@ export default function DoublyLinkedlistOperations() {
     toast.success("List deleted successfuly");
   }
 
-
   return (
     <div>
       <Helmet>
@@ -139,16 +141,21 @@ export default function DoublyLinkedlistOperations() {
         <meta name="keywords" content="linked list simulator, doubly linked list animation, node traversal tool, pointer visualization" />
       </Helmet>
       <TopicCard topicName="Doubly Linked List" />
-      <div className={`${theme === 'light' ? 'bg-gradient-to-tr from-emerald-100' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
-        <div className='w-full mb-2'>
-          <h1 className="sm:mb-2 text-base sm:text-lg md:text-xl font-bold">Doubly Linkedlist oprations</h1>
-          <div className="flex justify-between mb-4 pt-2 w-full">
+      <details
+        className="opSection w-full h-fit p-4 mb-4"
+        id='doublyLinkedListOp'
+        onToggle={(e) => { handleToggle('doublyLinkedListOp', e.target.open) }}
+        open={detailsState['doublyLinkedListOp'] !== undefined ? detailsState['doublyLinkedListOp'] : true}
+      >
+        <summary className="sm:mb-2 text-base sm:text-lg md:text-xl font-semibold text-ink cursor-pointer">Doubly Linked List Operations</summary>
+        <div className='w-full mb-2 pt-2'>
+          <div className="flex flex-wrap justify-between gap-y-2 mb-4 w-full sm:text-base text-sm">
             <div className='mr-2'>
               <button
                 onClick={createList}
-                className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate rounded-r-md md:p-2 p-1"
+                className="opBtn btnAnimate rounded-md"
               >
-                Create Linkedlist
+                Create Linked List
               </button>
             </div>
             <div className='flex flex-wrap justify-end'>
@@ -161,111 +168,91 @@ export default function DoublyLinkedlistOperations() {
               />
               <button
                 onClick={listAppend}
-                className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate h-fit"
+                className="opBtn btnAnimate"
               >
                 Insert at end
               </button>
               <button
                 onClick={removeFromEnd}
-                className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate h-fit rounded-r-md"
+                className="opBtn btnAnimate rounded-r-md"
               >
-                delete from end
+                Delete from end
               </button>
             </div>
-
           </div>
-          <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md shadow-xl'>
+
+          <div className='vizCard flex m-2 mx-0 mb-6'>
             <div className='w-full p-2 overflow-x-auto'>
-              <p className='m-2 font-bold'>{listExist ? 'Linkedlist' : ''}</p>
-              <div className="flex xl:ml-2"
-                style={{
-                  animationDelay: '0.2s', // Stagger the delay by 0.2s per item
-                  animationFillMode: 'both' // Ensures the element stays visible after the animation ends
-                }}
-              >
+              {listExist && <p className='md:m-2 font-semibold text-accent'>Linked List</p>}
+              <div className="flex flex-wrap items-center gap-y-3 xl:ml-2 p-2">
+                {list.length === 0 && (
+                  <span className='font-medium' style={{ color: 'rgb(var(--color-text-muted))' }}>NULL ⮜──➤ Head ──➤ NULL</span>
+                )}
                 {list.map((item, index) => (
-                  <div key={index} className='flex'>
-                    <div
-                      id={item}
-                      key={index}
-                      ref={divRefs.current[index]}
-                      className="flex justify-center rounded-l-sm text-black border border-black bg-green-300 flex-shrink-0 md:px-4 p-2 md:py-2 py-1 mt-2 animate-fadeIn"
-                    //   style={{ transform: `translateX(${index * 10}px)`, transition: 'transform 0.3s' }}
-                    >
-                      {item}
-                    </div>
-                    <div 
-                      className='flex justify-center rounded-r-sm text-black md:font-bold text-2xl border border-black bg-green-300 flex-shrink-0 md:px-2 px-1 md:py-1 py-0 mt-2 animate-fadeIn'
-                    >*</div>
-                    <div className='animate-fadeIn'
-                      style={{
-                        animationDelay: '0.2s', // Stagger the delay by 0.2s per item
-                        animationFillMode: 'both' // Ensures the element stays visible after the animation ends
-                      }}
-                    >
-                      <div className='flex'>
-                        <p className='mt-1'>──➤</p>
+                  <div key={index} className='flex items-center animate-fadeIn' style={{ animationDelay: `${index * 0.15}s`, animationFillMode: 'both' }}>
+                    {index === 0 && (
+                      <span className='mr-2 font-medium' style={{ color: 'rgb(var(--color-text-muted))' }}>NULL</span>
+                    )}
+                    <div className='flex flex-col items-center'>
+                      <span className='text-xs mb-0.5' style={{ color: 'rgb(var(--color-text-secondary))' }}>⮜──</span>
+                      <div
+                        id={item}
+                        ref={divRefs.current[index]}
+                        className="cell flex justify-center items-center flex-shrink-0 md:px-4 p-2 md:py-2 py-1 rounded-md"
+                      >
+                        {item}
                       </div>
-                      <div className='flex'>
-                        <p>⮜──</p>
-                      </div>
+                      <span className='text-xs mt-0.5' style={{ color: 'rgb(var(--color-text-secondary))' }}>──➤</span>
                     </div>
-                    <p className='mt-3 md:mt-4 ml-1 animate-fadeIn'
-                      style={{
-                        animationDelay: '0.2s', // Stagger the delay by 0.2s per item
-                        animationFillMode: 'both' // Ensures the element stays visible after the animation ends
-                      }}
-                    >{index == list.length - 1 ? 'Null' : ''}</p>
+                    {index === list.length - 1 && (
+                      <span className='ml-2 font-medium' style={{ color: 'rgb(var(--color-text-muted))' }}>NULL</span>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
-            <div className='p-1 text-white md:font-bold text-xs md:text-base bg-emerald-800 rounded-r-md'>
+            <div className='visualTag'>
               <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
             </div>
           </div>
-          <div className='flex flex-wrap justify-between'>
+
+          <div className='flex flex-wrap justify-between gap-y-1'>
             <div>
               <input
                 type="number"
                 value={customIdx}
                 onChange={(e) => setCustomIdx(parseInt(e.target.value))}
-                className="opInput h-fit w-48p"
+                className="opInput w-48p"
                 placeholder="Enter index"
               />
               <button
                 onClick={insertInList}
-                className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate md:m-0 my-1 h-fit rounded-r-md"
+                className="opBtn btnAnimate rounded-r-md"
               >
                 Insert
               </button>
             </div>
             <button
               onClick={removeItemAtIndex}
-              className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate md:m-0 my-1 h-fit rounded-md"
+              className="opBtn btnAnimate rounded-md"
             >
-              delete by index
+              Delete by index
             </button>
             <button
               onClick={removeByEle}
-              className="bg-emerald-600 hover:bg-emerald-700 opBtn btnAnimate md:m-0 my-1 h-fit rounded-md"
+              className="opBtn btnAnimate rounded-md"
             >
-              delete by element
+              Delete by element
             </button>
             <button
               onClick={removeList}
-              className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 xl:m-0 mt-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+              className="opBtn-danger btnAnimate"
             >
-              delete Linkedlist
+              Delete Linked List
             </button>
           </div>
         </div>
-        {/* <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
-          <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
-            <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
-          </div>
-        </div> */}
-      </div>
+      </details>
       <TopicCard topicName="Real-life Use (Doubly Linked List)" />
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
+import { DetailsStateContext } from '../context/DetailsContext';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import { ThemeContext } from '../context/ThemeContext';
@@ -10,7 +11,6 @@ const LinearSearch = () => {
     const [arrExist, setArrExist] = useState(true);
     const [isEqual, setIsEqual] = useState(false);
     const [searchEle, setSearchEle] = useState('');
-    // const [searchEle2, setSearchEle2] = useState(0);
     const [idx, setIdx] = useState(0);
     const abortRef = useRef(false);
     const [isRunning, setIsRunning] = useState(false);
@@ -20,6 +20,11 @@ const LinearSearch = () => {
     const [arrayLength, setArrayLength] = useState('');
     const [customIdx, setCustomIdx] = useState('');
     const { theme } = useContext(ThemeContext);
+    const { detailsState, updateState } = useContext(DetailsStateContext);
+
+    const handleToggle = (id, isOpen) => {
+        updateState(id, isOpen);
+    };
 
     const [divs, setDivs] = useState([]);
 
@@ -84,12 +89,10 @@ const LinearSearch = () => {
     }
 
     useEffect(() => {
-        // if(idx > 0) controller.abort;
         setIsFound('');
         setIdx(0);
         setIsEqual(false);
         setIsVisible(false);
-        // LinSearch();
     }, [array, searchEle, abortRef.current]);
 
     useEffect(() => {
@@ -99,17 +102,15 @@ const LinearSearch = () => {
                 <div
                     key={i}
                     className="flex items-center justify-center flex-shrink-0 lg:w-14 md:12 w-10"
-                // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
                 >
                     {i}
                 </div>
             );
         }
-        setDivs(newDivs); // Update the state with new divs
+        setDivs(newDivs);
     }, [array]);
 
     const createArray = async () => {
-        //  validation of input value of array length
         if (arrayLength === '' || parseInt(arrayLength) <= 0) {
             toast.error("Array length must be greater than 0.");
             return;
@@ -131,7 +132,6 @@ const LinearSearch = () => {
             return;
         }
 
-        // Validation of element and index
         if (element === '' && customIdx === '') {
             toast.error("Please enter both element and index.");
             return;
@@ -155,17 +155,16 @@ const LinearSearch = () => {
             let newArray = [...array];
             while (temp > 0) {
                 if (temp === 1) {
-                    newArray = [...newArray, Number(element)]; // Add element to newArray
+                    newArray = [...newArray, Number(element)];
                     temp--;
                 } else {
-                    newArray = [...newArray, 'NULL']; // Add 'Null' to newArray
+                    newArray = [...newArray, 'NULL'];
                     temp--;
                 }
             }
             setArray(newArray);
         } else {
             setArray(prevArray =>
-
                 prevArray.map((item, i) => (i === parseInt(customIdx) ? Number(element) : item))
             );
         }
@@ -214,10 +213,9 @@ const LinearSearch = () => {
         setEmptyElement(false);
         if (!array.includes(Number(element))) {
             toast.error("Element not found.");
-            return; // Return the array unchanged
+            return;
         }
 
-        // Replace the matching element with 'NULL' in the array
         setArray(prevArray => {
             return prevArray.map((item) => (item === Number(element) ? 'NULL' : item));
         });
@@ -248,10 +246,15 @@ const LinearSearch = () => {
                 <meta name="keywords" content="linear search animation, sequential search tool, linear search visualizer" />
             </Helmet>
             <TopicCard topicName="Linear Search" />
-            <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-indigo-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
-                <div className='w-full mb-2'>
-                    <h1 className="sm:mb-2 text-base sm:text-lg md:text-xl font-bold">Linear Search</h1>
-                    <div className="flex justify-between mb-4 pt-2 w-full">
+            <details
+                className="opSection w-full h-fit p-4 mb-4"
+                id='linearSearchOp'
+                onToggle={(e) => { handleToggle('linearSearchOp', e.target.open) }}
+                open={detailsState['linearSearchOp'] !== undefined ? detailsState['linearSearchOp'] : true}
+            >
+                <summary className="sm:mb-2 text-base sm:text-lg md:text-xl font-semibold text-ink cursor-pointer">Linear Search</summary>
+                <div className='w-full mb-2 pt-2'>
+                    <div className="flex flex-wrap justify-between gap-y-2 mb-4 w-full sm:text-base text-sm">
                         <div className='mr-2'>
                             <input
                                 name='arrayLength'
@@ -265,7 +268,7 @@ const LinearSearch = () => {
                             />
                             <button
                                 onClick={createArray}
-                                className="bg-indigo-500 hover:bg-indigo-600 opBtn btnAnimate rounded-r-md"
+                                className="opBtn btnAnimate rounded-r-md"
                                 disabled={isRunning}
                             >
                                 Create New array
@@ -282,86 +285,90 @@ const LinearSearch = () => {
                             />
                             {isRunning ? (<button
                                 onClick={() => abortRef.current = true}
-                                className="bg-red-500 hover:bg-red-600 opBtn btnAnimate rounded-r-md"
+                                className="opBtn-danger btnAnimate rounded-r-md"
                             >
                                 Abort Search
                             </button>)
                                 : (<button
                                     onClick={LinSearch}
-                                    className="bg-indigo-500 hover:bg-indigo-600 opBtn btnAnimate rounded-r-md"
+                                    className="opBtn btnAnimate rounded-r-md"
                                 >
                                     Search
                                 </button>)
                             }
                         </div>
                     </div>
-                    <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md shadow-xl'>
 
-                        <div className='w-full p-2'>
-                            {arrExist && <p className='m-2 font-bold text-indigo-700 dark:text-indigo-200'>Array</p>}
-                            <div className=''>
-                                <div className='w-full p-2 overflow-x-auto'>
-                                    <div
-                                        className={`grid grid-rows-3 w-fit`}
-                                        style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
-                                    >
-                                        {/* ------------------------------- highlighted index divs ------------------------------- */}
-                                        {array.map((item, index) => (
-                                            <div
-                                                key={index}
+                    <div className='vizCard flex m-2 mx-0 mb-6'>
+                        <div className='w-full p-2 overflow-x-auto'>
+                            {arrExist && <p className='md:m-2 font-semibold text-accent'>Array</p>}
+                            <div className='w-full p-2 overflow-x-auto'>
+                                <div
+                                    className={`grid grid-rows-3 w-fit`}
+                                    style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
+                                >
+                                    {/* ------------------------------- highlighted search value row ------------------------------- */}
+                                    {array.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className='arrayDiv font-semibold'
+                                            style={{ color: isEqual ? `rgb(var(--color-sorted))` : `rgb(var(--color-frontier))` }}
+                                        >
+                                            {`${index === idx ? searchEle : ''}`}
+                                        </div>
+                                    ))}
 
-                                                className='arrayDiv'
-                                                style={{ color: `${isEqual ? 'red' : 'blue'}`, }}
-                                            >
-                                                {`${index === idx ? searchEle : ''}`}
-                                            </div>
-                                        ))}
+                                    {/* ------------------------------- index divs ------------------------------- */}
+                                    {array.map((ele, index) =>
+                                        <div key={index} className='arrayDiv'>{index}</div>
+                                    )}
 
-                                        {/* ------------------------------- index divs ------------------------------- */}
-                                        {array.map((ele, index) =>
-                                            <div key={index} className='arrayDiv'>{index}</div>
-                                        )}
-
-                                        {/* ------------------------------- array element divs ------------------------------- */}
-                                        {array.map((item, index) => (
-                                            <div
-                                                id={item}
-                                                key={index}
-                                                ref={divRefs.current[index]}
-                                                className="border border-black bg-indigo-300 arrayDiv animate-fadeIn"
-                                                style={{
-                                                    color: `${index === idx ? (isEqual ? 'red' : 'black') : 'black'}`,
-                                                    fontSize: `${index === idx ? (isEqual ? 'medium' : '') : ''}`,
-                                                    fontWeight: `${index === idx ? 'bold' : ''}`,
-                                                    animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`, // Stagger the delay by 0.2s per item
-                                                    animationFillMode: 'both' // Ensures the element stays visible after the animation ends
-                                                }}
-                                            >
-                                                {item}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                
-                                {/* ------------------------------- comparison ------------------------------- */}
-                                <div className='p-4'>
-                                    <p className='font-bold' style={{ visibility: `${isVisible ? 'visible' : 'hidden'}` }}>
-                                        {searchEle} == Arr[{idx}]({array[idx]})
-                                        <span style={{ color: `${isEqual ? 'red' : 'blue'}` }}>
-                                            {isEqual ? ' ---->Equal' : ' ---->Not Equal'}
-                                        </span>
-                                    </p>
+                                    {/* ------------------------------- array element divs ------------------------------- */}
+                                    {array.map((item, index) => (
+                                        <div
+                                            id={item}
+                                            key={index}
+                                            ref={divRefs.current[index]}
+                                            className="cell arrayDiv animate-fadeIn"
+                                            style={{
+                                                color: index === idx
+                                                    ? (isEqual ? '#fff' : 'rgb(var(--color-text-primary))')
+                                                    : 'rgb(var(--color-text-primary))',
+                                                backgroundColor: index === idx
+                                                    ? (isEqual ? 'rgb(var(--color-sorted))' : 'rgb(var(--color-frontier))')
+                                                    : 'rgb(var(--color-element))',
+                                                borderColor: index === idx
+                                                    ? (isEqual ? 'rgb(var(--color-sorted))' : 'rgb(var(--color-frontier))')
+                                                    : 'rgb(var(--color-element-border))',
+                                                fontWeight: index === idx ? 700 : 500,
+                                                animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`,
+                                                animationFillMode: 'both'
+                                            }}
+                                        >
+                                            {item}
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                            <p className='m-2 font-bold text-green-500'>{isFound}</p>
+
+                            {/* ------------------------------- comparison ------------------------------- */}
+                            <div className='p-4'>
+                                <p className='font-semibold' style={{ visibility: `${isVisible ? 'visible' : 'hidden'}` }}>
+                                    {searchEle} == Arr[{idx}]({array[idx]})
+                                    <span style={{ color: isEqual ? `rgb(var(--color-sorted))` : `rgb(var(--color-frontier))` }}>
+                                        {isEqual ? ' ---->Equal' : ' ---->Not Equal'}
+                                    </span>
+                                </p>
+                            </div>
+                            <p className='md:m-2 font-semibold' style={{ color: 'rgb(var(--color-sorted))' }}>{isFound}</p>
                         </div>
-                        <div className='p-1 text-white md:font-bold text-xs md:text-base bg-indigo-800 rounded-r-md'>
-                            <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p><p>I</p><p>Z</p><p>E</p><p>D</p><p>S</p><p>A</p>
+                        <div className='visualTag'>
+                            <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
                         </div>
                     </div>
 
-                    <div className='flex flex-wrap justify-between'>
-                        <div className=''>
+                    <div className='flex flex-wrap justify-between gap-y-1'>
+                        <div>
                             <input
                                 type="number"
                                 value={element}
@@ -372,24 +379,24 @@ const LinearSearch = () => {
                             />
                             <button
                                 onClick={arrayPushOperation}
-                                className="bg-indigo-500 hover:bg-indigo-600 opBtn btnAnimate"
+                                className="opBtn btnAnimate"
                                 disabled={isRunning}
                             >
                                 Push
                             </button>
                             <button
                                 onClick={() => { arrayPopOperation() }}
-                                className="bg-indigo-500 hover:bg-indigo-600 opBtn btnAnimate"
+                                className="opBtn btnAnimate"
                                 disabled={isRunning}
                             >
                                 Pop
                             </button>
                             <button
                                 onClick={removeByEle}
-                                className="bg-indigo-500 hover:bg-indigo-600 opBtn btnAnimate rounded-r-md"
+                                className="opBtn btnAnimate rounded-r-md"
                                 disabled={isRunning}
                             >
-                                delete by element
+                                Delete by element
                             </button>
                         </div>
                         <div>
@@ -399,27 +406,27 @@ const LinearSearch = () => {
                                 min={0}
                                 value={customIdx}
                                 onChange={(e) => { setCustomIdx(e.target.value) }}
-                                className="opInput w-36p shadow-inner"
+                                className="opInput w-36p"
                                 placeholder="Enter index"
                                 disabled={isRunning}
                             />
                             <button
                                 onClick={arrayInsert}
-                                className="bg-indigo-500 hover:bg-indigo-600 rounded-r-md opBtn btnAnimate"
+                                className="opBtn btnAnimate rounded-r-md"
                                 disabled={isRunning}>
                                 Insert
                             </button>
                         </div>
                         <button
                             onClick={removeArray}
-                            className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                            className="opBtn-danger btnAnimate"
                             disabled={isRunning}
                         >
-                            delete array
+                            Delete array
                         </button>
                     </div>
                 </div>
-            </div>
+            </details>
             <TopicCard topicName="Real-life Use (Linear Search)" />
         </div>
     );

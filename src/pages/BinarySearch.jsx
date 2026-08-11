@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
+import { DetailsStateContext } from '../context/DetailsContext';
 import TopicCard from '../components/TopicCard';
 import { toast } from 'react-toastify';
 import { ThemeContext } from '../context/ThemeContext';
@@ -23,6 +24,11 @@ const BinarySearch = () => {
     const [arrayLength, setArrayLength] = useState('');
     const [customIdx, setCustomIdx] = useState('');
     const { theme } = useContext(ThemeContext);
+    const { detailsState, updateState } = useContext(DetailsStateContext);
+
+    const handleToggle = (id, isOpen) => {
+        updateState(id, isOpen);
+    };
 
     const [divs, setDivs] = useState([]);
 
@@ -34,11 +40,11 @@ const BinarySearch = () => {
 
     useEffect(() => {
         setEmptyElement(false);
-    },[element]);
+    }, [element]);
 
     useEffect(() => {
         setEmptySearchElement(false);
-    },[searchEle]);
+    }, [searchEle]);
 
     const binSearch = async () => {
         if (!arrExist) {
@@ -84,11 +90,8 @@ const BinarySearch = () => {
                 currentLow = midValue + 1;
             }
 
-            // Update the state after each iteration
             setLow(currentLow);
             setHigh(currentHigh);
-            // setIsEqual(localIsEqual);
-            // setIterations(iterations + 1);
         }
         if (localIsEqual) {
             toast.info("Element found");
@@ -104,7 +107,6 @@ const BinarySearch = () => {
         if (array.length == 0) {
             setIsVisible(false);
             setHigh(0);
-
         } else {
             setIsVisible(true);
             setHigh(array.length - 1);
@@ -123,31 +125,28 @@ const BinarySearch = () => {
                 <div
                     key={i}
                     className="flex items-center justify-center flex-shrink-0 lg:w-14 md:12 w-10"
-                // style={{ paddingLeft: `${idxSpace[i]}px`, paddingRight: `${idxSpace[i]}px` }}
                 >
                     {i}
                 </div>
             );
         }
-        setDivs(newDivs); // Update the state with new divs
+        setDivs(newDivs);
     }, [array]);
 
     const createArray = async () => {
-            //  validation of input value of array length
-            if (arrayLength === '' || parseInt(arrayLength) <= 0) {
-                toast.error("Array length must be greater than 0.");
-                return;
-            }
-    
-            await delay(200);
-            setOldArray(false);
-            setArray([]);
-            setArrExist(true);
-            await delay(500);
-            setArray(Array(parseInt(arrayLength)).fill('NULL'));
-            toast.success("Array created successfully", { position: 'top-center' });
-        };
-    
+        if (arrayLength === '' || parseInt(arrayLength) <= 0) {
+            toast.error("Array length must be greater than 0.");
+            return;
+        }
+
+        await delay(200);
+        setOldArray(false);
+        setArray([]);
+        setArrExist(true);
+        await delay(500);
+        setArray(Array(parseInt(arrayLength)).fill('NULL'));
+        toast.success("Array created successfully", { position: 'top-center' });
+    };
 
     //  Insert element to array
     const arrayInsert = async () => {
@@ -156,7 +155,6 @@ const BinarySearch = () => {
             return;
         }
 
-        // Validation of element and index
         if (element === '' && customIdx === '') {
             toast.error("Please enter both element and index.");
             return;
@@ -173,22 +171,22 @@ const BinarySearch = () => {
             return;
         }
 
-        if (parseInt(customIdx) !== 0 && parseInt(element) < array[parseInt(customIdx) - 1]) {  // check if inserted element is less than previous element
+        if (parseInt(customIdx) !== 0 && parseInt(element) < array[parseInt(customIdx) - 1]) {
             toast.info(`Value should be greater than or equal to ${array[parseInt(customIdx) - 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
                 autoClose: 12000
-              });              
+            });
             return;
-        } else if ((parseInt(customIdx) !== 0 && (parseInt(customIdx) !== array.length - 1)) && parseInt(element) > array[parseInt(customIdx) + 1]) {  // check if inserted element is greater than next element
+        } else if ((parseInt(customIdx) !== 0 && (parseInt(customIdx) !== array.length - 1)) && parseInt(element) > array[parseInt(customIdx) + 1]) {
             toast.info(`Value should be less than or equal to ${array[parseInt(customIdx) + 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
                 autoClose: 12000
-              });              
+            });
             return;
-        } else if(parseInt(customIdx) === 0 && parseInt(element) > array[1]) {
+        } else if (parseInt(customIdx) === 0 && parseInt(element) > array[1]) {
             toast.info(`Value should be less than or equal to ${array[1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
                 autoClose: 12000
             });
             return;
-        }    
+        }
 
         await delay(1000);
 
@@ -197,17 +195,16 @@ const BinarySearch = () => {
             let newArray = [...array];
             while (temp > 0) {
                 if (temp === 1) {
-                    newArray = [...newArray, parseInt(element)]; // Add element to newArray
+                    newArray = [...newArray, parseInt(element)];
                     temp--;
                 } else {
-                    newArray = [...newArray, 'NULL']; // Add 'Null' to newArray
+                    newArray = [...newArray, 'NULL'];
                     temp--;
                 }
             }
             setArray(newArray);
         } else {
             setArray(prevArray =>
-
                 prevArray.map((item, i) => (i === parseInt(customIdx) ? parseInt(element) : item))
             );
         }
@@ -226,12 +223,12 @@ const BinarySearch = () => {
             toast.error("Please enter an element");
             return;
         }
-        if (array.length !== 0 && parseInt(element) < array[array.length - 1]) {    // check if pushed element is less than last element
+        if (array.length !== 0 && parseInt(element) < array[array.length - 1]) {
             toast.info(`Value should be greater than or equal to ${array[array.length - 1]} to maintain ascending order, as Binary Search works only on sorted arrays`, {
                 autoClose: 12000
-              });              
+            });
             return;
-        }        
+        }
         setEmptyElement(false);
         setOldArray(true);
         setArray([...array, parseInt(element)]);
@@ -262,10 +259,9 @@ const BinarySearch = () => {
         setEmptyElement(false);
         if (!array.includes(parseInt(element))) {
             toast.error("Element not found.");
-            return; // Return the array unchanged
+            return;
         }
 
-        // Replace the matching element with 'NULL' in the array
         setArray(prevArray => {
             return prevArray.map((item) => (item === parseInt(element) ? 'NULL' : item));
         });
@@ -296,25 +292,29 @@ const BinarySearch = () => {
                 <meta name="keywords" content="binary search visualizer, log n algorithm simulation, sorted array search tool" />
             </Helmet>
             <TopicCard topicName="Binary Search" />
-            <div className={`${theme === 'light' ? 'bg-gradient-to-tl from-purple-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`}>
-                <div className='w-full mb-2'>
-                    <h1 className="sm:mb-2 text-base sm:text-lg md:text-xl font-bold">Binary Search</h1>
-                    <div className="flex justify-between mb-4 pt-2 w-full sm:text-base text-sm">
-                        <div className=''>
-                        <input
+            <details
+                className="opSection w-full h-fit p-4 mb-4"
+                id='binarySearchOp'
+                onToggle={(e) => { handleToggle('binarySearchOp', e.target.open) }}
+                open={detailsState['binarySearchOp'] !== undefined ? detailsState['binarySearchOp'] : true}
+            >
+                <summary className="sm:mb-2 text-base sm:text-lg md:text-xl font-semibold text-ink cursor-pointer">Binary Search</summary>
+                <div className='w-full mb-2 pt-2'>
+                    <div className="flex flex-wrap justify-between gap-y-2 mb-4 w-full sm:text-base text-sm">
+                        <div>
+                            <input
                                 name='arrayLength'
                                 min={1}
                                 type="number"
                                 value={arrayLength}
                                 onChange={(e) => { setArrayLength(e.target.value) }}
                                 className="opInput w-44p rounded-l-md"
-                                // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
                                 placeholder="Length"
                                 disabled={isRunning}
                             />
                             <button
                                 onClick={createArray}
-                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate rounded-r-md"
+                                className="opBtn btnAnimate rounded-r-md"
                                 disabled={isRunning}
                             >
                                 Create New array
@@ -331,93 +331,103 @@ const BinarySearch = () => {
                             />
                             {isRunning ? (<button
                                 onClick={() => abortRef.current = true}
-                                className="bg-red-500 hover:bg-red-600 opBtn btnAnimate rounded-r-md"
+                                className="opBtn-danger btnAnimate rounded-r-md"
                             >
                                 Abort Search
                             </button>)
-                            : (<button
-                                onClick={binSearch}
-                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate rounded-r-md"
-                            >
-                                Search
-                            </button>)}
+                                : (<button
+                                    onClick={binSearch}
+                                    className="opBtn btnAnimate rounded-r-md"
+                                >
+                                    Search
+                                </button>)}
                         </div>
                     </div>
-                    <div className='flex m-2 mx-0 mr-4 sm:mr-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md shadow-xl'>
-                        <div className='w-full p-2'>
-                            <div>
-                                <div className='flex justify-between'>
-                                    <p className='pl-4 font-bold'>Search element = {searchEle}</p>
-                                    <p className='font-bold'>Iterations = {iterations}</p>
-                                </div>
-                                <div className='flex justify-between'>
-                                    <p className='m-2 font-bold text-purple-700 dark:text-purple-300'>{arrExist ? 'Array' : ''}</p>
-                                    <p className='m-2 font-bold text-purple-700 dark:text-purple-300'>{"Mid = left + ( high - left) / 2"}</p>
-                                </div>
-                                <div className='w-full p-2 overflow-x-auto'>
-                                    <div
-                                        className={`grid grid-rows-3 w-fit`}
-                                        style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
-                                    >
-                                        {/* ------------------------------- mid position ------------------------------- */}
-                                        {array.map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className='flex justify-center pb-2 flex-shrink-0 lg:w-14 md:12 w-10'
-                                                style={{ color: `${isEqual ? 'red' : 'blue'}`, }}
-                                            >
-                                                {`${index === mid ? (isMidVisible ? 'Mid' : '') : ''}`}
-                                            </div>
-                                        ))}
 
-                                        {/* ------------------------------- left-right position ------------------------------- */}
-                                        {array.map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className='flex text-purple-900 dark:text-purple-300 justify-center items-center flex-shrink-0 lg:w-14 md:12 w-10'
-                                            >
-                                                {`${index === low ? 'Low' : (index === high ? 'High' : '')}`}
-                                            </div>
-                                        ))}
-
-                                        {/* ------------------------------- index divs ------------------------------- */}
-                                        {array.map((ele, index) =>
-                                            <div key={index} className='arrayDiv'>{index}</div>
-                                        )}
-
-                                        {/* ------------------------------- array element divs ------------------------------- */}
-                                        {array.map((item, index) => (
-                                            <div
-                                                id={item}
-                                                key={index}
-                                                ref={divRefs.current[index]}
-                                                className="border border-black bg-purple-300 arrayDiv animate-fadeIn"
-                                                style={{
-                                                    color: `${index === mid ? (isEqual ? 'red' : 'black') : 'black'}`,
-                                                    fontWeight: `${index === mid ? 'bold' : ''}`,
-                                                    animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`, // Stagger the delay by 0.2s per item
-                                                    animationFillMode: 'both' // Ensures the element stays visible after the animation ends
-                                                }}
-                                            >
-                                                {item}
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <p className='m-2 font-bold text-green-500'>{isFound}</p>
-                                </div>
+                    <div className='vizCard flex m-2 mx-0 mb-6'>
+                        <div className='w-full p-2 overflow-x-auto'>
+                            <div className='flex justify-between px-2'>
+                                <p className='font-semibold' style={{ color: 'rgb(var(--color-text-secondary))' }}>Search element = {searchEle}</p>
+                                <p className='font-semibold' style={{ color: 'rgb(var(--color-text-secondary))' }}>Iterations = {iterations}</p>
                             </div>
-                            <div className='p-4 font-bold' style={{ visibility: `${isVisible ? 'visible' : 'hidden'}` }}>
+                            <div className='flex justify-between px-2'>
+                                <p className='md:m-2 font-semibold text-accent'>{arrExist ? 'Array' : ''}</p>
+                                <p className='md:m-2 font-medium' style={{ color: 'rgb(var(--color-text-secondary))' }}>{"Mid = low + (high - low) / 2"}</p>
+                            </div>
+                            <div className='w-full p-2 overflow-x-auto'>
+                                <div
+                                    className={`grid grid-rows-4 w-fit`}
+                                    style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
+                                >
+                                    {/* ------------------------------- mid position ------------------------------- */}
+                                    {array.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className='arrayDiv font-semibold'
+                                            style={{ color: 'rgb(var(--color-pivot))' }}
+                                        >
+                                            {`${index === mid ? (isMidVisible ? 'Mid' : '') : ''}`}
+                                        </div>
+                                    ))}
+
+                                    {/* ------------------------------- low-high position ------------------------------- */}
+                                    {array.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className='arrayDiv font-medium'
+                                            style={{ color: 'rgb(var(--color-frontier))' }}
+                                        >
+                                            {`${index === low ? 'Low' : (index === high ? 'High' : '')}`}
+                                        </div>
+                                    ))}
+
+                                    {/* ------------------------------- index divs ------------------------------- */}
+                                    {array.map((ele, index) =>
+                                        <div key={index} className='arrayDiv'>{index}</div>
+                                    )}
+
+                                    {/* ------------------------------- array element divs ------------------------------- */}
+                                    {array.map((item, index) => (
+                                        <div
+                                            id={item}
+                                            key={index}
+                                            ref={divRefs.current[index]}
+                                            className="cell arrayDiv animate-fadeIn"
+                                            style={{
+                                                color: index === mid
+                                                    ? (isEqual ? '#fff' : 'rgb(var(--color-text-primary))')
+                                                    : 'rgb(var(--color-text-primary))',
+                                                backgroundColor: index === mid
+                                                    ? (isEqual ? 'rgb(var(--color-sorted))' : 'rgb(var(--color-pivot))')
+                                                    : ((index < low || index > high) ? 'rgb(var(--color-bg))' : 'rgb(var(--color-element))'),
+                                                borderColor: index === mid
+                                                    ? (isEqual ? 'rgb(var(--color-sorted))' : 'rgb(var(--color-pivot))')
+                                                    : 'rgb(var(--color-element-border))',
+                                                fontWeight: index === mid ? 700 : 500,
+                                                opacity: (index < low || index > high) ? 0.4 : 1,
+                                                animationDelay: `${(oldArray ? '0.2' : `${index * 0.2}`)}s`,
+                                                animationFillMode: 'both'
+                                            }}
+                                        >
+                                            {item}
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className='md:m-2 font-semibold' style={{ color: 'rgb(var(--color-sorted))' }}>{isFound}</p>
+                            </div>
+                            <div className='p-4 font-semibold' style={{ visibility: `${isVisible ? 'visible' : 'hidden'}`, color: 'rgb(var(--color-text-secondary))' }}>
                                 <span>Low = {low} </span>
                                 <span>{isMidVisible ? `Mid = ${mid}` : ''}  </span>
                                 <span>High = {high}</span>
                             </div>
                         </div>
-                        <div className='p-1 text-white md:font-bold text-xs md:text-base bg-purple-800 rounded-r-md'>
-                            <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p><p>I</p><p>Z</p><p>E</p><p>D</p><p>S</p><p>A</p>
+                        <div className='visualTag'>
+                            <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
                         </div>
                     </div>
-                    <div className='flex flex-wrap justify-between'>
-                        <div className=''>
+
+                    <div className='flex flex-wrap justify-between gap-y-1'>
+                        <div>
                             <input
                                 type="number"
                                 value={element}
@@ -428,24 +438,24 @@ const BinarySearch = () => {
                             />
                             <button
                                 onClick={arrayPushOperation}
-                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate"
+                                className="opBtn btnAnimate"
                                 disabled={isRunning}
                             >
                                 Push
                             </button>
                             <button
                                 onClick={() => { arrayPopOperation() }}
-                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate"
+                                className="opBtn btnAnimate"
                                 disabled={isRunning}
                             >
                                 Pop
                             </button>
                             <button
                                 onClick={removeByEle}
-                                className="bg-purple-500 hover:bg-purple-600 opBtn btnAnimate rounded-r-md"
+                                className="opBtn btnAnimate rounded-r-md"
                                 disabled={isRunning}
                             >
-                                delete by element
+                                Delete by element
                             </button>
                         </div>
                         <div>
@@ -461,7 +471,7 @@ const BinarySearch = () => {
                             />
                             <button
                                 onClick={arrayInsert}
-                                className="bg-purple-500 hover:bg-purple-600 lg:font-bold rounded-r-md opBtn btnAnimate"
+                                className="opBtn btnAnimate rounded-r-md"
                                 disabled={isRunning}
                             >
                                 Insert
@@ -469,15 +479,14 @@ const BinarySearch = () => {
                         </div>
                         <button
                             onClick={removeArray}
-                            className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-102 shadow-xl"
+                            className="opBtn-danger btnAnimate"
                             disabled={isRunning}
                         >
-                            delete array
+                            Delete array
                         </button>
                     </div>
-
                 </div>
-            </div>
+            </details>
             <TopicCard topicName="Real-life Use (Binary Search)" />
         </div>
     );

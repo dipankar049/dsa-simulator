@@ -1,0 +1,59 @@
+/* ==========================================================================
+   DSA Simulator — theme tokens
+   All values are "R G B" triplets (no commas) so Tailwind can apply them as
+   rgb(var(--x) / <alpha-value>) and still support opacity utilities.
+   Flip happens purely via the `.dark` class on <html>, set in ThemeContext.
+   ========================================================================== */
+
+:root {
+    /* surfaces */
+    --color-bg: 250 251 253;
+    --color-surface: 255 255 255;
+    --color-surface-elevated: 255 255 255;
+
+    /* borders */
+    --color-border: 225 229 238;
+    --color-border-strong: 199 206 220;
+
+    /* text */
+    --color-text-primary: 23 27 36;
+    --color-text-secondary: 86 94 117;
+    --color-text-muted: 137 145 168;
+
+    /* brand */
+    --color-accent: 56 84 214;
+
+    /* algorithm element states */
+    --color-element: 231 234 242;
+    --color-element-border: 199 206 220;
+    --color-comparing: 232 163 36;
+    --color-swapping: 225 74 61;
+    --color-sorted: 28 166 114;
+    --color-pivot: 124 79 224;
+    --color-frontier: 229 118 31;
+    --color-visited: 56 84 214;
+}
+
+.dark {
+    --color-bg: 11 14 20;
+    --color-surface: 21 26 35;
+    --color-surface-elevated: 28 34 48;
+
+    --color-border: 35 40 56;
+    --color-border-strong: 46 53 72;
+
+    --color-text-primary: 232 234 240;
+    --color-text-secondary: 154 162 184;
+    --color-text-muted: 98 107 133;
+
+    --color-accent: 91 124 255;
+
+    --color-element: 43 50 68;
+    --color-element-border: 58 67 88;
+    --color-comparing: 255 200 87;
+    --color-swapping: 255 107 93;
+    --color-sorted: 63 221 160;
+    --color-pivot: 184 146 255;
+    --color-frontier: 255 159 90;
+    --color-visited: 91 124 255;
+}

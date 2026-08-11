@@ -15,7 +15,7 @@ export default function DynamicArrayOperations() {
     element: ''
   });
   const [oldArray, setOldArray] = useState(false);
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
 
   const divRefs = useRef([]);
   const indexDivs = IndexDivs(array.length);
@@ -96,25 +96,25 @@ export default function DynamicArrayOperations() {
     await delay(1000);
     setOperationEleVisibility(true);
     await delay(1000);
-      if (parseInt(arrayInputs.customIdx) === array.length) {
-        let temp = parseInt(arrayInputs.customIdx) - array.length + 1;
-        let newArray = [...array];
-        while (temp > 0) {
-          if (temp === 1) {
-            newArray = [...newArray, Number(arrayInputs.element)]; // Add element to newArray
-            temp--;
-          } else {
-            newArray = [...newArray, 'NULL']; // Add 'Null' to newArray
-            temp--;
-          }
+    if (parseInt(arrayInputs.customIdx) === array.length) {
+      let temp = parseInt(arrayInputs.customIdx) - array.length + 1;
+      let newArray = [...array];
+      while (temp > 0) {
+        if (temp === 1) {
+          newArray = [...newArray, Number(arrayInputs.element)]; // Add element to newArray
+          temp--;
+        } else {
+          newArray = [...newArray, 'NULL']; // Add 'Null' to newArray
+          temp--;
         }
-        setArray(newArray);
-      } else {
-        setArray(prevArray =>
-
-          prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? Number(arrayInputs.element) : item))
-        );
       }
+      setArray(newArray);
+    } else {
+      setArray(prevArray =>
+
+        prevArray.map((item, i) => (i === parseInt(arrayInputs.customIdx) ? Number(arrayInputs.element) : item))
+      );
+    }
     toast.success(`"${arrayInputs.element}" inserted at index ${arrayInputs.customIdx}`);
     setOperationIdxVisibility(false);
     setOperationEleVisibility(false);
@@ -196,12 +196,12 @@ export default function DynamicArrayOperations() {
         <meta name="keywords" content="dynamic array simulator, dynamic array visualizer, array data structure tool, memory overflow simulation" />
       </Helmet>
       <TopicCard topicName="Dynamic Array" />
-      <details className={`${theme === 'light' ? 'bg-gradient-to-r from-cyan-200' : 'bg-gray-800'} h-fit w-full p-4 rounded-lg`} open>
-        <summary className="sm:mb-2 text-base sm:text-lg md:text-xl">Dynamic array oprations</summary>
+      <details className="opSection h-fit w-full p-4 mb-4" open>
+        <summary className="sm:mb-2 text-base sm:text-lg md:text-xl font-semibold text-ink cursor-pointer">Dynamic array oprations</summary>
         <div className='md:flex pt-2'>
           <div className='w-full mb-2'>
 
-            <div className="flex justify-between mb-4 w-full sm:text-base text-sm">
+            <div className="flex flex-wrap justify-between gap-y-2 mb-4 w-full sm:text-base text-sm">
               <div className='mr-2'>
                 <input
                   name='arrayLength'
@@ -210,12 +210,11 @@ export default function DynamicArrayOperations() {
                   value={arrayInputs.arrayLength}
                   onChange={handleChange}
                   className="opInput w-44p rounded-l-md"
-                  // style={{border: `${emptyLength ? '2px solid red' : '1px solid #d1d5db'}`}}
                   placeholder="Length"
                 />
                 <button
                   onClick={createArray}
-                  className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-r-md btnAnimate"
+                  className="opBtn btnAnimate rounded-r-md"
                 >
                   Create New array
                 </button>
@@ -227,26 +226,26 @@ export default function DynamicArrayOperations() {
                   value={arrayInputs.element}
                   onChange={handleChange}
                   className="opInput w-36p rounded-l-md"
-                  
+
                   placeholder="Enter element"
                 />
                 <button
                   onClick={arrayPushOperation}
-                  className="bg-cyan-700 hover:bg-cyan-800 opBtn btnAnimate"
+                  className="opBtn btnAnimate"
                 >
                   Push
                 </button>
                 <button
                   onClick={() => { arrayPopOperation() }}
-                  className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-r-md btnAnimate"
+                  className="opBtn btnAnimate rounded-r-md"
                 >
                   Pop
                 </button>
               </div>
             </div>
-            <div className='flex m-2 mx-0 mb-6 bg-white dark:bg-gray-600 dark:text-white border border-gray-300 rounded-md'>
+            <div className='vizCard flex m-2 mx-0 mb-6'>
               <div className='w-full p-2 overflow-x-auto'>
-                {(array.length != 0) && <p className='md:m-2 font-bold text-teal-800 dark:text-teal-200'>Array</p>}
+                {(array.length != 0) && <p className='md:m-2 font-semibold text-accent'>Array</p>}
                 <div
                   className={`grid grid-rows-3 w-fit`}
                   style={{ gridTemplateColumns: `repeat(${array.length || 1}, auto)` }}
@@ -263,10 +262,14 @@ export default function DynamicArrayOperations() {
                       id={item}
                       key={index}
                       ref={divRefs.current[index]}
-                      className="border border-black arrayDiv animate-fadeIn"
+                      className="cell arrayDiv animate-fadeIn"
                       style={{
-                        color: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'red' : 'black') : 'black',
-                        backgroundColor: operationIdxVisibility ? ((index === parseInt(arrayInputs.customIdx)) ? 'white' : '#6ee7b7') : '#6ee7b7',
+                        color: operationIdxVisibility && index === parseInt(arrayInputs.customIdx)
+                          ? '#fff'
+                          : 'rgb(var(--color-text-primary))',
+                        backgroundColor: operationIdxVisibility && index === parseInt(arrayInputs.customIdx)
+                          ? 'rgb(var(--color-frontier))'
+                          : 'rgb(var(--color-element))',
                         animationDelay: `${index * 0.2}s`, // Stagger the delay by 0.2s per item
                       }}
                     >{item}</div>
@@ -277,7 +280,7 @@ export default function DynamicArrayOperations() {
                     <div
                       key={index}
                       ref={divRefs.current[index]}
-                      className={`arrayDiv font-bold text-red-500 dark:text-white`}
+                      className="arrayDiv font-bold text-accent"
                     >
                       <div style={{ display: operationEleVisibility ? 'block' : 'none' }}>
                         {index === parseInt(arrayInputs.customIdx) && arrayInputs.element}
@@ -286,11 +289,11 @@ export default function DynamicArrayOperations() {
                   ))}
                 </div>
               </div>
-              <div className='p-1 text-white md:font-bold text-xs md:text-base bg-cyan-900 rounded-r-md'>
+              <div className='visualTag'>
                 <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
               </div>
             </div>
-            <div className='flex flex-wrap justify-between'>
+            <div className='flex flex-wrap justify-between gap-y-1'>
               <div>
                 <input
                   name='customIdx'
@@ -299,41 +302,36 @@ export default function DynamicArrayOperations() {
                   value={arrayInputs.customIdx}
                   onChange={handleChange}
                   className="opInput w-36p"
-                  
+
                   placeholder="Enter index"
                 />
                 <button
                   onClick={arrayInsert}
-                  className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-r-md btnAnimate"
+                  className="opBtn btnAnimate rounded-r-md"
                 >
                   Insert
                 </button>
               </div>
               <button
                 onClick={removeItemAtIndex}
-                className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-md btnAnimate"
+                className="opBtn btnAnimate rounded-md"
               >
                 delete by index
               </button>
               <button
                 onClick={removeByEle}
-                className="bg-cyan-700 hover:bg-cyan-800 opBtn rounded-md btnAnimate"
+                className="opBtn btnAnimate rounded-md"
               >
                 delete by element
               </button>
               <button
                 onClick={removeArray}
-                className="border sm:border-2 border-red-500 text-red-500 sm:font-bold hover:bg-red-500 hover:text-white md:p-2 p-1 md:m-0 my-1 h-fit rounded-md btnAnimate shadow-xl"
+                className="opBtn-danger btnAnimate"
               >
                 delete array
               </button>
             </div>
           </div>
-          {/* <div className='min-h-full w-full md:w-28p bg-black  md:m-4 md:mr-0 md:ml-2p'>
-            <div className='p-1 text-white md:font-bold text-xs md:text-base md:hidden'>
-                <p>V</p><p>I</p><p>S</p><p>U</p><p>A</p><p>L</p>
-            </div>
-          </div> */}
         </div>
       </details>
       <TopicCard topicName="Real-Life Use(Dynamic Array)" />

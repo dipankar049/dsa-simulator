@@ -7,6 +7,33 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      colors: {
+        bg: 'rgb(var(--color-bg) / <alpha-value>)',
+        surface: {
+          DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
+          elevated: 'rgb(var(--color-surface-elevated) / <alpha-value>)',
+        },
+        border: {
+          DEFAULT: 'rgb(var(--color-border) / <alpha-value>)',
+          strong: 'rgb(var(--color-border-strong) / <alpha-value>)',
+        },
+        ink: {
+          DEFAULT: 'rgb(var(--color-text-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--color-text-secondary) / <alpha-value>)',
+          muted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+        },
+        accent: 'rgb(var(--color-accent) / <alpha-value>)',
+        element: {
+          DEFAULT: 'rgb(var(--color-element) / <alpha-value>)',
+          border: 'rgb(var(--color-element-border) / <alpha-value>)',
+        },
+        comparing: 'rgb(var(--color-comparing) / <alpha-value>)',
+        swapping: 'rgb(var(--color-swapping) / <alpha-value>)',
+        sorted: 'rgb(var(--color-sorted) / <alpha-value>)',
+        pivot: 'rgb(var(--color-pivot) / <alpha-value>)',
+        frontier: 'rgb(var(--color-frontier) / <alpha-value>)',
+        visited: 'rgb(var(--color-visited) / <alpha-value>)',
+      },
       height: {
         '1p': '1%',
         '2p': '2%',
