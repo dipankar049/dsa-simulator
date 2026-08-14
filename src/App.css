@@ -5,17 +5,19 @@
 }
 
 .bg-theme-gradient {
-  background-image: linear-gradient(to bottom right,
-      rgb(var(--color-bg)) 0%,
-      rgb(var(--color-surface)) 50%,
-      rgb(var(--color-bg)) 100%);
+  background:
+    radial-gradient(circle at 0% 0%,
+      rgb(var(--color-accent) / 0.045),
+      transparent 28%),
+    rgb(var(--color-bg));
 }
 
 .dark .bg-theme-gradient {
-  background-image: linear-gradient(to bottom right,
-      rgb(var(--color-bg)),
-      rgb(var(--color-surface-elevated)),
-      rgb(var(--color-bg)));
+  background:
+    radial-gradient(circle at 0% 0%,
+      rgb(var(--color-accent) / 0.08),
+      transparent 32%),
+    rgb(var(--color-bg));
 }
 
 /* ==========================================================================
@@ -64,6 +66,46 @@
 }
 
 .opBtn-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.opBtn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 2.35rem;
+  padding: 0.5rem 0.85rem;
+
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-text-primary));
+
+  border: 1px solid rgb(var(--color-borderStrong));
+  border-radius: 0.45rem;
+
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.opBtn-secondary:hover {
+  background: rgb(var(--color-element));
+  border-color: rgb(var(--color-accent) / 0.45);
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.06);
+}
+
+.opBtn-secondary:active {
+  box-shadow: none;
+}
+
+.opBtn-secondary:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -136,10 +178,8 @@
 
 /* Card wrapper used around every array/list visualization */
 .vizCard {
-  background: rgb(var(--color-surface));
-  border: 1px solid rgb(var(--color-border));
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+  background: rgb(var(--color-bg));
+  border-radius: 0.75rem;
   color: rgb(var(--color-text-primary));
 }
 
@@ -161,10 +201,9 @@
 
 /* Section panel wrapper (replaces the old per-page pastel gradients) */
 .opSection {
-  background: rgb(var(--color-surface-elevated));
+  background: rgb(var(--color-surface));
   border: 1px solid rgb(var(--color-border));
   border-radius: 0.75rem;
-  color: rgb(var(--color-text-primary));
 }
 
 /* Medium to larger screen */
@@ -196,4 +235,93 @@
 
 .divAnimate:hover {
   transform: scale(1.03);
+}
+
+.topicCard {
+  margin: 1rem 0;
+  padding: 1rem 1.25rem;
+
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 0.75rem;
+
+  color: rgb(var(--color-text-primary));
+}
+
+.topicCard-title {
+  color: rgb(var(--color-text-primary));
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.topicCard-content {
+  padding-top: 0.75rem;
+}
+
+.topicCard-description {
+  color: rgb(var(--color-text-primary));
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.topicCard-exampleTitle {
+  margin-top: 1rem;
+
+  color: rgb(var(--color-text-secondary));
+
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.topicCard-code {
+  margin-top: 0.5rem;
+  padding: 0.9rem 1rem;
+
+  background: rgb(var(--color-bg));
+  border: 1px solid rgb(var(--color-border));
+
+  border-radius: 0.5rem;
+
+  color: rgb(var(--color-text-primary));
+
+  font-size: 0.8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 640px) {
+  .topicCard-title {
+    padding: 0.9rem 1rem;
+  }
+
+  .topicCard-content {
+    padding: 0 1rem 1rem;
+  }
+
+  .topicCard-description {
+    font-size: 0.9rem;
+  }
+}
+
+.arrayIndex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 2.5rem;
+
+  color: rgb(var(--color-text-muted));
+
+  font-size: 0.75rem;
+  font-weight: 500;
 }
