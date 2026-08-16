@@ -1,88 +1,52 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 
-/**
- * Central color system for the DSA Simulator.
- *
- * The palette is intentionally calm and educational:
- * - Indigo = primary interaction / focus
- * - Amber = comparison / attention
- * - Red = destructive / swapping
- * - Green = success / completed
- * - Purple = pivot / special element
- * - Orange = active frontier
- *
- * Runtime visualizer components should use useThemeColors()
- * instead of hardcoding colors.
- */
+const CSS_VAR_MAP = {
+    bg: "--color-bg",
+    surface: "--color-surface",
+    surfaceElevated: "--color-surface-elevated",
+    border: "--color-border",
+    borderStrong: "--color-border-strong",
+    textPrimary: "--color-text-primary",
+    textSecondary: "--color-text-secondary",
+    textMuted: "--color-text-muted",
+    accent: "--color-accent",
 
-export const lightColors = {
-    // Page
-    bg: "#F3F4FA",
-    surface: "#F9F9FD",
-    surfaceElevated: "#FFFFFF",
+    element: "--color-element",
+    elementBorder: "--color-element-border",
+    comparing: "--color-comparing",
+    swapping: "--color-swapping",
+    sorted: "--color-sorted",
+    pivot: "--color-pivot",
+    frontier: "--color-frontier",
+    visited: "--color-visited",
 
-    // Borders
-    border: "#DFE1EC",
-    borderStrong: "#C9CCDA",
-
-    // Text
-    textPrimary: "#202334",
-    textSecondary: "#555B72",
-    textMuted: "#858BA0",
-
-    // Brand
-    accent: "#4F46C7",
-
-    // Visualizer
-    element: "#ECEEF7",
-    elementBorder: "#C9CCDA",
-
-    // Algorithm states
-    comparing: "#D89A1B",
-    swapping: "#D94B45",
-    sorted: "#159A70",
-    pivot: "#7652C9",
-    frontier: "#D97724",
-    visited: "#5267C9",
+    // Text colors for highlighted algorithm elements
+    comparingText: "--color-comparing-text",
+    swappingText: "--color-swapping-text",
+    sortedText: "--color-sorted-text",
+    pivotText: "--color-pivot-text",
+    frontierText: "--color-frontier-text",
+    visitedText: "--color-visited-text",
 };
 
-export const darkColors = {
-    // Page
-    bg: "#0D1020",
-    surface: "#15192A",
-    surfaceElevated: "#1C2134",
-
-    // Borders
-    border: "#292E43",
-    borderStrong: "#3A4059",
-
-    // Text
-    textPrimary: "#ECEEF7",
-    textSecondary: "#A5ABC0",
-    textMuted: "#70778E",
-
-    // Brand
-    accent: "#7C7AF2",
-
-    // Visualizer
-    element: "#252A40",
-    elementBorder: "#3A4059",
-
-    // Algorithm states
-    comparing: "#F2C14E",
-    swapping: "#FF746B",
-    sorted: "#45D9A5",
-    pivot: "#B394F5",
-    frontier: "#FFAA67",
-    visited: "#788AF0",
-};
+function readCssColors() {
+    if (typeof window === "undefined") return null;
+    const styles = getComputedStyle(document.documentElement);
+    const out = {};
+    for (const key in CSS_VAR_MAP) {
+        const raw = styles.getPropertyValue(CSS_VAR_MAP[key]).trim(); // "56 84 214"
+        if (raw) out[key] = `rgb(${raw.split(/\s+/).join(", ")})`;
+    }
+    return out;
+}
 
 /**
- * Returns the active palette based on the current theme.
+ * Returns the active palette by reading theme.css's CSS variables directly,
+ * so there is exactly one place (theme.css) that defines colors. Re-reads
+ * whenever `theme` flips because that's what toggles the `.dark` class.
  */
 export function useThemeColors() {
     const { theme } = useContext(ThemeContext);
-
-    return theme === "dark" ? darkColors : lightColors;
+    return useMemo(() => readCssColors(), [theme]);
 }

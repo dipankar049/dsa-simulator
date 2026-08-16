@@ -32,6 +32,14 @@
     --color-pivot: 124 79 224;
     --color-frontier: 229 118 31;
     --color-visited: 56 84 214;
+
+    /* text on algorithm state backgrounds */
+    --color-comparing-text: 23 27 36;
+    --color-swapping-text: 255 255 255;
+    --color-sorted-text: 255 255 255;
+    --color-pivot-text: 255 255 255;
+    --color-frontier-text: 255 255 255;
+    --color-visited-text: 255 255 255;
 }
 
 .dark {
@@ -48,6 +56,7 @@
 
     --color-accent: 91 124 255;
 
+    /* algorithm element states */
     --color-element: 43 50 68;
     --color-element-border: 58 67 88;
     --color-comparing: 255 200 87;
@@ -56,4 +65,12 @@
     --color-pivot: 184 146 255;
     --color-frontier: 255 159 90;
     --color-visited: 91 124 255;
+
+    /* text on algorithm state backgrounds */
+    --color-comparing-text: 23 27 36;
+    --color-swapping-text: 23 27 36;
+    --color-sorted-text: 11 14 20;
+    --color-pivot-text: 11 14 20;
+    --color-frontier-text: 11 14 20;
+    --color-visited-text: 255 255 255;
 }

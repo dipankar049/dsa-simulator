@@ -52,7 +52,7 @@ function App() {
             theme={theme}
             pauseOnFocusLoss
           />
-          <div className="w-full h-[100vh] bg-theme-gradient">
+          <div className="w-full min-h-screen bg-theme-gradient">
             <Header toggleSidebar={toggleSidebar} changeLanguage={handleChangeLanguage} />
 
             <div className="w-full flex pt-16">

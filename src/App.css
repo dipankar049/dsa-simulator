@@ -251,10 +251,16 @@
 .topicCard-title {
   color: rgb(var(--color-text-primary));
 
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
 
   cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .topicCard-title {
+    font-size: 1rem;
+  }
 }
 
 .topicCard-content {
@@ -263,8 +269,15 @@
 
 .topicCard-description {
   color: rgb(var(--color-text-primary));
-  font-size: 0.95rem;
-  line-height: 1.7;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+@media (min-width: 640px) {
+  .topicCard-description {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
 }
 
 .topicCard-exampleTitle {
@@ -272,15 +285,21 @@
 
   color: rgb(var(--color-text-secondary));
 
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
+@media (min-width: 640px) {
+  .topicCard-exampleTitle {
+    font-size: 0.8rem;
+  }
+}
+
 .topicCard-code {
   margin-top: 0.5rem;
-  padding: 0.9rem 1rem;
+  padding: 0.75rem 0.85rem;
 
   background: rgb(var(--color-bg));
   border: 1px solid rgb(var(--color-border));
@@ -289,26 +308,39 @@
 
   color: rgb(var(--color-text-primary));
 
-  font-size: 0.8rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  line-height: 1.5;
   white-space: pre-wrap;
   overflow-x: auto;
+}
+
+@media (min-width: 640px) {
+  .topicCard-code {
+    padding: 0.9rem 1rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
 }
 
 
 /* ---------- Mobile ---------- */
 
 @media (max-width: 640px) {
+  .topicCard {
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+  }
+
   .topicCard-title {
-    padding: 0.9rem 1rem;
+    padding: 0.5rem 0;
   }
 
   .topicCard-content {
-    padding: 0 1rem 1rem;
+    padding: 0.5rem 0 0;
   }
 
   .topicCard-description {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
   }
 }
 
