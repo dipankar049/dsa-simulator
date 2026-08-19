@@ -1,0 +1,262 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   DSA Simulator — Tailwind v4 theme
+   
+   KEY RULE: @theme inline expects raw channel triplets ("R G B") — NOT
+   rgb(R G B). Tailwind wraps rgb() itself when generating utilities:
+     • bg-accent         →  background-color: rgb(var(--color-accent))
+     • bg-accent/10      →  color-mix(in oklab, rgb(var(--color-accent)) 10%, ...)
+   
+   Dark mode switches by toggling .dark on <html>. The --ch-* vars change,
+   --color-* references them via var(), so every utility updates automatically.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Raw channel tokens — light mode
+   -------------------------------------------------------------------------- */
+:root {
+  --ch-bg:               250 251 253;
+  --ch-surface:          255 255 255;
+  --ch-surface-elevated: 255 255 255;
+  --ch-border:           225 229 238;
+  --ch-border-strong:    199 206 220;
+  --ch-ink:              23 27 36;
+  --ch-ink-secondary:    86 94 117;
+  --ch-ink-muted:        137 145 168;
+  --ch-accent:           56 84 214;
+  --ch-element:          231 234 242;
+  --ch-element-border:   199 206 220;
+  --ch-comparing:        232 163 36;
+  --ch-swapping:         225 74 61;
+  --ch-sorted:           28 166 114;
+  --ch-pivot:            124 79 224;
+  --ch-frontier:         229 118 31;
+  --ch-visited:          56 84 214;
+  --ch-comparing-text:   23 27 36;
+  --ch-swapping-text:    255 255 255;
+  --ch-sorted-text:      255 255 255;
+  --ch-pivot-text:       255 255 255;
+  --ch-frontier-text:    255 255 255;
+  --ch-visited-text:     255 255 255;
+}
+
+/* --------------------------------------------------------------------------
+   Raw channel tokens — dark mode
+   -------------------------------------------------------------------------- */
+.dark {
+  --ch-bg:               11 14 20;
+  --ch-surface:          21 26 35;
+  --ch-surface-elevated: 28 34 48;
+  --ch-border:           35 40 56;
+  --ch-border-strong:    46 53 72;
+  --ch-ink:              232 234 240;
+  --ch-ink-secondary:    154 162 184;
+  --ch-ink-muted:        98 107 133;
+  --ch-accent:           91 124 255;
+  --ch-element:          43 50 68;
+  --ch-element-border:   58 67 88;
+  --ch-comparing:        255 200 87;
+  --ch-swapping:         255 107 93;
+  --ch-sorted:           63 221 160;
+  --ch-pivot:            184 146 255;
+  --ch-frontier:         255 159 90;
+  --ch-visited:          91 124 255;
+  --ch-comparing-text:   23 27 36;
+  --ch-swapping-text:    23 27 36;
+  --ch-sorted-text:      11 14 20;
+  --ch-pivot-text:       11 14 20;
+  --ch-frontier-text:    11 14 20;
+  --ch-visited-text:     255 255 255;
+}
+
+/* --------------------------------------------------------------------------
+   @theme inline — Tailwind v4 design tokens.
+   Values MUST be raw channel triplets (var(--ch-*) resolves to e.g. "56 84 214").
+   Tailwind adds rgb() itself. Do NOT wrap in rgb() here.
+   -------------------------------------------------------------------------- */
+@theme inline {
+  /* Colors */
+  --color-bg:               rgb(var(--ch-bg));
+  --color-surface:          rgb(var(--ch-surface));
+  --color-surface-elevated: rgb(var(--ch-surface-elevated));
+  --color-border:           rgb(var(--ch-border));
+  --color-border-strong:    rgb(var(--ch-border-strong));
+  --color-ink:              rgb(var(--ch-ink));
+  --color-ink-secondary:    rgb(var(--ch-ink-secondary));
+  --color-ink-muted:        rgb(var(--ch-ink-muted));
+  --color-accent:           rgb(var(--ch-accent));
+  --color-element:          rgb(var(--ch-element));
+  --color-element-border:   rgb(var(--ch-element-border));
+  --color-comparing:        rgb(var(--ch-comparing));
+  --color-swapping:         rgb(var(--ch-swapping));
+  --color-sorted:           rgb(var(--ch-sorted));
+  --color-pivot:            rgb(var(--ch-pivot));
+  --color-frontier:         rgb(var(--ch-frontier));
+  --color-visited:          rgb(var(--ch-visited));
+  --color-comparing-text:   rgb(var(--ch-comparing-text));
+  --color-swapping-text:    rgb(var(--ch-swapping-text));
+  --color-sorted-text:      rgb(var(--ch-sorted-text));
+  --color-pivot-text:       rgb(var(--ch-pivot-text));
+  --color-frontier-text:    rgb(var(--ch-frontier-text));
+  --color-visited-text:     rgb(var(--ch-visited-text));
+
+  /* Custom height utilities: h-1p … h-100p */
+  --height-1p:   1%;
+  --height-2p:   2%;
+  --height-3p:   3%;
+  --height-5p:   5%;
+  --height-10p:  10%;
+  --height-20p:  20%;
+  --height-30p:  30%;
+  --height-40p:  40%;
+  --height-50p:  50%;
+  --height-60p:  60%;
+  --height-70p:  70%;
+  --height-80p:  80%;
+  --height-90p:  90%;
+  --height-100p: 100%;
+
+  /* Custom spacing — pixel steps */
+  --spacing-128: 32px;
+  --spacing-130: 34px;
+  --spacing-132: 36px;
+  --spacing-134: 38px;
+  --spacing-136: 40px;
+  --spacing-138: 42px;
+  --spacing-140: 44px;
+  --spacing-142: 46px;
+  --spacing-144: 48px;
+  --spacing-146: 50px;
+
+  /* Custom spacing — percentage steps */
+  --spacing-2p:   2%;
+  --spacing-4p:   4%;
+  --spacing-6p:   6%;
+  --spacing-8p:   8%;
+  --spacing-10p:  10%;
+  --spacing-12p:  12%;
+  --spacing-14p:  14%;
+  --spacing-16p:  16%;
+  --spacing-18p:  18%;
+  --spacing-20p:  20%;
+  --spacing-22p:  22%;
+  --spacing-24p:  24%;
+  --spacing-26p:  26%;
+  --spacing-28p:  28%;
+  --spacing-30p:  30%;
+  --spacing-32p:  32%;
+  --spacing-34p:  34%;
+  --spacing-36p:  36%;
+  --spacing-38p:  38%;
+  --spacing-40p:  40%;
+  --spacing-42p:  42%;
+  --spacing-44p:  44%;
+  --spacing-46p:  46%;
+  --spacing-48p:  48%;
+  --spacing-50p:  50%;
+  --spacing-52p:  52%;
+  --spacing-54p:  54%;
+  --spacing-56p:  56%;
+  --spacing-58p:  58%;
+  --spacing-60p:  60%;
+  --spacing-62p:  62%;
+  --spacing-64p:  64%;
+  --spacing-66p:  66%;
+  --spacing-68p:  68%;
+  --spacing-70p:  70%;
+  --spacing-72p:  72%;
+  --spacing-74p:  74%;
+  --spacing-76p:  76%;
+  --spacing-78p:  78%;
+  --spacing-80p:  80%;
+  --spacing-82p:  82%;
+  --spacing-84p:  84%;
+  --spacing-86p:  86%;
+  --spacing-88p:  88%;
+  --spacing-90p:  90%;
+  --spacing-92p:  92%;
+  --spacing-94p:  94%;
+  --spacing-96p:  96%;
+  --spacing-98p:  98%;
+  --spacing-100p: 100%;
+  --spacing-102p: 102%;
+
+  /* Named pixel spacing */
+  --spacing-1px: 1px;
+  --spacing-2px: 2px;
+  --spacing-3px: 3px;
+  --spacing-4px: 4px;
+  --spacing-5px: 5px;
+  --spacing-6px: 6px;
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+
+  @keyframes fadeIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   bg-theme-gradient — root shell background
+   -------------------------------------------------------------------------- */
+@utility bg-theme-gradient {
+  background-color: rgb(var(--ch-bg));
+}
+
+/* --------------------------------------------------------------------------
+   Shared component styles
+   -------------------------------------------------------------------------- */
+@layer components {
+  .arrayDiv {
+    @apply flex items-center justify-center rounded-md border border-border bg-element text-ink text-sm font-semibold transition-all duration-200;
+  }
+
+  .cell {
+    @apply transition-all duration-200;
+  }
+
+  .opBtn {
+    @apply rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-110 transition-all disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .opBtn-secondary {
+    @apply rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-ink hover:bg-element transition-all disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .opBtn-danger {
+    @apply rounded-lg bg-swapping px-4 py-2 text-sm font-semibold text-swapping-text hover:brightness-110 transition-all disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .opInput {
+    @apply rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors disabled:opacity-50;
+  }
+
+  .topicCard {
+    @apply mb-4 w-full overflow-hidden rounded-xl border border-border bg-surface text-ink;
+  }
+
+  .topicCard-title {
+    @apply cursor-pointer select-none px-5 py-4 text-base font-semibold text-ink marker:text-accent hover:bg-bg transition-colors;
+  }
+
+  .topicCard-content {
+    @apply px-5 pb-5;
+  }
+
+  .topicCard-description {
+    @apply text-sm leading-relaxed text-ink-secondary;
+  }
+
+  .topicCard-exampleTitle {
+    @apply mt-4 mb-2 text-sm font-semibold text-ink;
+  }
+
+  .topicCard-code {
+    @apply overflow-x-auto rounded-lg border border-border bg-bg p-4 text-xs leading-relaxed text-ink-secondary font-mono whitespace-pre-wrap;
+  }
+}

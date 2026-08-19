@@ -23,6 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 
+# Next.js
+.next/
+out/
+build/
+
+# Vercel & Turbopack/Turborepo cache
+.vercel
+.turbo
+
 src/pages/StaticArrayNew.jsx
 src/pages/StaticArrayOperations2.jsx
 src/pages/LinearSearch2.jsx

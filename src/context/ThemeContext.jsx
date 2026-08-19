@@ -1,17 +1,16 @@
-import { createContext, useContext, useState, useEffect } from "react";
+"use client";
+
+import { createContext, useState, useEffect } from "react";
 
 const ThemeContext = createContext();
 
-const ThemeProvider = ({children}) => {
-    const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('dsa-simulator-theme') || 'dark';
-            // (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    });    
+const ThemeProvider = ({ children }) => {
+    const [theme, setTheme] = useState("dark"); // always matches SSR — no localStorage read here
 
     useEffect(() => {
-        const storedTheme = localStorage.getItem('dsa-simulator-theme') || 'dark';
+        const storedTheme = localStorage.getItem("dsa-simulator-theme") || "dark";
         if (storedTheme !== theme) {
-            updateTheme(storedTheme);
+            setTheme(storedTheme);
         }
     }, []);
 
@@ -22,26 +21,21 @@ const ThemeProvider = ({children}) => {
             document.documentElement.classList.remove("dark");
         }
     }, [theme]);
-    
-    const updateTheme = (newTheme) =>{
+
+    const updateTheme = (newTheme) => {
         try {
-            if (['light', 'dark'].includes(newTheme)) {
+            if (["light", "dark"].includes(newTheme)) {
                 setTheme(newTheme);
-                localStorage.setItem('dsa-simulator-theme', newTheme);
+                localStorage.setItem("dsa-simulator-theme", newTheme);
             } else {
-                console.warn('Invalid theme:', newTheme);
+                console.warn("Invalid theme:", newTheme);
             }
-        } catch(err) {
+        } catch (err) {
             console.error(err);
         }
-        
-    }
+    };
 
-    return (
-        <ThemeContext.Provider value={{theme, updateTheme}}>
-            {children}
-        </ThemeContext.Provider>
-    );
-}
+    return <ThemeContext.Provider value={{ theme, updateTheme }}>{children}</ThemeContext.Provider>;
+};
 
 export { ThemeContext, ThemeProvider };
