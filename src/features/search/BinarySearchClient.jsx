@@ -1,199 +1,771 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, {
+    useState,
+    useRef,
+    useEffect,
+    useContext,
+    useCallback,
+} from "react";
 import { DetailsStateContext } from "../../context/DetailsContext";
 import StateLegend from "../../components/StateLegend";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+    Play,
+    Pause,
+    ChevronLeft,
+    ChevronRight,
+    RotateCcw,
+    Square,
+    ArrowLeftRight,
+    CheckCircle2,
+    ArrowLeft,
+    ArrowRight,
+    Search,
+} from "lucide-react";
 
 const OPERATION_TABS = [
-    { id: 'create', label: 'Create' },
-    { id: 'pushpop', label: 'Push / Pop' },
-    { id: 'insert', label: 'Insert' },
-    { id: 'delete', label: 'Delete' },
+    { id: "create", label: "Create" },
+    { id: "pushpop", label: "Push / Pop" },
+    { id: "insert", label: "Insert" },
+    { id: "delete", label: "Delete" },
 ];
 
+const SPEED_OPTIONS = [
+    { id: "slow", label: "Slow", ms: 1900 },
+    { id: "normal", label: "Normal", ms: 1200 },
+    { id: "fast", label: "Fast", ms: 550 },
+];
+
+const FRAME_PACING = {
+    start: 0.6,
+    compare: 1,
+    "move-left": 0.9,
+    "move-right": 0.9,
+    found: 0.8,
+    "not-found": 0.8,
+};
+
+const getFrameDelay = (step, speedMs) => {
+    const pacing = FRAME_PACING[step?.type] ?? 1;
+    return Math.max(250, Math.round(speedMs * pacing));
+};
+
+function getStepAction(step) {
+    if (!step) return null;
+
+    switch (step.type) {
+        case "start":
+            return {
+                icon: Search,
+                label: "Starting search",
+                tone: "accent",
+            };
+
+        case "compare":
+            return {
+                icon: ArrowLeftRight,
+                label: "Comparing",
+                tone: "comparing",
+            };
+
+        case "move-left":
+            return {
+                icon: ArrowLeft,
+                label: "Move left",
+                tone: "pivot",
+            };
+
+        case "move-right":
+            return {
+                icon: ArrowRight,
+                label: "Move right",
+                tone: "pivot",
+            };
+
+        case "found":
+            return {
+                icon: CheckCircle2,
+                label: "Found",
+                tone: "sorted",
+            };
+
+        case "not-found":
+            return {
+                icon: CheckCircle2,
+                label: "Not found",
+                tone: "swapping",
+            };
+
+        default:
+            return {
+                icon: Search,
+                label: "Processing",
+                tone: "secondary",
+            };
+    }
+}
+
+function buildBinarySearchSteps(inputArray, target) {
+    const steps = [];
+
+    if (!inputArray.length) {
+        return steps;
+    }
+
+    let low = 0;
+    let high = inputArray.length - 1;
+    let iterations = 0;
+
+    const pushStep = ({
+        type,
+        message,
+        currentLow = low,
+        currentHigh = high,
+        currentMid = -1,
+        midVisible = false,
+        equal = false,
+        found = "",
+        iteration = iterations,
+    }) => {
+        steps.push({
+            type,
+            message,
+            array: [...inputArray],
+            low: currentLow,
+            high: currentHigh,
+            mid: currentMid,
+            midVisible,
+            equal,
+            found,
+            iterations: iteration,
+        });
+    };
+
+    pushStep({
+        type: "start",
+        message: `Searching for ${target}. The search range starts from index 0 to ${inputArray.length - 1}.`,
+    });
+
+    while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        const midValue = inputArray[mid];
+
+        iterations += 1;
+
+        pushStep({
+            type: "compare",
+            currentLow: low,
+            currentHigh: high,
+            currentMid: mid,
+            midVisible: true,
+            iteration: iterations,
+            message: `Checking index ${mid} with value ${midValue} — the midpoint of [${low}, ${high}].`,
+        });
+
+        if (target === midValue) {
+            pushStep({
+                type: "found",
+                currentLow: low,
+                currentHigh: high,
+                currentMid: mid,
+                midVisible: true,
+                equal: true,
+                found: "Found",
+                iteration: iterations,
+                message: `${target} = ${midValue} — match found at index ${mid}!`,
+            });
+
+            return steps;
+        }
+
+        if (target < midValue) {
+            const newHigh = mid - 1;
+
+            pushStep({
+                type: "move-left",
+                currentLow: low,
+                currentHigh: newHigh,
+                currentMid: mid,
+                midVisible: true,
+                iteration: iterations,
+                message: `${target} < ${midValue} — target must be in the left half, so High moves to ${newHigh}.`,
+            });
+
+            high = newHigh;
+        } else {
+            const newLow = mid + 1;
+
+            pushStep({
+                type: "move-right",
+                currentLow: newLow,
+                currentHigh: high,
+                currentMid: mid,
+                midVisible: true,
+                iteration: iterations,
+                message: `${target} > ${midValue} — target must be in the right half, so Low moves to ${newLow}.`,
+            });
+
+            low = newLow;
+        }
+    }
+
+    pushStep({
+        type: "not-found",
+        currentLow: low,
+        currentHigh: high,
+        currentMid: -1,
+        midVisible: false,
+        found: "Not Found",
+        iteration: iterations,
+        message: `Low crossed High — ${target} is not in the array.`,
+    });
+
+    return steps;
+}
+
 const BinarySearchClient = () => {
-    const [array, setArray] = useState([22, 25, 32, 48, 51, 57, 64, 73]);
+    const [array, setArray] = useState([
+        22,
+        25,
+        32,
+        48,
+        51,
+        57,
+        64,
+        73,
+    ]);
+
     const [arrExist, setArrExist] = useState(true);
     const [oldArray, setOldArray] = useState(false);
 
-    const [arrayLength, setArrayLength] = useState('');
-    const [pushValue, setPushValue] = useState('');
-    const [insertValue, setInsertValue] = useState('');
-    const [insertIndex, setInsertIndex] = useState('');
-    const [deleteValue, setDeleteValue] = useState('');
+    const [arrayLength, setArrayLength] = useState("");
+    const [pushValue, setPushValue] = useState("");
+    const [insertValue, setInsertValue] = useState("");
+    const [insertIndex, setInsertIndex] = useState("");
+    const [deleteValue, setDeleteValue] = useState("");
 
-    const [activeTab, setActiveTab] = useState('create');
+    const [activeTab, setActiveTab] = useState("create");
 
-    const [searchEle, setSearchEle] = useState('');
-    const [isEqual, setIsEqual] = useState(false);
-    const [isRunning, setIsRunning] = useState(false);
+    const [searchEle, setSearchEle] = useState("");
+    const [emptySearchElement, setEmptySearchElement] = useState(false);
+
+    // =========================================================
+    // Search player state
+    // =========================================================
+    const [steps, setSteps] = useState([]);
+    const [stepIndex, setStepIndex] = useState(0);
+    const [isSearching, setIsSearching] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [speed, setSpeed] = useState("normal");
+
+    const directionRef = useRef("forward");
+    const timerRef = useRef(null);
+    const sortedToastShownRef = useRef(false);
+
+    // Current visual state
     const [low, setLow] = useState(0);
     const [high, setHigh] = useState(array.length - 1);
-    const [mid, setMid] = useState(0);
+    const [mid, setMid] = useState(-1);
     const [isVisible, setIsVisible] = useState(array.length > 0);
     const [isMidVisible, setIsMidVisible] = useState(false);
-    const [isFound, setIsFound] = useState('');
+    const [isEqual, setIsEqual] = useState(false);
+    const [isFound, setIsFound] = useState("");
     const [iterations, setIterations] = useState(0);
-    const [emptySearchElement, setEmptySearchElement] = useState(false);
-    const [stepMessage, setStepMessage] = useState('');
-    const abortRef = useRef(false);
+    const [stepMessage, setStepMessage] = useState("");
+
     const divRefs = useRef([]);
 
-    const { detailsState, updateState } = useContext(DetailsStateContext);
-    const handleToggle = (id, isOpen) => updateState(id, isOpen);
+    const { detailsState, updateState } =
+        useContext(DetailsStateContext);
 
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const handleToggle = (id, isOpen) =>
+        updateState(id, isOpen);
 
-    const hasEmptySlots = arrExist && array.includes('NULL');
+    const hasEmptySlots =
+        arrExist && array.includes("NULL");
 
+    const currentStep = steps[stepIndex] ?? null;
+
+    // =========================================================
+    // Delay helper for array operations only
+    // =========================================================
+    const delay = (ms) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+
+    // =========================================================
+    // Apply one search frame to the visualizer
+    // =========================================================
+    const applyStep = useCallback(
+        (step) => {
+            if (!step) return;
+
+            setLow(step.low);
+            setHigh(step.high);
+            setMid(step.mid);
+            setIsMidVisible(step.midVisible);
+            setIsEqual(step.equal);
+            setIsFound(step.found);
+            setIterations(step.iterations);
+            setStepMessage(step.message);
+            setIsVisible(step.array.length > 0);
+        },
+        []
+    );
+
+    // =========================================================
+    // Reset search visual state
+    // =========================================================
+    const resetSearchView = useCallback(
+        (nextArray = array) => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+
+            setSteps([]);
+            setStepIndex(0);
+            setIsSearching(false);
+            setIsPlaying(false);
+
+            setIsEqual(false);
+            setLow(0);
+            setHigh(
+                nextArray.length > 0
+                    ? nextArray.length - 1
+                    : 0
+            );
+            setMid(-1);
+            setIsVisible(nextArray.length > 0);
+            setIsMidVisible(false);
+            setIsFound("");
+            setIterations(0);
+            setStepMessage("");
+
+            directionRef.current = "forward";
+            sortedToastShownRef.current = false;
+        },
+        [array]
+    );
+
+    // =========================================================
+    // Sync current step into UI
+    // =========================================================
+    useEffect(() => {
+        if (currentStep) {
+            applyStep(currentStep);
+        }
+    }, [currentStep, applyStep]);
+
+    // =========================================================
+    // Reset when search value changes
+    // =========================================================
     useEffect(() => {
         setEmptySearchElement(false);
-    }, [searchEle]);
 
-    useEffect(() => {
-        if (array.length === 0 && activeTab !== 'create') {
-            setActiveTab('create');
-        }
-    }, [array.length]); // eslint-disable-line react-hooks/exhaustive-deps
+        if (isSearching) return;
 
-    useEffect(() => {
-        if (array.length === 0) {
-            setIsVisible(false);
-            setHigh(0);
-        } else {
-            setIsVisible(true);
-            setHigh(array.length - 1);
-        }
         setIsEqual(false);
         setLow(0);
+        setHigh(
+            array.length > 0
+                ? array.length - 1
+                : 0
+        );
+        setMid(-1);
         setIsMidVisible(false);
-        setIsFound('');
+        setIsFound("");
         setIterations(0);
-        setStepMessage('');
-    }, [array, searchEle]);
+        setStepMessage("");
+    }, [searchEle, array.length, isSearching]);
 
     // =========================================================
-    // Search
+    // Empty array behavior
     // =========================================================
-    const binSearch = async () => {
+    useEffect(() => {
+        if (array.length === 0 && activeTab !== "create") {
+            setActiveTab("create");
+        }
+    }, [array.length, activeTab]);
+
+    // =========================================================
+    // Auto playback
+    // =========================================================
+    useEffect(() => {
+        if (!isSearching || !isPlaying || !currentStep) {
+            return undefined;
+        }
+
+        if (stepIndex >= steps.length - 1) {
+            setIsPlaying(false);
+            setIsSearching(false);
+
+            if (
+                currentStep.type === "found" &&
+                !sortedToastShownRef.current
+            ) {
+                sortedToastShownRef.current = true;
+                toast.info("Element found");
+            }
+
+            if (
+                currentStep.type === "not-found" &&
+                !sortedToastShownRef.current
+            ) {
+                sortedToastShownRef.current = true;
+                toast.info("Element not found");
+            }
+
+            return undefined;
+        }
+
+        const speedOption =
+            SPEED_OPTIONS.find(
+                (item) => item.id === speed
+            ) ?? SPEED_OPTIONS[1];
+
+        timerRef.current = setTimeout(() => {
+            setStepIndex((prev) => {
+                const nextIndex = Math.min(
+                    prev + 1,
+                    steps.length - 1
+                );
+
+                directionRef.current = "forward";
+
+                return nextIndex;
+            });
+        }, getFrameDelay(currentStep, speedOption.ms));
+
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+    }, [
+        isSearching,
+        isPlaying,
+        currentStep,
+        stepIndex,
+        steps.length,
+        speed,
+    ]);
+
+    // =========================================================
+    // Keyboard controls
+    // =========================================================
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (!isSearching || !steps.length) return;
+
+            if (event.code === "Space") {
+                event.preventDefault();
+
+                setIsPlaying((prev) => !prev);
+                return;
+            }
+
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+
+                setIsPlaying(false);
+                directionRef.current = "backward";
+
+                setStepIndex((prev) =>
+                    Math.max(0, prev - 1)
+                );
+
+                return;
+            }
+
+            if (event.key === "ArrowRight") {
+                event.preventDefault();
+
+                setIsPlaying(false);
+                directionRef.current = "forward";
+
+                setStepIndex((prev) =>
+                    Math.min(
+                        steps.length - 1,
+                        prev + 1
+                    )
+                );
+            }
+        };
+
+        window.addEventListener(
+            "keydown",
+            handleKeyDown
+        );
+
+        return () =>
+            window.removeEventListener(
+                "keydown",
+                handleKeyDown
+            );
+    }, [isSearching, steps.length]);
+
+    // =========================================================
+    // Start Binary Search
+    // =========================================================
+    const binSearch = () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
-        if (searchEle === '') {
-            toast.error('Please enter a search element.');
+
+        if (searchEle === "") {
+            toast.error(
+                "Please enter a search element."
+            );
             setEmptySearchElement(true);
             return;
         }
-        if (array.includes('NULL')) {
-            toast.error('Fill every slot first — binary search needs a fully sorted array, no empty slots.');
+
+        if (array.includes("NULL")) {
+            toast.error(
+                "Fill every slot first — binary search needs a fully sorted array, no empty slots."
+            );
             return;
         }
 
-        abortRef.current = false;
-        setIsRunning(true);
+        const target = parseInt(searchEle, 10);
+
+        if (Number.isNaN(target)) {
+            toast.error(
+                "Please enter a valid number."
+            );
+            return;
+        }
+
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+
+        const generatedSteps =
+            buildBinarySearchSteps(
+                array,
+                target
+            );
+
+        if (!generatedSteps.length) {
+            return;
+        }
+
+        sortedToastShownRef.current = false;
+        directionRef.current = "forward";
+
+        setSteps(generatedSteps);
+        setStepIndex(0);
+        setIsSearching(true);
+        setIsPlaying(true);
         setEmptySearchElement(false);
-        let currentLow = low;
-        let currentHigh = high;
-        setIsFound('');
-        setIterations(0);
-        let localIsEqual = false;
-        let i = 0;
-        const target = parseInt(searchEle);
 
-        while (currentLow <= currentHigh) {
-            if (abortRef.current) {
-                setIsRunning(false);
-                setStepMessage('');
-                toast.info('Search aborted.');
-                return;
-            }
-            const midValue = Math.floor((currentLow + currentHigh) / 2);
-            setStepMessage(`Checking index ${midValue} (value ${array[midValue]}) — the midpoint of [${currentLow}, ${currentHigh}]`);
-            await delay(1000);
-            setMid(midValue);
-            setIsMidVisible(true);
-            setIterations(++i);
+        applyStep(generatedSteps[0]);
+    };
 
-            await delay(1000);
+    // =========================================================
+    // Pause / Play
+    // =========================================================
+    const togglePlayPause = () => {
+        if (!steps.length) return;
 
-            if (target === array[midValue]) {
-                localIsEqual = true;
-                setIsEqual(true);
-                setStepMessage(`${target} = ${array[midValue]} — match found at index ${midValue}!`);
-                break;
-            } else if (target < array[midValue]) {
-                setStepMessage(`${target} < ${array[midValue]} — target must be in the left half, so High becomes ${midValue - 1}`);
-                currentHigh = midValue - 1;
-            } else {
-                setStepMessage(`${target} > ${array[midValue]} — target must be in the right half, so Low becomes ${midValue + 1}`);
-                currentLow = midValue + 1;
-            }
-
-            setLow(currentLow);
-            setHigh(currentHigh);
-            await delay(1200);
+        if (
+            stepIndex >=
+            steps.length - 1
+        ) {
+            setStepIndex(0);
+            setIsSearching(true);
+            setIsPlaying(true);
+            sortedToastShownRef.current = false;
+            directionRef.current = "forward";
+            return;
         }
 
-        if (localIsEqual) {
-            toast.info('Element found');
-            setIsFound('Found');
-        } else {
-            toast.info('Element not found');
-            setIsFound('Not Found');
-            setStepMessage(`Low crossed High — ${target} is not in the array.`);
+        setIsSearching(true);
+        setIsPlaying((prev) => !prev);
+    };
+
+    // =========================================================
+    // Previous
+    // =========================================================
+    const handlePrevious = () => {
+        if (!steps.length) return;
+
+        setIsSearching(true);
+        setIsPlaying(false);
+
+        directionRef.current = "backward";
+
+        setStepIndex((prev) =>
+            Math.max(0, prev - 1)
+        );
+    };
+
+    // =========================================================
+    // Next
+    // =========================================================
+    const handleNext = () => {
+        if (!steps.length) return;
+
+        setIsSearching(true);
+        setIsPlaying(false);
+
+        directionRef.current = "forward";
+
+        setStepIndex((prev) =>
+            Math.min(
+                steps.length - 1,
+                prev + 1
+            )
+        );
+    };
+
+    // =========================================================
+    // Restart
+    // =========================================================
+    const handleRestart = () => {
+        if (!steps.length) return;
+
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
         }
-        setIsRunning(false);
+
+        sortedToastShownRef.current = false;
+        directionRef.current = "forward";
+
+        setStepIndex(0);
+        setIsSearching(true);
+        setIsPlaying(true);
+
+        applyStep(steps[0]);
+    };
+
+    // =========================================================
+    // Stop
+    // =========================================================
+    const handleStop = () => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+
+        setIsPlaying(false);
+        setIsSearching(false);
+        directionRef.current = "forward";
+    };
+
+    // =========================================================
+    // Speed
+    // =========================================================
+    const handleSpeedChange = (speedId) => {
+        setSpeed(speedId);
     };
 
     // =========================================================
     // Create array
     // =========================================================
     const createArray = async () => {
-        if (arrayLength === '' || parseInt(arrayLength) <= 0) {
-            toast.error('Array length must be greater than 0.');
-            return;
-        }
-
-        await delay(200);
-        setOldArray(false);
-        setArray([]);
-        setArrExist(true);
-        await delay(500);
-        setArray(Array(parseInt(arrayLength)).fill('NULL'));
-        toast.success('Array created successfully', { position: 'top-center' });
-        setActiveTab('pushpop');
-    };
-
-    // =========================================================
-    // Push (must maintain ascending order)
-    // =========================================================
-    const arrayPushOperation = () => {
-        if (!arrExist) {
-            toast.error('Please create an array first.');
-            return;
-        }
-        if (pushValue === '') {
-            toast.error('Please enter an element');
-            return;
-        }
-        if (array.includes('NULL')) {
-            toast.error('Fill every empty slot with Insert before pushing a new value.');
-            return;
-        }
-        if (array.length !== 0 && parseInt(pushValue) < array[array.length - 1]) {
-            toast.info(
-                `Value should be ≥ ${array[array.length - 1]} to keep the array sorted — binary search only works on sorted data.`,
-                { autoClose: 8000 }
+        if (
+            arrayLength === "" ||
+            parseInt(arrayLength, 10) <= 0
+        ) {
+            toast.error(
+                "Array length must be greater than 0."
             );
             return;
         }
+
+        handleStop();
+
+        await delay(200);
+
+        setOldArray(false);
+        setArray([]);
+        setArrExist(true);
+
+        await delay(500);
+
+        setArray(
+            Array(
+                parseInt(arrayLength, 10)
+            ).fill("NULL")
+        );
+
+        resetSearchView([]);
+
+        toast.success(
+            "Array created successfully",
+            {
+                position: "top-center",
+            }
+        );
+
+        setActiveTab("pushpop");
+    };
+
+    // =========================================================
+    // Push
+    // =========================================================
+    const arrayPushOperation = () => {
+        if (!arrExist) {
+            toast.error(
+                "Please create an array first."
+            );
+            return;
+        }
+
+        if (pushValue === "") {
+            toast.error(
+                "Please enter an element"
+            );
+            return;
+        }
+
+        if (array.includes("NULL")) {
+            toast.error(
+                "Fill every empty slot with Insert before pushing a new value."
+            );
+            return;
+        }
+
+        if (
+            array.length !== 0 &&
+            parseInt(pushValue, 10) <
+            array[array.length - 1]
+        ) {
+            toast.info(
+                `Value should be ≥ ${array[array.length - 1]
+                } to keep the array sorted — binary search only works on sorted data.`,
+                {
+                    autoClose: 8000,
+                }
+            );
+            return;
+        }
+
+        handleStop();
+
+        const nextArray = [
+            ...array,
+            parseInt(pushValue, 10),
+        ];
+
         setOldArray(true);
-        setArray([...array, parseInt(pushValue)]);
-        toast.success('Element successfully pushed into the array.');
-        setPushValue('');
+        setArray(nextArray);
+        resetSearchView(nextArray);
+
+        toast.success(
+            "Element successfully pushed into the array."
+        );
+
+        setPushValue("");
     };
 
     // =========================================================
@@ -201,72 +773,149 @@ const BinarySearchClient = () => {
     // =========================================================
     const arrayPopOperation = () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
+
         if (array.length === 0) {
-            toast.error('Array is already empty.');
+            toast.error(
+                "Array is already empty."
+            );
             return;
         }
-        setArray(array.slice(0, -1));
-        toast.success('Element popped from the array.');
+
+        handleStop();
+
+        const nextArray = array.slice(0, -1);
+
+        setArray(nextArray);
+        resetSearchView(nextArray);
+
+        toast.success(
+            "Element popped from the array."
+        );
     };
 
     // =========================================================
-    // Insert (with sortedness validation)
+    // Insert
     // =========================================================
     const arrayInsert = async () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
-            return;
-        }
-        if (insertValue === '') {
-            toast.error('Please enter an element.');
-            return;
-        }
-        if (insertIndex === '') {
-            toast.error('Please enter an index.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
 
-        const index = parseInt(insertIndex);
-        const value = parseInt(insertValue);
-
-        if (index > array.length || index < 0) {
-            toast.error(`Index must be between 0 and ${array.length}.`);
+        if (insertValue === "") {
+            toast.error(
+                "Please enter an element."
+            );
             return;
         }
 
-        if (index !== 0 && value < array[index - 1]) {
-            toast.info(`Value should be ≥ ${array[index - 1]} to keep the array sorted, as binary search requires sorted data.`, {
-                autoClose: 8000,
-            });
+        if (insertIndex === "") {
+            toast.error(
+                "Please enter an index."
+            );
             return;
         }
-        if (index !== 0 && index !== array.length - 1 && value > array[index + 1]) {
-            toast.info(`Value should be ≤ ${array[index + 1]} to keep the array sorted, as binary search requires sorted data.`, {
-                autoClose: 8000,
-            });
+
+        const index = parseInt(
+            insertIndex,
+            10
+        );
+
+        const value = parseInt(
+            insertValue,
+            10
+        );
+
+        if (
+            index > array.length ||
+            index < 0
+        ) {
+            toast.error(
+                `Index must be between 0 and ${array.length}.`
+            );
             return;
         }
-        if (index === 0 && array.length > 1 && value > array[1]) {
-            toast.info(`Value should be ≤ ${array[1]} to keep the array sorted, as binary search requires sorted data.`, {
-                autoClose: 8000,
-            });
+
+        if (
+            index !== 0 &&
+            value < array[index - 1]
+        ) {
+            toast.info(
+                `Value should be ≥ ${array[index - 1]
+                } to keep the array sorted, as binary search requires sorted data.`,
+                {
+                    autoClose: 8000,
+                }
+            );
             return;
         }
+
+        if (
+            index !== 0 &&
+            index !== array.length - 1 &&
+            value > array[index + 1]
+        ) {
+            toast.info(
+                `Value should be ≤ ${array[index + 1]
+                } to keep the array sorted, as binary search requires sorted data.`,
+                {
+                    autoClose: 8000,
+                }
+            );
+            return;
+        }
+
+        if (
+            index === 0 &&
+            array.length > 1 &&
+            value > array[1]
+        ) {
+            toast.info(
+                `Value should be ≤ ${array[1]
+                } to keep the array sorted, as binary search requires sorted data.`,
+                {
+                    autoClose: 8000,
+                }
+            );
+            return;
+        }
+
+        handleStop();
 
         await delay(1000);
 
+        let nextArray;
+
         if (index === array.length) {
-            setArray((prev) => [...prev, value]);
+            nextArray = [
+                ...array,
+                value,
+            ];
         } else {
-            setArray((prev) => prev.map((item, i) => (i === index ? value : item)));
+            nextArray = array.map(
+                (item, i) =>
+                    i === index
+                        ? value
+                        : item
+            );
         }
 
-        toast.success(`"${insertValue}" inserted at index ${insertIndex}`);
-        setInsertValue('');
-        setInsertIndex('');
+        setArray(nextArray);
+        resetSearchView(nextArray);
+
+        toast.success(
+            `"${insertValue}" inserted at index ${insertIndex}`
+        );
+
+        setInsertValue("");
+        setInsertIndex("");
     };
 
     // =========================================================
@@ -274,20 +923,51 @@ const BinarySearchClient = () => {
     // =========================================================
     const removeByEle = () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
-        if (deleteValue === '') {
-            toast.error('Please enter an element.');
+
+        if (deleteValue === "") {
+            toast.error(
+                "Please enter an element."
+            );
             return;
         }
-        if (!array.includes(parseInt(deleteValue))) {
-            toast.error('Element not found.');
+
+        if (
+            !array.includes(
+                parseInt(deleteValue, 10)
+            )
+        ) {
+            toast.error(
+                "Element not found."
+            );
             return;
         }
-        setArray((prev) => prev.map((item) => (item === parseInt(deleteValue) ? 'NULL' : item)));
-        toast.success('Element deleted.');
-        setDeleteValue('');
+
+        handleStop();
+
+        const nextArray = array.map(
+            (item) =>
+                item ===
+                    parseInt(
+                        deleteValue,
+                        10
+                    )
+                    ? "NULL"
+                    : item
+        );
+
+        setArray(nextArray);
+        resetSearchView(nextArray);
+
+        toast.success(
+            "Element deleted."
+        );
+
+        setDeleteValue("");
     };
 
     // =========================================================
@@ -295,223 +975,799 @@ const BinarySearchClient = () => {
     // =========================================================
     const removeArray = () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
+
+        handleStop();
+
         setOldArray(false);
         setArray([]);
         setArrExist(false);
-        toast.success('Array has been successfully deleted.');
-        setPushValue('');
-        setInsertValue('');
-        setInsertIndex('');
-        setDeleteValue('');
+
+        resetSearchView([]);
+
+        toast.success(
+            "Array has been successfully deleted."
+        );
+
+        setPushValue("");
+        setInsertValue("");
+        setInsertIndex("");
+        setDeleteValue("");
+    };
+
+    // =========================================================
+    // Step action card
+    // =========================================================
+    const renderStepMessage = () => {
+        if (!isSearching || !currentStep?.message) {
+            return null;
+        }
+
+        const action =
+            getStepAction(currentStep);
+
+        const Icon =
+            action?.icon ?? Search;
+
+        const toneClasses = {
+            accent:
+                "border-accent/30 bg-accent/5 text-accent",
+
+            comparing:
+                "border-comparing/30 bg-comparing/10 text-comparing-text",
+
+            pivot:
+                "border-pivot/30 bg-pivot/10 text-pivot-text",
+
+            sorted:
+                "border-sorted/30 bg-sorted/10 text-sorted-text",
+
+            swapping:
+                "border-swapping/30 bg-swapping/10 text-swapping-text",
+
+            secondary:
+                "border-border bg-surface text-secondary",
+        };
+
+        return (
+            <div
+                key={stepIndex}
+                className={`animate-fade-in mb-4 flex items-center gap-3 rounded-lg border px-3 py-2.5 sm:px-4 sm:py-3 ${toneClasses[
+                    action?.tone
+                ] ??
+                    toneClasses.secondary
+                    }`}
+                aria-live="polite"
+            >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface sm:h-9 sm:w-9">
+                    <Icon
+                        size={17}
+                        strokeWidth={2.2}
+                        className="shrink-0"
+                        color="blue"
+                    />
+                </div>
+
+                <div className="min-w-0">
+                    <div className="text-[10px] text-white font-semibold uppercase tracking-[0.08em] opacity-70 sm:text-[11px]">
+                        {action?.label ??
+                            "Processing"}
+                    </div>
+
+                    <div className="mt-0.5 break-words text-xs font-medium leading-relaxed text-ink sm:text-sm">
+                        {
+                            currentStep.message
+                        }
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // =========================================================
+    // Player controls
+    // =========================================================
+    const renderPlayerControls = () => {
+        if (!isSearching || !steps.length) {
+            return null;
+        }
+
+        const atStart = stepIndex <= 0;
+        const atEnd =
+            stepIndex >= steps.length - 1;
+
+        return (
+            <div className="mb-4 w-full min-w-0 rounded-lg border border-border bg-surface p-2 sm:p-3">
+
+                {/* =========================
+                PLAYER CONTROLS
+            ========================= */}
+                <div className="flex w-full min-w-0 items-center gap-1 sm:gap-2">
+                    {/* Previous */}
+                    <button
+                        type="button"
+                        onClick={handlePrevious}
+                        disabled={atStart}
+                        title="Previous step"
+                        className="opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-0.5 px-1.5 py-2 text-[11px] sm:flex-none sm:gap-1 sm:px-3 sm:text-sm"
+                    >
+                        <ChevronLeft
+                            size={15}
+                            className="shrink-0 sm:h-4 sm:w-4"
+                        />
+                        <span>Prev</span>
+                    </button>
+
+                    {/* Play / Pause */}
+                    <button
+                        type="button"
+                        onClick={togglePlayPause}
+                        title={
+                            isPlaying
+                                ? "Pause"
+                                : "Play"
+                        }
+                        className="opBtn-primary flex min-w-0 flex-1 items-center justify-center gap-0.5 px-1.5 py-2 text-[11px] sm:flex-none sm:gap-1 sm:px-4 sm:text-sm"
+                    >
+                        {isPlaying ? (
+                            <>
+                                <Pause
+                                    size={15}
+                                    className="shrink-0 sm:h-4 sm:w-4"
+                                />
+                                <span>Pause</span>
+                            </>
+                        ) : (
+                            <>
+                                <Play
+                                    size={15}
+                                    className="shrink-0 sm:h-4 sm:w-4"
+                                />
+                                <span>Play</span>
+                            </>
+                        )}
+                    </button>
+
+                    {/* Next */}
+                    <button
+                        type="button"
+                        onClick={handleNext}
+                        disabled={atEnd}
+                        title="Next step"
+                        className="opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-0.5 px-1.5 py-2 text-[11px] sm:flex-none sm:gap-1 sm:px-3 sm:text-sm"
+                    >
+                        <span>Next</span>
+                        <ChevronRight
+                            size={15}
+                            className="shrink-0 sm:h-4 sm:w-4"
+                        />
+                    </button>
+
+                    {/* Restart */}
+                    <button
+                        type="button"
+                        onClick={handleRestart}
+                        title="Restart"
+                        aria-label="Restart"
+                        className="opBtn-secondary flex h-9 w-9 shrink-0 items-center justify-center px-0 sm:h-auto sm:w-auto sm:gap-1 sm:px-3 sm:py-2"
+                    >
+                        <RotateCcw
+                            size={15}
+                            className="shrink-0 sm:h-4 sm:w-4"
+                        />
+                        <span className="hidden sm:inline">
+                            Restart
+                        </span>
+                    </button>
+
+                    {/* Stop */}
+                    <button
+                        type="button"
+                        onClick={handleStop}
+                        title="Stop"
+                        aria-label="Stop"
+                        className="opBtn-danger flex h-9 w-9 shrink-0 items-center justify-center px-0 sm:h-auto sm:w-auto sm:gap-1 sm:px-3 sm:py-2"
+                    >
+                        <Square
+                            size={14}
+                            className="shrink-0 sm:h-[15px] sm:w-[15px]"
+                        />
+                        <span className="hidden sm:inline">
+                            Stop
+                        </span>
+                    </button>
+                </div>
+
+                {/* =========================
+                STEP INFO
+            ========================= */}
+                <div className="mt-2 flex min-w-0 items-center justify-between gap-2 text-[10px] text-muted sm:text-xs">
+                    <span className="shrink-0">
+                        Step {stepIndex + 1} of{" "}
+                        {steps.length}
+                    </span>
+
+                    <span className="hidden truncate sm:inline">
+                        Space: Play/Pause · ← → Navigate
+                    </span>
+                </div>
+            </div>
+        );
     };
 
     return (
         <details
             id="binarySearchOp"
             className="mb-5 w-full overflow-hidden rounded-xl border border-border bg-surface text-ink"
-            onToggle={(e) => handleToggle('binarySearchOp', e.target.open)}
-            open={detailsState['binarySearchOp'] !== undefined ? detailsState['binarySearchOp'] : true}
+            onToggle={(e) =>
+                handleToggle(
+                    "binarySearchOp",
+                    e.target.open
+                )
+            }
+            open={
+                detailsState[
+                    "binarySearchOp"
+                ] !== undefined
+                    ? detailsState[
+                    "binarySearchOp"
+                    ]
+                    : true
+            }
         >
-            <summary className="cursor-pointer select-none px-4 py-4 sm:px-5 text-base sm:text-lg md:text-xl font-semibold text-ink marker:text-accent hover:bg-bg/50 transition-colors">
+            <summary className="cursor-pointer select-none px-4 py-4 text-base font-semibold text-ink marker:text-accent transition-colors hover:bg-bg/50 sm:px-5 sm:text-lg md:text-xl">
                 Binary Search
             </summary>
 
             <div className="px-4 pb-5 sm:px-5">
                 {/* =================================================
-              OPERATIONS PANEL
-          ================================================= */}
+                    OPERATIONS PANEL
+                ================================================= */}
                 <div className="rounded-lg border border-border bg-bg p-4">
                     <div className="mb-3 flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-ink">Build Array</h3>
+                        <h3 className="text-sm font-semibold text-ink">
+                            Build Array
+                        </h3>
+
                         <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
-                            {arrExist ? `${array.length} elements` : 'No array yet'}
+                            {arrExist
+                                ? `${array.length} elements`
+                                : "No array yet"}
                         </span>
                     </div>
 
                     <div className="mb-4 flex w-full flex-wrap rounded-md border border-borderStrong bg-surface p-1 sm:flex-nowrap">
-                        {OPERATION_TABS.map((tab) => {
-                            const disabled = tab.id !== 'create' && !arrExist;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    type="button"
-                                    disabled={disabled || isRunning}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`flex-1 basis-1/2 rounded px-3 py-2 text-xs sm:basis-0 sm:text-sm font-medium transition-colors
-                      ${activeTab === tab.id ? 'bg-accent text-white' : 'text-muted hover:bg-element hover:text-ink'}
-                      ${disabled || isRunning ? 'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted' : ''}`}
-                                >
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
+                        {OPERATION_TABS.map(
+                            (tab) => {
+                                const disabled =
+                                    tab.id !==
+                                    "create" &&
+                                    !arrExist;
+
+                                return (
+                                    <button
+                                        key={
+                                            tab.id
+                                        }
+                                        type="button"
+                                        disabled={
+                                            disabled ||
+                                            isSearching
+                                        }
+                                        onClick={() =>
+                                            setActiveTab(
+                                                tab.id
+                                            )
+                                        }
+                                        className={`flex-1 basis-1/2 rounded px-3 py-2 text-xs font-medium transition-colors sm:basis-0 sm:text-sm ${activeTab ===
+                                            tab.id
+                                            ? "bg-accent text-white"
+                                            : "text-muted hover:bg-element hover:text-ink"
+                                            } ${disabled ||
+                                                isSearching
+                                                ? "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted"
+                                                : ""
+                                            }`}
+                                    >
+                                        {
+                                            tab.label
+                                        }
+                                    </button>
+                                );
+                            }
+                        )}
                     </div>
 
-                    {activeTab === 'create' && (
-                        <div className="flex flex-col gap-3">
-                            <p className="text-xs leading-relaxed text-muted">
-                                Binary search needs sorted data. New slots start as <span className="font-medium text-ink">NULL</span> — fill them
-                                in ascending order using Push or Insert below.
-                            </p>
-                            <div className="flex flex-col gap-2 sm:flex-row">
-                                <input
-                                    type="number"
-                                    min={1}
-                                    value={arrayLength}
-                                    onChange={(e) => setArrayLength(e.target.value)}
-                                    className="opInput w-full sm:flex-1"
-                                    placeholder="Array length"
-                                    disabled={isRunning}
-                                />
-                                <button type="button" onClick={createArray} disabled={isRunning} className="opBtn w-full whitespace-nowrap sm:w-auto">
-                                    Create Array
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    {activeTab ===
+                        "create" && (
+                            <div className="flex flex-col gap-3">
+                                <p className="text-xs leading-relaxed text-muted">
+                                    Binary search
+                                    needs sorted
+                                    data. New
+                                    slots start
+                                    as{" "}
+                                    <span className="font-medium text-ink">
+                                        NULL
+                                    </span>
+                                    {" "}— fill them
+                                    in ascending
+                                    order using
+                                    Push or Insert
+                                    below.
+                                </p>
 
-                    {activeTab === 'pushpop' && (
-                        <div className="flex flex-col gap-3">
-                            <p className="text-xs leading-relaxed text-muted">
-                                Push only accepts a value ≥ the current last element, to keep the array sorted. Fill empty slots with Insert first.
-                            </p>
-                            <div className="flex flex-col gap-2 sm:flex-row">
-                                <input
-                                    type="number"
-                                    value={pushValue}
-                                    onChange={(e) => setPushValue(e.target.value)}
-                                    className="opInput w-full sm:flex-1"
-                                    placeholder="Value"
-                                    disabled={isRunning}
-                                />
-                                <div className="flex w-full gap-2 sm:w-auto">
-                                    <button type="button" onClick={arrayPushOperation} disabled={isRunning} className="opBtn flex-1 whitespace-nowrap sm:flex-none">
-                                        Push
-                                    </button>
-                                    <button type="button" onClick={arrayPopOperation} disabled={isRunning} className="opBtn-secondary flex-1 whitespace-nowrap sm:flex-none">
-                                        Pop
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={
+                                            arrayLength
+                                        }
+                                        onChange={(
+                                            e
+                                        ) =>
+                                            setArrayLength(
+                                                e
+                                                    .target
+                                                    .value
+                                            )
+                                        }
+                                        className="opInput w-full sm:flex-1"
+                                        placeholder="Array length"
+                                        disabled={
+                                            isSearching
+                                        }
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            createArray
+                                        }
+                                        disabled={
+                                            isSearching
+                                        }
+                                        className="opBtn w-full whitespace-nowrap sm:w-auto"
+                                    >
+                                        Create Array
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {activeTab === 'insert' && (
-                        <div className="flex flex-col gap-3">
-                            <p className="text-xs leading-relaxed text-muted">
-                                Insert at any index — the value must keep neighboring elements in ascending order.
-                            </p>
-                            <div className="flex flex-col gap-2 sm:flex-row">
-                                <input
-                                    type="number"
-                                    value={insertValue}
-                                    onChange={(e) => setInsertValue(e.target.value)}
-                                    className="opInput w-full sm:flex-1"
-                                    placeholder="Value"
-                                    disabled={isRunning}
-                                />
-                                <input
-                                    type="number"
-                                    min={0}
-                                    value={insertIndex}
-                                    onChange={(e) => setInsertIndex(e.target.value)}
-                                    className="opInput w-full sm:flex-1"
-                                    placeholder="Index"
-                                    disabled={isRunning}
-                                />
-                                <button type="button" onClick={arrayInsert} disabled={isRunning} className="opBtn w-full whitespace-nowrap sm:w-auto">
-                                    Insert
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'delete' && (
-                        <div className="flex flex-col gap-4">
-                            <p className="text-xs leading-relaxed text-muted">Delete the first matching value, or clear the whole array.</p>
-                            <div className="flex flex-col gap-2 sm:flex-row">
-                                <input
-                                    type="number"
-                                    value={deleteValue}
-                                    onChange={(e) => setDeleteValue(e.target.value)}
-                                    className="opInput w-full sm:max-w-[180px]"
-                                    placeholder="Value"
-                                    disabled={isRunning}
-                                />
-                                <button type="button" onClick={removeByEle} disabled={isRunning} className="opBtn-secondary w-full whitespace-nowrap sm:w-auto">
-                                    Delete
-                                </button>
-                            </div>
-                            <div className="flex flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+                    {activeTab ===
+                        "pushpop" && (
+                            <div className="flex flex-col gap-3">
                                 <p className="text-xs leading-relaxed text-muted">
-                                    Need a fresh array? Remove the current array and create a new one.
+                                    Push only
+                                    accepts a
+                                    value ≥ the
+                                    current last
+                                    element, to
+                                    keep the
+                                    array sorted.
+                                    Fill empty
+                                    slots with
+                                    Insert first.
                                 </p>
 
-                                <button
-                                    type="button"
-                                    onClick={removeArray}
-                                    disabled={isRunning}
-                                    className="opBtn-danger w-full whitespace-nowrap sm:w-auto"
-                                >
-                                    Delete Array
-                                </button>
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                    <input
+                                        type="number"
+                                        value={
+                                            pushValue
+                                        }
+                                        onChange={(
+                                            e
+                                        ) =>
+                                            setPushValue(
+                                                e
+                                                    .target
+                                                    .value
+                                            )
+                                        }
+                                        className="opInput w-full sm:flex-1"
+                                        placeholder="Value"
+                                        disabled={
+                                            isSearching
+                                        }
+                                    />
+
+                                    <div className="flex w-full gap-2 sm:w-auto">
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                arrayPushOperation
+                                            }
+                                            disabled={
+                                                isSearching
+                                            }
+                                            className="opBtn flex-1 whitespace-nowrap sm:flex-none"
+                                        >
+                                            Push
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                arrayPopOperation
+                                            }
+                                            disabled={
+                                                isSearching
+                                            }
+                                            className="opBtn-secondary flex-1 whitespace-nowrap sm:flex-none"
+                                        >
+                                            Pop
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* =================================================
-              SEARCH PANEL
-          ================================================= */}
-                <div className="mt-5 rounded-lg border border-border bg-bg p-4">
-                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                            <h3 className="text-sm font-semibold text-ink">Search</h3>
-                            <p className="text-xs leading-relaxed text-muted">Repeatedly halves the range using the midpoint.</p>
-                        </div>
-                        <span className="text-xs font-medium text-muted">Iterations: {iterations}</span>
-                    </div>
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                        <input
-                            type="number"
-                            value={searchEle}
-                            onChange={(e) => setSearchEle(e.target.value)}
-                            className={`opInput w-full sm:flex-1 ${emptySearchElement ? '!border-swapping' : ''}`}
-                            placeholder="Value to search for"
-                            disabled={isRunning}
-                        />
-                        {isRunning ? (
-                            <button type="button" onClick={() => (abortRef.current = true)} className="opBtn-danger w-full whitespace-nowrap sm:w-auto">
-                                Abort Search
-                            </button>
-                        ) : (
-                            <button type="button" onClick={binSearch} className="opBtn w-full whitespace-nowrap sm:w-auto">
-                                Search
-                            </button>
                         )}
-                    </div>
-                    {hasEmptySlots && (
-                        <p className="mt-2 text-xs text-swapping">
-                            Fill every slot before searching — {array.filter((v) => v === 'NULL').length} slot(s) still empty.
-                        </p>
-                    )}
+
+                    {activeTab ===
+                        "insert" && (
+                            <div className="flex flex-col gap-3">
+                                <p className="text-xs leading-relaxed text-muted">
+                                    Insert at any
+                                    index — the
+                                    value must
+                                    keep
+                                    neighboring
+                                    elements in
+                                    ascending
+                                    order.
+                                </p>
+
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                    <input
+                                        type="number"
+                                        value={
+                                            insertValue
+                                        }
+                                        onChange={(
+                                            e
+                                        ) =>
+                                            setInsertValue(
+                                                e
+                                                    .target
+                                                    .value
+                                            )
+                                        }
+                                        className="opInput w-full sm:flex-1"
+                                        placeholder="Value"
+                                        disabled={
+                                            isSearching
+                                        }
+                                    />
+
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        value={
+                                            insertIndex
+                                        }
+                                        onChange={(
+                                            e
+                                        ) =>
+                                            setInsertIndex(
+                                                e
+                                                    .target
+                                                    .value
+                                            )
+                                        }
+                                        className="opInput w-full sm:flex-1"
+                                        placeholder="Index"
+                                        disabled={
+                                            isSearching
+                                        }
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            arrayInsert
+                                        }
+                                        disabled={
+                                            isSearching
+                                        }
+                                        className="opBtn w-full whitespace-nowrap sm:w-auto"
+                                    >
+                                        Insert
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                    {activeTab ===
+                        "delete" && (
+                            <div className="flex flex-col gap-4">
+                                <p className="text-xs leading-relaxed text-muted">
+                                    Delete the
+                                    first matching
+                                    value, or
+                                    clear the
+                                    whole array.
+                                </p>
+
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                    <input
+                                        type="number"
+                                        value={
+                                            deleteValue
+                                        }
+                                        onChange={(
+                                            e
+                                        ) =>
+                                            setDeleteValue(
+                                                e
+                                                    .target
+                                                    .value
+                                            )
+                                        }
+                                        className="opInput w-full sm:max-w-[180px]"
+                                        placeholder="Value"
+                                        disabled={
+                                            isSearching
+                                        }
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            removeByEle
+                                        }
+                                        disabled={
+                                            isSearching
+                                        }
+                                        className="opBtn-secondary w-full whitespace-nowrap sm:w-auto"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+
+                                <div className="flex flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <p className="text-xs leading-relaxed text-muted">
+                                        Need a fresh
+                                        array? Remove
+                                        the current
+                                        array and
+                                        create a new
+                                        one.
+                                    </p>
+
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            removeArray
+                                        }
+                                        disabled={
+                                            isSearching
+                                        }
+                                        className="opBtn-danger w-full whitespace-nowrap sm:w-auto"
+                                    >
+                                        Delete Array
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                 </div>
 
                 {/* =================================================
-              Visualizer
-          ================================================= */}
+                    SEARCH PANEL
+                ================================================= */}
+                <div className="mt-5 rounded-lg border border-border bg-bg p-4">
+                    <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+    <div>
+        <h3 className="text-sm font-semibold text-ink">
+            Search
+        </h3>
+
+        <p className="text-[10px] leading-relaxed text-muted sm:text-xs">
+            Repeatedly halves the range using the midpoint.
+        </p>
+    </div>
+
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-medium text-muted sm:text-xs">
+        <span>
+            Iterations: {iterations}
+        </span>
+
+        <div className="flex items-center gap-1.5">
+            <span>Speed</span>
+
+            <div className="flex rounded-md border border-borderStrong bg-surface p-0.5">
+                {SPEED_OPTIONS.map((option) => (
+                    <button
+                        key={option.id}
+                        type="button"
+                        onClick={() =>
+                            handleSpeedChange(option.id)
+                        }
+                        className={`rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors sm:px-2 sm:py-1 sm:text-xs ${
+                            speed === option.id
+                                ? "bg-accent text-white"
+                                : "text-muted hover:bg-element hover:text-ink"
+                        }`}
+                    >
+                        {option.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+    </div>
+</div>
+
+                    <div className="flex flex-col gap-2 sm:flex-row">
+    <input
+        type="number"
+        value={searchEle}
+        onChange={(e) =>
+            setSearchEle(e.target.value)
+        }
+        className={`opInput w-full sm:flex-1 ${
+            emptySearchElement
+                ? "!border-swapping"
+                : ""
+        }`}
+        placeholder="Value to search for"
+        disabled={isSearching}
+    />
+
+    {!isSearching ? (
+        <button
+            type="button"
+            onClick={binSearch}
+            className="opBtn flex w-full items-center justify-center gap-1.5 whitespace-nowrap sm:w-auto"
+        >
+            <Search
+                size={16}
+                strokeWidth={2.2}
+            />
+            Search
+        </button>
+    ) : (
+        <div className="flex w-full gap-2 sm:w-auto">
+            <button
+                type="button"
+                onClick={handleStop}
+                className="opBtn-danger w-full whitespace-nowrap sm:w-auto"
+            >
+                Stop Search
+            </button>
+        </div>
+    )}
+</div>
+
+{hasEmptySlots && (
+    <p className="mt-2 text-xs text-swapping">
+        Fill every slot before searching —{" "}
+        {
+            array.filter(
+                (v) => v === "NULL"
+            ).length
+        }{" "}
+        slot(s) still empty.
+    </p>
+)}
+
+{/* Search player controls — same placement concept as Bubble Sort */}
+{isSearching && steps.length > 0 && (
+    <div className="mt-3 flex w-full items-center gap-1.5 sm:gap-2">
+        <button
+            type="button"
+            onClick={handlePrevious}
+            disabled={stepIndex <= 0}
+            className="opBtn opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs sm:flex-none sm:px-3 sm:text-sm"
+        >
+            <ChevronLeft
+                size={15}
+                className="shrink-0 sm:h-[17px] sm:w-[17px]"
+            />
+            <span>Prev</span>
+        </button>
+
+        <button
+            type="button"
+            onClick={togglePlayPause}
+            className="opBtn opBtn-primary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs sm:flex-none sm:px-3 sm:text-sm"
+        >
+            {isPlaying ? (
+                <>
+                    <Pause
+                        size={15}
+                        className="shrink-0 sm:h-[17px] sm:w-[17px]"
+                    />
+                    <span>Pause</span>
+                </>
+            ) : (
+                <>
+                    <Play
+                        size={15}
+                        className="shrink-0 sm:h-[17px] sm:w-[17px]"
+                    />
+                    <span>Play</span>
+                </>
+            )}
+        </button>
+
+        <button
+            type="button"
+            onClick={handleNext}
+            disabled={
+                stepIndex >= steps.length - 1
+            }
+            className="opBtn opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs sm:flex-none sm:px-3 sm:text-sm"
+        >
+            <span>Next</span>
+            <ChevronRight
+                size={15}
+                className="shrink-0 sm:h-[17px] sm:w-[17px]"
+            />
+        </button>
+
+        <button
+            type="button"
+            onClick={handleRestart}
+            aria-label="Restart"
+            title="Restart"
+            className="opBtn opBtn-secondary flex shrink-0 items-center justify-center p-1.5 sm:gap-1.5 sm:px-3 sm:py-1.5"
+        >
+            <RotateCcw
+                size={15}
+                className="sm:h-[17px] sm:w-[17px]"
+            />
+            <span className="hidden sm:inline text-sm">
+                Restart
+            </span>
+        </button>
+
+        <button
+            type="button"
+            onClick={handleStop}
+            aria-label="Stop"
+            title="Stop"
+            className="opBtn-danger flex shrink-0 items-center justify-center p-1.5 sm:gap-1.5 sm:px-3 sm:py-1.5"
+        >
+            <Square
+                size={14}
+                className="sm:h-4 sm:w-4"
+            />
+            <span className="hidden sm:inline text-sm">
+                Stop
+            </span>
+        </button>
+    </div>
+)}
+                </div>
+
+                {/* =================================================
+                    VISUALIZER
+                ================================================= */}
                 <div className="mt-5 overflow-hidden rounded-xl border border-border bg-bg">
                     <div className="flex items-center justify-between border-b border-border px-4 py-3 sm:px-5">
                         <div>
-                            <div className="text-sm font-semibold text-ink">Array Visualizer</div>
-                            <div className="mt-0.5 text-xs text-muted">{arrExist ? `${array.length} elements` : 'No array created'}</div>
+                            <div className="text-sm font-semibold text-ink">
+                                Array Visualizer
+                            </div>
+
+                            <div className="mt-0.5 text-xs text-muted">
+                                {arrExist
+                                    ? `${array.length} elements`
+                                    : "No array created"}
+                            </div>
                         </div>
+
                         {isFound && (
                             <span
-                                className={`rounded-full px-2.5 py-1 text-xs font-medium ${isFound === 'Found' ? 'bg-sorted/10 text-sorted' : 'bg-swapping/10 text-swapping'
+                                className={`rounded-full px-2.5 py-1 text-xs font-medium ${isFound ===
+                                    "Found"
+                                    ? "bg-sorted/10 text-sorted"
+                                    : "bg-swapping/10 text-swapping"
                                     }`}
                             >
                                 {isFound}
@@ -520,80 +1776,194 @@ const BinarySearchClient = () => {
                     </div>
 
                     <div className="overflow-x-auto p-4 sm:p-5">
-                        {arrExist && array.length > 0 ? (
-                            <div className="w-max min-w-full">
-                                <div className="grid w-fit grid-rows-3" style={{ gridTemplateColumns: `repeat(${array.length}, auto)` }}>
-                                    {/* Mid label row */}
-                                    {array.map((item, index) => (
-                                        <div key={`mid-${index}`} className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-semibold text-pivot">
-                                            {index === mid && isMidVisible ? 'Mid' : ''}
-                                        </div>
-                                    ))}
+                        {arrExist &&
+                            array.length > 0 ? (
+                            <div className="w-full min-w-0">
+                                {/* =================================================
+                                    STEP MESSAGE
+                                ================================================= */}
+                                {renderStepMessage()}
 
-                                    {/* Low/High label row */}
-                                    {array.map((item, index) => (
-                                        <div key={`lh-${index}`} className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-medium text-frontier">
-                                            {index === low ? 'Low' : index === high ? 'High' : ''}
-                                        </div>
-                                    ))}
+                                {/* =================================================
+                                    PLAYER CONTROLS
+                                ================================================= */}
+                                {/* {renderPlayerControls()} */}
+
+                                {/* =================================================
+                                    ARRAY
+                                ================================================= */}
+                                <div
+                                    className="grid w-fit grid-rows-3"
+                                    style={{
+                                        gridTemplateColumns: `repeat(${array.length}, auto)`,
+                                    }}
+                                >
+                                    {/* Mid label row */}
+                                    {array.map(
+                                        (
+                                            item,
+                                            index
+                                        ) => (
+                                            <div
+                                                key={`mid-${index}`}
+                                                className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-semibold text-pivot"
+                                            >
+                                                {index ===
+                                                    mid &&
+                                                    isMidVisible
+                                                    ? "Mid"
+                                                    : ""}
+                                            </div>
+                                        )
+                                    )}
+
+                                    {/* Low / High label row */}
+                                    {array.map(
+                                        (
+                                            item,
+                                            index
+                                        ) => (
+                                            <div
+                                                key={`lh-${index}`}
+                                                className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-medium text-frontier"
+                                            >
+                                                {index ===
+                                                    low ? (
+                                                    "Low"
+                                                ) : index ===
+                                                    high ? (
+                                                    "High"
+                                                ) : (
+                                                    ""
+                                                )}
+                                            </div>
+                                        )
+                                    )}
 
                                     {/* Cells */}
-                                    {array.map((item, index) => {
-                                        const eliminated = isVisible && (index < low || index > high);
-                                        const isMid = index === mid && isMidVisible;
-                                        const isMatch = isMid && isEqual;
+                                    {array.map(
+                                        (
+                                            item,
+                                            index
+                                        ) => {
+                                            const eliminated =
+                                                isSearching &&
+                                                isVisible &&
+                                                (index <
+                                                    low ||
+                                                    index >
+                                                    high);
 
-                                        return (
-                                            <div
-                                                key={`cell-${index}`}
-                                                id={`node-${index}`}
-                                                ref={(el) => (divRefs.current[index] = el)}
-                                                className={`cell arrayDiv h-11 w-14 shrink-0 font-semibold
-                                                    ${item === 'NULL' ? 'italic font-normal text-muted' : ''}
-                                                    ${eliminated ? '!bg-visited/10 !border-visited/40 opacity-40' : ''}
-                                                    ${isMid && !isMatch ? '!border-pivot !bg-pivot text-pivot-text animate-pulse' : ''}
-                                                    ${isMatch ? '!border-sorted !bg-sorted text-sorted-text' : ''}`}
-                                                style={{ animationDelay: `${oldArray ? '0.2' : index * 0.2}s`, animationFillMode: 'both' }}
-                                            >
-                                                {item}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                            const isMid =
+                                                index ===
+                                                mid &&
+                                                isMidVisible;
 
-                                <div className="mt-4 min-h-[1.5rem] text-sm font-semibold text-muted">
-                                    {isVisible && (
-                                        <span>
-                                            Low = {low} {isMidVisible ? `· Mid = ${mid}` : ''} · High = {high}
-                                        </span>
+                                            const isMatch =
+                                                isMid &&
+                                                isEqual;
+
+                                            return (
+                                                <div
+                                                    key={`cell-${index}`}
+                                                    id={`node-${index}`}
+                                                    ref={(
+                                                        el
+                                                    ) =>
+                                                    (divRefs.current[
+                                                        index
+                                                    ] =
+                                                        el)
+                                                    }
+                                                    className={`cell arrayDiv h-11 w-14 shrink-0 font-semibold
+                                                        ${item ===
+                                                            "NULL"
+                                                            ? "italic font-normal text-white"
+                                                            : ""
+                                                        }
+                                                        ${eliminated
+                                                            ? "!border-visited/40 !bg-visited/10 !text-ink opacity-60"
+                                                            : ""
+                                                        }
+                                                        ${isMid &&
+                                                            !isMatch
+                                                            ? "!border-pivot !bg-pivot !text-white animate-pulse"
+                                                            : ""
+                                                        }
+                                                        ${isMatch
+                                                            ? "!border-sorted !bg-sorted !text-white"
+                                                            : ""
+                                                        }`}
+                                                    style={{
+                                                        animationDelay: `${oldArray ? "0.2" : index * 0.2}s`,
+                                                        animationFillMode:
+                                                            "both",
+                                                    }}
+                                                >
+                                                    {item}
+                                                </div>
+                                            );
+                                        }
                                     )}
                                 </div>
 
-                                {stepMessage && (
-                                    <div
-                                        className="mt-3 rounded-md border border-border bg-surface px-3 py-2 text-xs leading-relaxed text-secondary sm:text-sm"
-                                        aria-live="polite"
-                                    >
-                                        {stepMessage}
-                                    </div>
-                                )}
+                                {/* Range info */}
+                                <div className="mt-4 min-h-[1.5rem] text-sm font-semibold text-muted">
+                                    {isVisible &&
+                                        isSearching ? (
+                                        <span>
+                                            Low ={" "}
+                                            {low}{" "}
+                                            {isMidVisible
+                                                ? `· Mid = ${mid}`
+                                                : ""}{" "}
+                                            · High ={" "}
+                                            {high}
+                                        </span>
+                                    ) : null}
+                                </div>
 
+                                {/* Legend */}
                                 <div className="mt-4">
                                     <StateLegend
                                         items={[
-                                            { token: 'frontier', label: 'Low / High' },
-                                            { token: 'pivot', label: 'Mid (checking)' },
-                                            { token: 'visited', label: 'Eliminated range' },
-                                            { token: 'sorted', label: 'Found' },
+                                            {
+                                                token: "frontier",
+                                                label: "Low / High",
+                                            },
+                                            {
+                                                token: "pivot",
+                                                label: "Mid (checking)",
+                                            },
+                                            {
+                                                token: "visited",
+                                                label: "Eliminated range",
+                                            },
+                                            {
+                                                token: "sorted",
+                                                label: "Found",
+                                            },
                                         ]}
                                     />
                                 </div>
                             </div>
                         ) : (
                             <div className="flex min-h-[150px] flex-col items-center justify-center text-center">
-                                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-element text-muted">∅</div>
-                                <p className="text-sm font-medium text-ink">No array to visualize</p>
-                                <p className="mt-1 max-w-xs text-xs leading-relaxed text-muted">Create an array above to start experimenting.</p>
+                                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-element text-muted">
+                                    ∅
+                                </div>
+
+                                <p className="text-sm font-medium text-ink">
+                                    No array to
+                                    visualize
+                                </p>
+
+                                <p className="mt-1 max-w-xs text-xs leading-relaxed text-muted">
+                                    Create an
+                                    array above
+                                    to start
+                                    experimenting.
+                                </p>
                             </div>
                         )}
                     </div>

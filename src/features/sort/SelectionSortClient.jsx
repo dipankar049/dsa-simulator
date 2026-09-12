@@ -1,9 +1,26 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, {
+    useState,
+    useRef,
+    useEffect,
+    useContext,
+    useCallback,
+} from "react";
 import { DetailsStateContext } from "../../context/DetailsContext";
 import StateLegend from "../../components/StateLegend";
 import { toast } from "react-toastify";
+import {
+    Play,
+    Pause,
+    ChevronLeft,
+    ChevronRight,
+    RotateCcw,
+    Square,
+    ArrowLeftRight,
+    ArrowDown,
+    CheckCircle2,
+} from "lucide-react";
 
 const OPERATION_TABS = [
     { id: "create", label: "Create" },
@@ -12,178 +29,570 @@ const OPERATION_TABS = [
     { id: "delete", label: "Delete" },
 ];
 
-const CELL_WIDTH = 56;
 const SPEED_OPTIONS = [
-    { id: "slow", label: "Slow", multiplier: 1.6 },
-    { id: "normal", label: "Normal", multiplier: 1 },
-    { id: "fast", label: "Fast", multiplier: 0.5 },
+    { id: "slow", label: "Slow", ms: 1900 },
+    { id: "normal", label: "Normal", ms: 1200 },
+    { id: "fast", label: "Fast", ms: 550 },
 ];
 
+const CELL_WIDTH = 56;
+const SWAP_SLIDE_MS = 320;
+
+const FRAME_PACING = {
+    start: 0.5,
+    compare: 1,
+    "new-minimum": 0.9,
+    "no-change": 0.75,
+    swap: 0.85,
+    "swap-animating": 0.55,
+    "swap-done": 0.7,
+    "no-swap": 0.75,
+    sorted: 0.5,
+};
+
+function getFrameDelay(type, baseMs) {
+    const floor =
+        type === "swap-animating"
+            ? SWAP_SLIDE_MS + 80
+            : 200;
+
+    return Math.max(
+        floor,
+        Math.round(baseMs * (FRAME_PACING[type] ?? 1))
+    );
+}
+
+function getStepAction(step) {
+    if (!step) return null;
+
+    switch (step.type) {
+        case "start":
+            return {
+                icon: Play,
+                label: "Starting",
+                tone: "accent",
+            };
+
+        case "compare":
+            return {
+                icon: ArrowLeftRight,
+                label: "Comparing",
+                tone: "comparing",
+            };
+
+        case "new-minimum":
+            return {
+                icon: ArrowDown,
+                label: "New minimum",
+                tone: "pivot",
+            };
+
+        case "no-change":
+            return {
+                icon: CheckCircle2,
+                label: "No change",
+                tone: "secondary",
+            };
+
+        case "swap":
+            return {
+                icon: ArrowLeftRight,
+                label: "Swapping",
+                tone: "swapping",
+            };
+
+        case "swap-animating":
+            return {
+                icon: ArrowLeftRight,
+                label: "Swapping",
+                tone: "swapping",
+            };
+
+        case "swap-done":
+            return {
+                icon: CheckCircle2,
+                label: "Swap complete",
+                tone: "sorted",
+            };
+
+        case "no-swap":
+            return {
+                icon: CheckCircle2,
+                label: "No swap needed",
+                tone: "secondary",
+            };
+
+        case "sorted":
+            return {
+                icon: CheckCircle2,
+                label: "Sorted",
+                tone: "sorted",
+            };
+
+        default:
+            return {
+                icon: ArrowLeftRight,
+                label: "Processing",
+                tone: "secondary",
+            };
+    }
+}
+
+// =========================================================
+// Step generator
+// Builds the entire Selection Sort run up front.
+// Nothing here is async.
+// =========================================================
+function buildSelectionSortSteps(initialArray) {
+    const steps = [];
+    let arr = [...initialArray];
+    const n = arr.length;
+
+    steps.push({
+        type: "start",
+        array: [...arr],
+        min: -1,
+        first: -1,
+        second: -1,
+        pass: 0,
+        comparison: 0,
+        sortedFrom: n,
+        message:
+            "Starting Selection Sort — we'll find the smallest value in each unsorted section and move it to the front.",
+    });
+
+    for (let j = 0; j < n - 1; j++) {
+        let minIndex = j;
+
+        // ---------------------------------------------------------
+        // Start of pass — current position becomes the boundary.
+        // ---------------------------------------------------------
+        steps.push({
+            type: "compare",
+            array: [...arr],
+            min: minIndex,
+            first: j,
+            second: -1,
+            pass: j + 1,
+            comparison: 0,
+            sortedFrom: j,
+            message:
+                `Starting pass ${j + 1}. ${arr[j]} is the current minimum candidate.`,
+        });
+
+        for (let i = j + 1; i < n; i++) {
+            steps.push({
+                type: "compare",
+                array: [...arr],
+                min: minIndex,
+                first: j,
+                second: i,
+                pass: j + 1,
+                comparison: i - j,
+                sortedFrom: j,
+                message:
+                    `Comparing ${arr[i]} with the current minimum ${arr[minIndex]}.`,
+            });
+
+            if (arr[i] < arr[minIndex]) {
+                minIndex = i;
+
+                steps.push({
+                    type: "new-minimum",
+                    array: [...arr],
+                    min: minIndex,
+                    first: j,
+                    second: i,
+                    pass: j + 1,
+                    comparison: i - j,
+                    sortedFrom: j,
+                    message:
+                        `${arr[i]} is smaller — it becomes the new minimum.`,
+                });
+            } else {
+                steps.push({
+                    type: "no-change",
+                    array: [...arr],
+                    min: minIndex,
+                    first: j,
+                    second: i,
+                    pass: j + 1,
+                    comparison: i - j,
+                    sortedFrom: j,
+                    message:
+                        `${arr[i]} is not smaller — the current minimum stays ${arr[minIndex]}.`,
+                });
+            }
+        }
+
+        // ---------------------------------------------------------
+        // Swap if a smaller value was found.
+        // ---------------------------------------------------------
+        if (minIndex !== j) {
+            const leftValue = arr[j];
+            const minValue = arr[minIndex];
+
+            steps.push({
+                type: "swap",
+                array: [...arr],
+                min: minIndex,
+                first: j,
+                second: minIndex,
+                pass: j + 1,
+                comparison: 0,
+                sortedFrom: j,
+                message:
+                    `${minValue} is the smallest value found, so we'll swap it with ${leftValue}.`,
+            });
+
+            steps.push({
+                type: "swap-animating",
+                array: [...arr],
+                min: minIndex,
+                first: j,
+                second: minIndex,
+                pass: j + 1,
+                comparison: 0,
+                sortedFrom: j,
+                swapFrom: j,
+                swapTo: minIndex,
+                message:
+                    `Moving ${minValue} to position ${j} and ${leftValue} to position ${minIndex}.`,
+            });
+
+            [arr[j], arr[minIndex]] = [arr[minIndex], arr[j]];
+
+            steps.push({
+                type: "swap-done",
+                array: [...arr],
+                min: -1,
+                first: j,
+                second: -1,
+                pass: j + 1,
+                comparison: 0,
+                sortedFrom: j + 1,
+                message:
+                    `Swap complete — ${arr[j]} is now in its sorted position.`,
+            });
+        } else {
+            steps.push({
+                type: "no-swap",
+                array: [...arr],
+                min: -1,
+                first: j,
+                second: -1,
+                pass: j + 1,
+                comparison: 0,
+                sortedFrom: j + 1,
+                message:
+                    `${arr[j]} is already the smallest value in the unsorted part — no swap needed.`,
+            });
+        }
+    }
+
+    steps.push({
+        type: "sorted",
+        array: [...arr],
+        min: -1,
+        first: -1,
+        second: -1,
+        pass: n > 1 ? n - 1 : 0,
+        comparison: 0,
+        sortedFrom: 0,
+        message:
+            "Array is sorted! Every value is now in its correct position.",
+    });
+
+    return steps;
+}
+
 const SelectionSortClient = () => {
-    const [array, setArray] = useState([20, 64, 132, 101, 95, 7, 64, 153, 80]);
+    const [array, setArray] = useState([
+        20,
+        64,
+        132,
+        101,
+        95,
+        7,
+        64,
+        153,
+        80,
+    ]);
+
     const [arrExist, setArrExist] = useState(true);
     const [oldArray, setOldArray] = useState(false);
 
-    const [arrayLength, setArrayLength] = useState('');
-    const [pushValue, setPushValue] = useState('');
-    const [insertValue, setInsertValue] = useState('');
-    const [insertIndex, setInsertIndex] = useState('');
-    const [deleteValue, setDeleteValue] = useState('');
+    const [arrayLength, setArrayLength] = useState("");
+    const [pushValue, setPushValue] = useState("");
+    const [insertValue, setInsertValue] = useState("");
+    const [insertIndex, setInsertIndex] = useState("");
+    const [deleteValue, setDeleteValue] = useState("");
 
-    const [activeTab, setActiveTab] = useState('create');
+    const [activeTab, setActiveTab] = useState("create");
 
-    const [isVisible, setIsVisible] = useState(false);
     const [isSorted, setIsSorted] = useState(false);
-    const [iterations, setIterations] = useState(0);
-    const [comparisons, setComparisons] = useState(0);
-    const [stepMessage, setStepMessage] = useState('');
-    const divRefs = useRef([]);
-    const abortRef = useRef(false);
-    const [isRunning, setIsRunning] = useState(false);
-
-    const [isSmaller, setIsSmaller] = useState(false);
-    const [min, setMin] = useState(-1);
-    const [firstEle, setFirstEle] = useState(-1);
-    const [secondEle, setSecondEle] = useState(-1);
-
-    // Cells currently mid-swap get a translateX offset here so they visibly
-    // slide across to their new slot instead of just flashing a new value.
-    const [swapOffsets, setSwapOffsets] = useState({});
-
-    const [speed, setSpeed] = useState('normal');
-    const speedRef = useRef(1);
-    useEffect(() => {
-        speedRef.current = SPEED_OPTIONS.find((o) => o.id === speed)?.multiplier ?? 1;
-    }, [speed]);
-
-    const { detailsState, updateState } = useContext(DetailsStateContext);
-    const handleToggle = (id, isOpen) => updateState(id, isOpen);
-
-    // Reads speedRef fresh on every call, so changing speed mid-sort takes
-    // effect immediately instead of only on the next run.
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms * speedRef.current));
-
-    useEffect(() => {
-        if (array.length === 0 && activeTab !== 'create') {
-            setActiveTab('create');
-        }
-    }, [array.length]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    useEffect(() => {
-        if (array.length === 0) {
-            setIsVisible(false);
-        }
-        setIsSorted(false);
-        setStepMessage('');
-        setSwapOffsets({});
-    }, [array]);
 
     // =========================================================
-    // Sort
+    // Step player state
     // =========================================================
-    const selectionSort = async () => {
-        if (!arrExist) {
-            toast.error('Please create an array first.');
-            return;
-        }
-        if (array.includes('NULL')) {
-            toast.error('Fill every slot first — sorting needs a complete array, no empty slots.');
-            return;
-        }
-        if (array.length < 2) {
-            toast.info('Array already has fewer than 2 elements — nothing to sort.');
-            return;
-        }
+    const [steps, setSteps] = useState([]);
+    const [stepIndex, setStepIndex] = useState(0);
+    const [isSorting, setIsSorting] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
 
-        setIsVisible(true);
-        abortRef.current = false;
-        setIsRunning(true);
+    const directionRef = useRef("forward");
+    const sortedToastShownRef = useRef(false);
+
+    const currentStep = isSorting
+        ? steps[stepIndex] ?? null
+        : null;
+
+    const [speed, setSpeed] = useState("normal");
+
+    const speedMs =
+        SPEED_OPTIONS.find((o) => o.id === speed)?.ms ?? 1200;
+
+    const { detailsState, updateState } =
+        useContext(DetailsStateContext);
+
+    const handleToggle = (id, isOpen) =>
+        updateState(id, isOpen);
+
+    useEffect(() => {
+        if (array.length === 0 && activeTab !== "create") {
+            setActiveTab("create");
+        }
+    }, [array.length, activeTab]);
+
+    // =========================================================
+    // Reset sort/player state
+    // =========================================================
+    const resetSortView = () => {
         setIsSorted(false);
-        setComparisons(0);
-
-        // Work on a local copy so every visual update goes through setArray.
-        let workingArray = [...array];
-
-        for (let j = 0; j < workingArray.length - 1; j++) {
-            setFirstEle(j);
-            setIterations(j + 1);
-            setMin(j);
-            let minIndex = j;
-
-            // Start at j + 1 — comparing the minimum to itself is wasted work.
-            for (let i = j + 1; i < workingArray.length; i++) {
-                if (abortRef.current) {
-                    setIsRunning(false);
-                    setStepMessage('');
-                    setSwapOffsets({});
-                    toast.info('Sorting aborted.');
-                    return;
-                }
-                setComparisons(i - j);
-                setSecondEle(i);
-                setStepMessage(`Is ${workingArray[i]} smaller than the current minimum ${workingArray[minIndex]}?`);
-                await delay(1000);
-
-                if (workingArray[i] < workingArray[minIndex]) {
-                    setIsSmaller(true);
-                    minIndex = i;
-                    setStepMessage(`${workingArray[i]} is the new minimum for this pass.`);
-                    await delay(1000);
-                } else {
-                    setIsSmaller(false);
-                    setStepMessage(`${workingArray[i]} ≥ ${workingArray[minIndex]} — minimum stays the same.`);
-                    await delay(700);
-                }
-                setMin(minIndex);
-            }
-
-            if (minIndex !== j) {
-                setStepMessage(`Swapping ${workingArray[j]} (position ${j}) with the minimum ${workingArray[minIndex]} (position ${minIndex}).`);
-                // The two positions can be any distance apart here (unlike bubble
-                // sort's adjacent swaps), so scale the slide by that distance.
-                const distance = (minIndex - j) * CELL_WIDTH;
-                setSwapOffsets({ [j]: distance, [minIndex]: -distance });
-                await delay(650);
-
-                const swapped = [...workingArray];
-                [swapped[j], swapped[minIndex]] = [swapped[minIndex], swapped[j]];
-                workingArray = swapped;
-                setArray(swapped);
-                setSwapOffsets({});
-                await delay(350);
-            } else {
-                setStepMessage(`${workingArray[j]} is already the minimum for this pass — no swap needed.`);
-                await delay(700);
-            }
-
-            if (j === workingArray.length - 2) {
-                setIsSorted(true);
-                setMin(-1);
-                setFirstEle(-1);
-                setSecondEle(-1);
-                setStepMessage('Array is sorted!');
-            }
-        }
-        setIsRunning(false);
+        setSteps([]);
+        setStepIndex(0);
+        setIsSorting(false);
+        setIsPlaying(false);
+        sortedToastShownRef.current = false;
+        directionRef.current = "forward";
     };
+
+    // =========================================================
+    // Sort — start / stop / navigation
+    // =========================================================
+    const startSort = () => {
+        if (!arrExist) {
+            toast.error("Please create an array first.");
+            return;
+        }
+
+        if (array.includes("NULL")) {
+            toast.error(
+                "Fill every slot first — sorting needs a complete array, no empty slots."
+            );
+            return;
+        }
+
+        if (array.length < 2) {
+            toast.info(
+                "Array already has fewer than 2 elements — nothing to sort."
+            );
+            return;
+        }
+
+        const generated =
+            buildSelectionSortSteps(array);
+
+        sortedToastShownRef.current = false;
+
+        setSteps(generated);
+        setStepIndex(0);
+        setIsSorted(false);
+        setIsSorting(true);
+
+        directionRef.current = "forward";
+        setIsPlaying(true);
+    };
+
+    const stopSort = (commit = true) => {
+        const step = steps[stepIndex];
+
+        if (commit && step) {
+            setArray(step.array);
+        }
+
+        setIsPlaying(false);
+        setIsSorting(false);
+        setSteps([]);
+        setStepIndex(0);
+
+        directionRef.current = "forward";
+
+        toast.info("Sorting stopped.");
+    };
+
+    const goNext = useCallback(() => {
+        setIsPlaying(false);
+        directionRef.current = "forward";
+
+        setStepIndex((i) =>
+            Math.min(i + 1, steps.length - 1)
+        );
+    }, [steps.length]);
+
+    const goPrev = useCallback(() => {
+        setIsPlaying(false);
+        directionRef.current = "backward";
+
+        setStepIndex((i) =>
+            Math.max(i - 1, 0)
+        );
+    }, []);
+
+    const togglePlay = useCallback(() => {
+        if (!steps.length) return;
+
+        if (stepIndex >= steps.length - 1) {
+            directionRef.current = "forward";
+            setStepIndex(0);
+            setIsPlaying(true);
+            return;
+        }
+
+        directionRef.current = "forward";
+        setIsPlaying((p) => !p);
+    }, [stepIndex, steps.length]);
+
+    const restartSort = () => {
+        directionRef.current = "forward";
+        setStepIndex(0);
+        setIsPlaying(true);
+    };
+
+    // =========================================================
+    // Auto advance
+    // =========================================================
+    useEffect(() => {
+        if (!isPlaying || !steps.length) return;
+
+        if (stepIndex >= steps.length - 1) {
+            setIsPlaying(false);
+            return;
+        }
+
+        const type =
+            steps[stepIndex]?.type;
+
+        const timer = setTimeout(() => {
+            directionRef.current = "forward";
+
+            setStepIndex((i) =>
+                Math.min(i + 1, steps.length - 1)
+            );
+        }, getFrameDelay(type, speedMs));
+
+        return () => clearTimeout(timer);
+    }, [
+        isPlaying,
+        stepIndex,
+        steps,
+        speedMs,
+    ]);
+
+    // =========================================================
+    // Commit final sorted state
+    // =========================================================
+    useEffect(() => {
+        if (!isSorting) return;
+
+        const step = steps[stepIndex];
+
+        if (step?.type === "sorted") {
+            setArray(step.array);
+            setIsSorted(true);
+            setIsPlaying(false);
+
+            if (!sortedToastShownRef.current) {
+                toast.success("Array is sorted!");
+                sortedToastShownRef.current = true;
+            }
+        }
+    }, [
+        stepIndex,
+        steps,
+        isSorting,
+    ]);
+
+    // =========================================================
+    // Keyboard controls
+    // =========================================================
+    useEffect(() => {
+        if (!isSorting) return;
+
+        const handler = (e) => {
+            if (e.key === "ArrowRight") {
+                e.preventDefault();
+                goNext();
+            } else if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                goPrev();
+            } else if (e.key === " ") {
+                e.preventDefault();
+                togglePlay();
+            }
+        };
+
+        window.addEventListener(
+            "keydown",
+            handler
+        );
+
+        return () =>
+            window.removeEventListener(
+                "keydown",
+                handler
+            );
+    }, [
+        isSorting,
+        goNext,
+        goPrev,
+        togglePlay,
+    ]);
 
     // =========================================================
     // Create array
     // =========================================================
     const createArray = async () => {
-        if (arrayLength === '' || parseInt(arrayLength) <= 0) {
-            toast.error('Array length must be greater than 0.');
+        if (
+            arrayLength === "" ||
+            parseInt(arrayLength) <= 0
+        ) {
+            toast.error(
+                "Array length must be greater than 0."
+            );
             return;
         }
 
-        await delay(200);
+        resetSortView();
+
         setOldArray(false);
         setArray([]);
         setArrExist(true);
-        await delay(500);
-        setArray(Array(parseInt(arrayLength)).fill('NULL'));
-        toast.success('Array created successfully', { position: 'top-center' });
-        setActiveTab('pushpop');
+
+        await new Promise((r) =>
+            setTimeout(r, 500)
+        );
+
+        setArray(
+            Array(parseInt(arrayLength)).fill("NULL")
+        );
+
+        toast.success(
+            "Array created successfully",
+            { position: "top-center" }
+        );
+
+        setActiveTab("pushpop");
     };
 
     // =========================================================
@@ -191,30 +600,58 @@ const SelectionSortClient = () => {
     // =========================================================
     const arrayPushOperation = () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
-        if (pushValue === '') {
-            toast.error('Please enter an element');
+
+        if (pushValue === "") {
+            toast.error(
+                "Please enter an element"
+            );
             return;
         }
+
+        resetSortView();
+
         setOldArray(true);
-        setArray([...array, Number(pushValue)]);
-        toast.success('Element successfully pushed into the array.');
-        setPushValue('');
+        setArray([
+            ...array,
+            Number(pushValue),
+        ]);
+
+        toast.success(
+            "Element successfully pushed into the array."
+        );
+
+        setPushValue("");
     };
 
     const arrayPopOperation = () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
+
         if (array.length === 0) {
-            toast.error('Array is already empty.');
+            toast.error(
+                "Array is already empty."
+            );
             return;
         }
-        setArray(array.slice(0, -1));
-        toast.success('Element popped from the array.');
+
+        resetSortView();
+
+        setArray(
+            array.slice(0, -1)
+        );
+
+        toast.success(
+            "Element popped from the array."
+        );
     };
 
     // =========================================================
@@ -222,37 +659,69 @@ const SelectionSortClient = () => {
     // =========================================================
     const arrayInsert = async () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
-            return;
-        }
-        if (insertValue === '') {
-            toast.error('Please enter an element.');
-            return;
-        }
-        if (insertIndex === '') {
-            toast.error('Please enter an index.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
 
-        const index = parseInt(insertIndex);
-        const value = Number(insertValue);
-
-        if (index > array.length || index < 0) {
-            toast.error(`Index must be between 0 and ${array.length}.`);
+        if (insertValue === "") {
+            toast.error(
+                "Please enter an element."
+            );
             return;
         }
 
-        await delay(1000);
+        if (insertIndex === "") {
+            toast.error(
+                "Please enter an index."
+            );
+            return;
+        }
+
+        const index =
+            parseInt(insertIndex);
+
+        const value =
+            Number(insertValue);
+
+        if (
+            index > array.length ||
+            index < 0
+        ) {
+            toast.error(
+                `Index must be between 0 and ${array.length}.`
+            );
+            return;
+        }
+
+        resetSortView();
+
+        await new Promise((r) =>
+            setTimeout(r, 400)
+        );
 
         if (index === array.length) {
-            setArray((prev) => [...prev, value]);
+            setArray((prev) => [
+                ...prev,
+                value,
+            ]);
         } else {
-            setArray((prev) => prev.map((item, i) => (i === index ? value : item)));
+            setArray((prev) =>
+                prev.map((item, i) =>
+                    i === index
+                        ? value
+                        : item
+                )
+            );
         }
 
-        toast.success(`"${insertValue}" inserted at index ${insertIndex}`);
-        setInsertValue('');
-        setInsertIndex('');
+        toast.success(
+            `"${insertValue}" inserted at index ${insertIndex}`
+        );
+
+        setInsertValue("");
+        setInsertIndex("");
     };
 
     // =========================================================
@@ -260,99 +729,286 @@ const SelectionSortClient = () => {
     // =========================================================
     const removeByEle = () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
-        if (deleteValue === '') {
-            toast.error('Please enter an element.');
+
+        if (deleteValue === "") {
+            toast.error(
+                "Please enter an element."
+            );
             return;
         }
-        if (!array.includes(Number(deleteValue))) {
-            toast.error('Element not found.');
+
+        if (
+            !array.includes(
+                Number(deleteValue)
+            )
+        ) {
+            toast.error(
+                "Element not found."
+            );
             return;
         }
-        setArray((prev) => prev.map((item) => (item === Number(deleteValue) ? 'NULL' : item)));
-        toast.success('Element deleted.');
-        setDeleteValue('');
+
+        resetSortView();
+
+        setArray((prev) =>
+            prev.map((item) =>
+                item === Number(deleteValue)
+                    ? "NULL"
+                    : item
+            )
+        );
+
+        toast.success(
+            "Element deleted."
+        );
+
+        setDeleteValue("");
     };
 
     const removeArray = () => {
         if (!arrExist) {
-            toast.error('Please create an array first.');
+            toast.error(
+                "Please create an array first."
+            );
             return;
         }
+
+        resetSortView();
+
         setOldArray(false);
         setArray([]);
         setArrExist(false);
-        toast.success('Array has been successfully deleted.');
-        setPushValue('');
-        setInsertValue('');
-        setInsertIndex('');
-        setDeleteValue('');
+
+        toast.success(
+            "Array has been successfully deleted."
+        );
+
+        setPushValue("");
+        setInsertValue("");
+        setInsertIndex("");
+        setDeleteValue("");
     };
 
-    const cellStyle = (index) => {
-        if (index === min) {
+    // =========================================================
+    // Visualizer
+    // =========================================================
+    const displayArray =
+        isSorting && currentStep
+            ? currentStep.array
+            : array;
+
+    const getCellStyle = (index) => {
+        if (!isSorting || !currentStep) {
+            return {};
+        }
+
+        const { first, second, min } = currentStep;
+
+        // Currently comparing candidate with minimum
+        if (currentStep.type === 'compare' && index === second) {
             return {
-                backgroundColor: 'rgb(var(--color-pivot))',
-                borderColor: 'rgb(var(--color-pivot))',
-                color: 'rgb(var(--color-pivot-text))',
+                backgroundColor: 'var(--color-comparing)',
+                color: 'var(--color-comparing-text)',
+                borderColor: 'var(--color-comparing)',
             };
         }
 
-        if (index === firstEle) {
+        // New minimum
+        if (currentStep.type === 'new-minimum' && index === min) {
             return {
-                backgroundColor: 'rgb(var(--color-frontier))',
-                borderColor: 'rgb(var(--color-frontier))',
-                color: 'rgb(var(--color-frontier-text))',
+                backgroundColor: 'var(--color-pivot)',
+                color: 'var(--color-pivot-text)',
+                borderColor: 'var(--color-pivot)',
             };
         }
 
-        if (index === secondEle) {
+        // During swap animation, highlight the two cells being swapped
+        if (
+            currentStep.type === 'swap-animating' &&
+            (index === first || index === min)
+        ) {
             return {
-                backgroundColor: isSmaller ? 'rgb(var(--color-comparing))' : 'rgb(var(--color-element))',
-                borderColor: isSmaller ? 'rgb(var(--color-comparing))' : 'rgb(var(--color-element-border))',
-                color: isSmaller ? 'rgb(var(--color-comparing-text))' : 'rgb(var(--color-text-primary))',
+                backgroundColor: 'var(--color-swapping)',
+                color: 'var(--color-swapping-text)',
+                borderColor: 'var(--color-swapping)',
             };
         }
+
+        // Minimum so far
+        if (
+            min !== null &&
+            min !== undefined &&
+            index === min &&
+            currentStep.type !== 'swap-done'
+        ) {
+            return {
+                backgroundColor: 'var(--color-pivot)',
+                color: 'var(--color-pivot-text)',
+                borderColor: 'var(--color-pivot)',
+            };
+        }
+
+        // Current position / sorted boundary
+        if (
+            first !== null &&
+            first !== undefined &&
+            index === first &&
+            currentStep.type !== 'sorted'
+        ) {
+            return {
+                backgroundColor: 'var(--color-frontier)',
+                color: 'var(--color-frontier-text)',
+                borderColor: 'var(--color-frontier)',
+            };
+        }
+
         return {};
     };
+
+    // =========================================================
+    // Swap transform
+    // Only the forward transition INTO swap-animating
+    // gets a transform.
+    //
+    // This intentionally matches Bubble Sort behaviour:
+    // - swap frame: no movement
+    // - swap-animating: slide
+    // - swap-done: snap
+    // - backward: snap
+    // =========================================================
+    const getCellTransform = (index) => {
+        if (
+            !isSorting ||
+            !currentStep
+        ) {
+            return {
+                transform: undefined,
+                transition: "none",
+            };
+        }
+
+        if (
+            currentStep.type ===
+            "swap-animating" &&
+            directionRef.current ===
+            "forward"
+        ) {
+            const from =
+                currentStep.swapFrom;
+
+            const to =
+                currentStep.swapTo;
+
+            if (index === from) {
+                const distance =
+                    (to - from) *
+                    CELL_WIDTH;
+
+                return {
+                    transform: `translateX(${distance}px)`,
+                    transition: `transform ${SWAP_SLIDE_MS}ms ease`,
+                };
+            }
+
+            if (index === to) {
+                const distance =
+                    (to - from) *
+                    CELL_WIDTH;
+
+                return {
+                    transform: `translateX(${-distance}px)`,
+                    transition: `transform ${SWAP_SLIDE_MS}ms ease`,
+                };
+            }
+        }
+
+        return {
+            transform: "none",
+            transition: "none",
+        };
+    };
+
+    const showSortedBadge =
+        isSorting
+            ? currentStep?.type === "sorted"
+            : isSorted;
 
     return (
         <details
             id="selectionSortOp"
             className="mb-5 w-full overflow-hidden rounded-xl border border-border bg-surface text-ink"
-            onToggle={(e) => handleToggle('selectionSortOp', e.target.open)}
-            open={detailsState['selectionSortOp'] !== undefined ? detailsState['selectionSortOp'] : true}
+            onToggle={(e) =>
+                handleToggle(
+                    "selectionSortOp",
+                    e.target.open
+                )
+            }
+            open={
+                detailsState[
+                    "selectionSortOp"
+                ] !== undefined
+                    ? detailsState[
+                    "selectionSortOp"
+                    ]
+                    : true
+            }
         >
             <summary className="cursor-pointer select-none px-4 py-4 sm:px-5 text-base sm:text-lg md:text-xl font-semibold text-ink marker:text-accent hover:bg-bg/50 transition-colors">
                 Selection Sort
             </summary>
 
             <div className="px-4 pb-5 sm:px-5">
+
                 {/* =================================================
-              OPERATIONS PANEL
-          ================================================= */}
+                    OPERATIONS PANEL
+                ================================================= */}
                 <div className="rounded-lg border border-border bg-bg p-4">
                     <div className="mb-3 flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-ink">Build Array</h3>
+                        <h3 className="text-sm font-semibold text-ink">
+                            Build Array
+                        </h3>
+
                         <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
-                            {arrExist ? `${array.length} elements` : 'No array yet'}
+                            {arrExist
+                                ? `${array.length} elements`
+                                : "No array yet"}
                         </span>
                     </div>
 
-                    <div className="mb-4 flex w-full flex-wrap rounded-md border border-borderStrong bg-surface p-1 sm:flex-nowrap">
+                    <div className="mb-4 flex w-full flex-wrap rounded-md border border-borderStrong bg-surface p-0.5 sm:flex-nowrap sm:p-1">
                         {OPERATION_TABS.map((tab) => {
-                            const disabled = tab.id !== 'create' && !arrExist;
+                            const disabled =
+                                tab.id !== "create" &&
+                                !arrExist;
+
                             return (
                                 <button
                                     key={tab.id}
                                     type="button"
-                                    disabled={disabled || isRunning}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`flex-1 basis-1/2 rounded px-3 py-2 text-xs sm:basis-0 sm:text-sm font-medium transition-colors
-                      ${activeTab === tab.id ? 'bg-accent text-white' : 'text-muted hover:bg-element hover:text-ink'}
-                      ${disabled || isRunning ? 'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted' : ''}`}
+                                    disabled={
+                                        disabled ||
+                                        isSorting
+                                    }
+                                    onClick={() =>
+                                        setActiveTab(
+                                            tab.id
+                                        )
+                                    }
+                                    className={`flex-1 basis-[calc(50%-4px)] m-0.5 rounded px-2 py-1.5 text-[10px] sm:basis-0 sm:m-0 sm:px-3 sm:py-2 sm:text-sm font-medium transition-colors
+                      ${activeTab === tab.id
+                                            ? "bg-accent text-white"
+                                            : "text-muted hover:bg-element hover:text-ink"
+                                        }
+                      ${disabled ||
+                                            isSorting
+                                            ? "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted"
+                                            : ""
+                                        }`}
                                 >
                                     {tab.label}
                                 </button>
@@ -360,48 +1016,99 @@ const SelectionSortClient = () => {
                         })}
                     </div>
 
-                    {activeTab === 'create' && (
+                    {activeTab === "create" && (
                         <div className="flex flex-col gap-3">
                             <p className="text-xs leading-relaxed text-muted">
-                                Start with an empty array of a chosen length. New slots start as{' '}
-                                <span className="font-medium text-ink">NULL</span> — fill them with Push or Insert below.
+                                Start with an empty array of a chosen length. New slots start as{" "}
+                                <span className="font-medium text-ink">
+                                    NULL
+                                </span>{" "}
+                                — fill them with Push or Insert below.
                             </p>
+
                             <div className="flex flex-col gap-2 sm:flex-row">
                                 <input
                                     type="number"
                                     min={1}
-                                    value={arrayLength}
-                                    onChange={(e) => setArrayLength(e.target.value)}
+                                    value={
+                                        arrayLength
+                                    }
+                                    onChange={(e) =>
+                                        setArrayLength(
+                                            e.target.value
+                                        )
+                                    }
                                     className="opInput w-full sm:flex-1"
                                     placeholder="Array length"
-                                    disabled={isRunning}
+                                    disabled={
+                                        isSorting
+                                    }
                                 />
-                                <button type="button" onClick={createArray} disabled={isRunning} className="opBtn w-full whitespace-nowrap sm:w-auto">
+
+                                <button
+                                    type="button"
+                                    onClick={
+                                        createArray
+                                    }
+                                    disabled={
+                                        isSorting
+                                    }
+                                    className="opBtn w-full whitespace-nowrap sm:w-auto"
+                                >
                                     Create Array
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {activeTab === 'pushpop' && (
+                    {activeTab === "pushpop" && (
                         <div className="flex flex-col gap-3">
                             <p className="text-xs leading-relaxed text-muted">
                                 Push adds a value to the end of the array. Order doesn't matter yet — that's exactly what sorting will fix.
                             </p>
+
                             <div className="flex flex-col gap-2 sm:flex-row">
                                 <input
                                     type="number"
-                                    value={pushValue}
-                                    onChange={(e) => setPushValue(e.target.value)}
+                                    value={
+                                        pushValue
+                                    }
+                                    onChange={(e) =>
+                                        setPushValue(
+                                            e.target.value
+                                        )
+                                    }
                                     className="opInput w-full sm:flex-1"
                                     placeholder="Value"
-                                    disabled={isRunning}
+                                    disabled={
+                                        isSorting
+                                    }
                                 />
+
                                 <div className="flex w-full gap-2 sm:w-auto">
-                                    <button type="button" onClick={arrayPushOperation} disabled={isRunning} className="opBtn flex-1 whitespace-nowrap sm:flex-none">
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            arrayPushOperation
+                                        }
+                                        disabled={
+                                            isSorting
+                                        }
+                                        className="opBtn flex-1 whitespace-nowrap sm:flex-none"
+                                    >
                                         Push
                                     </button>
-                                    <button type="button" onClick={arrayPopOperation} disabled={isRunning} className="opBtn-secondary flex-1 whitespace-nowrap sm:flex-none">
+
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            arrayPopOperation
+                                        }
+                                        disabled={
+                                            isSorting
+                                        }
+                                        className="opBtn-secondary flex-1 whitespace-nowrap sm:flex-none"
+                                    >
                                         Pop
                                     </button>
                                 </div>
@@ -409,60 +1116,115 @@ const SelectionSortClient = () => {
                         </div>
                     )}
 
-                    {activeTab === 'insert' && (
+                    {activeTab === "insert" && (
                         <div className="flex flex-col gap-3">
                             <p className="text-xs leading-relaxed text-muted">
                                 Insert at any index — fills an empty NULL slot, or extends the array if you target the end.
                             </p>
+
                             <div className="flex flex-col gap-2 sm:flex-row">
                                 <input
                                     type="number"
-                                    value={insertValue}
-                                    onChange={(e) => setInsertValue(e.target.value)}
+                                    value={
+                                        insertValue
+                                    }
+                                    onChange={(e) =>
+                                        setInsertValue(
+                                            e.target.value
+                                        )
+                                    }
                                     className="opInput w-full sm:flex-1"
                                     placeholder="Value"
-                                    disabled={isRunning}
+                                    disabled={
+                                        isSorting
+                                    }
                                 />
+
                                 <input
                                     type="number"
                                     min={0}
-                                    value={insertIndex}
-                                    onChange={(e) => setInsertIndex(e.target.value)}
+                                    value={
+                                        insertIndex
+                                    }
+                                    onChange={(e) =>
+                                        setInsertIndex(
+                                            e.target.value
+                                        )
+                                    }
                                     className="opInput w-full sm:flex-1"
                                     placeholder="Index"
-                                    disabled={isRunning}
+                                    disabled={
+                                        isSorting
+                                    }
                                 />
-                                <button type="button" onClick={arrayInsert} disabled={isRunning} className="opBtn w-full whitespace-nowrap sm:w-auto">
+
+                                <button
+                                    type="button"
+                                    onClick={
+                                        arrayInsert
+                                    }
+                                    disabled={
+                                        isSorting
+                                    }
+                                    className="opBtn w-full whitespace-nowrap sm:w-auto"
+                                >
                                     Insert
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {activeTab === 'delete' && (
+                    {activeTab === "delete" && (
                         <div className="flex flex-col gap-4">
-                            <p className="text-xs leading-relaxed text-muted">Delete the first matching value, or clear the whole array.</p>
+                            <p className="text-xs leading-relaxed text-muted">
+                                Delete the first matching value, or clear the whole array.
+                            </p>
+
                             <div className="flex flex-col gap-2 sm:flex-row">
                                 <input
                                     type="number"
-                                    value={deleteValue}
-                                    onChange={(e) => setDeleteValue(e.target.value)}
+                                    value={
+                                        deleteValue
+                                    }
+                                    onChange={(e) =>
+                                        setDeleteValue(
+                                            e.target.value
+                                        )
+                                    }
                                     className="opInput w-full sm:max-w-[180px]"
                                     placeholder="Value"
-                                    disabled={isRunning}
+                                    disabled={
+                                        isSorting
+                                    }
                                 />
-                                <button type="button" onClick={removeByEle} disabled={isRunning} className="opBtn-secondary w-full whitespace-nowrap sm:w-auto">
+
+                                <button
+                                    type="button"
+                                    onClick={
+                                        removeByEle
+                                    }
+                                    disabled={
+                                        isSorting
+                                    }
+                                    className="opBtn-secondary w-full whitespace-nowrap sm:w-auto"
+                                >
                                     Delete
                                 </button>
                             </div>
+
                             <div className="flex flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
                                 <p className="text-xs leading-relaxed text-muted">
                                     Need a fresh array? Remove the current array and create a new one.
                                 </p>
+
                                 <button
                                     type="button"
-                                    onClick={removeArray}
-                                    disabled={isRunning}
+                                    onClick={
+                                        removeArray
+                                    }
+                                    disabled={
+                                        isSorting
+                                    }
                                     className="opBtn-danger w-full whitespace-nowrap sm:w-auto"
                                 >
                                     Delete Array
@@ -473,132 +1235,440 @@ const SelectionSortClient = () => {
                 </div>
 
                 {/* =================================================
-              SORT PANEL
-          ================================================= */}
-                <div className="mt-5 rounded-lg border border-border bg-bg p-4">
-                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    SORT PANEL
+                ================================================= */}
+                <div className="mt-4 rounded-lg border border-border bg-bg p-3 sm:mt-5 sm:p-4">
+                    <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
                         <div>
-                            <h3 className="text-sm font-semibold text-ink">Sort</h3>
-                            <p className="text-xs leading-relaxed text-muted">Scans the unsorted part for the smallest value and moves it to the front.</p>
+                            <h3 className="text-sm font-semibold text-ink">
+                                Sort
+                            </h3>
+
+                            <p className="text-[10px] leading-relaxed text-muted sm:text-xs">
+                                Finds the smallest value in the unsorted part and moves it to the front.
+                            </p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-muted">
-                            <span>Pass: {iterations}</span>
-                            <span>Comparisons: {comparisons}</span>
+
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-medium text-muted sm:text-xs">
+                            <div className="flex gap-3">
+                                <span>
+                                    Pass:{" "}
+                                    {currentStep?.pass ??
+                                        0}
+                                </span>
+
+                                <span>
+                                    Comparison:{" "}
+                                    {currentStep?.comparison ??
+                                        0}
+                                </span>
+                            </div>
+
                             <div className="flex items-center gap-1.5">
-                                <span>Speed</span>
+                                <span>
+                                    Speed
+                                </span>
+
                                 <div className="flex rounded-md border border-borderStrong bg-surface p-0.5">
-                                    {SPEED_OPTIONS.map((opt) => (
-                                        <button
-                                            key={opt.id}
-                                            type="button"
-                                            onClick={() => setSpeed(opt.id)}
-                                            className={`rounded px-2 py-1 text-xs font-medium transition-colors ${speed === opt.id ? 'bg-accent text-white' : 'text-muted hover:bg-element hover:text-ink'
-                                                }`}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
+                                    {SPEED_OPTIONS.map(
+                                        (opt) => (
+                                            <button
+                                                key={
+                                                    opt.id
+                                                }
+                                                type="button"
+                                                onClick={() =>
+                                                    setSpeed(
+                                                        opt.id
+                                                    )
+                                                }
+                                                className={`rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors sm:px-2 sm:py-1 sm:text-xs ${speed ===
+                                                    opt.id
+                                                    ? "bg-accent text-white"
+                                                    : "text-muted hover:bg-element hover:text-ink"
+                                                    }`}
+                                            >
+                                                {
+                                                    opt.label
+                                                }
+                                            </button>
+                                        )
+                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                        {isRunning ? (
-                            <button type="button" onClick={() => (abortRef.current = true)} className="opBtn-danger w-full whitespace-nowrap sm:w-auto">
-                                Abort Sorting
-                            </button>
-                        ) : (
-                            <button type="button" onClick={selectionSort} className="opBtn w-full whitespace-nowrap sm:w-auto">
-                                Sort
-                            </button>
-                        )}
-                    </div>
-                    {arrExist && array.includes('NULL') && (
-                        <p className="mt-2 text-xs text-swapping">
-                            Fill every slot before sorting — {array.filter((v) => v === 'NULL').length} slot(s) still empty.
-                        </p>
+
+                    {!isSorting ? (
+                        <button
+                            type="button"
+                            onClick={startSort}
+                            className="opBtn flex w-full items-center justify-center gap-1.5 whitespace-nowrap sm:w-auto"
+                        >
+                            <Play
+                                size={16}
+                                strokeWidth={2.2}
+                                className="shrink-0"
+                            />
+                            <span>Sort</span>
+                        </button>
+                    ) : (
+                        <div className="flex flex-col gap-3">
+                            <div className="flex w-full items-center gap-1.5 sm:w-auto sm:gap-2">
+                                <button
+                                    type="button"
+                                    onClick={goPrev}
+                                    disabled={stepIndex <= 0}
+                                    className="opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:px-3 sm:text-sm"
+                                >
+                                    <ChevronLeft
+                                        size={15}
+                                        strokeWidth={2.2}
+                                        className="shrink-0 sm:h-[17px] sm:w-[17px]"
+                                    />
+                                    <span>Prev</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={togglePlay}
+                                    className="opBtn flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs whitespace-nowrap sm:flex-none sm:px-3 sm:text-sm"
+                                >
+                                    {isPlaying ? (
+                                        <>
+                                            <Pause
+                                                size={15}
+                                                strokeWidth={2.2}
+                                                className="shrink-0 sm:h-[17px] sm:w-[17px]"
+                                            />
+                                            <span>Pause</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Play
+                                                size={15}
+                                                strokeWidth={2.2}
+                                                className="shrink-0 sm:h-[17px] sm:w-[17px]"
+                                            />
+                                            <span>
+                                                {stepIndex >= steps.length - 1
+                                                    ? "Replay"
+                                                    : "Play"}
+                                            </span>
+                                        </>
+                                    )}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={goNext}
+                                    disabled={stepIndex >= steps.length - 1}
+                                    className="opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:px-3 sm:text-sm"
+                                >
+                                    <span>Next</span>
+                                    <ChevronRight
+                                        size={15}
+                                        strokeWidth={2.2}
+                                        className="shrink-0 sm:h-[17px] sm:w-[17px]"
+                                    />
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={restartSort}
+                                    aria-label="Restart sorting"
+                                    title="Restart"
+                                    className="opBtn-secondary flex shrink-0 items-center justify-center p-1.5 sm:gap-1.5 sm:px-3 sm:py-1.5"
+                                >
+                                    <RotateCcw
+                                        size={16}
+                                        strokeWidth={2.2}
+                                        className="shrink-0"
+                                    />
+                                    <span className="hidden text-sm sm:inline">
+                                        Restart
+                                    </span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => stopSort(true)}
+                                    aria-label="Stop sorting"
+                                    title="Stop"
+                                    className="opBtn-danger flex shrink-0 items-center justify-center p-1.5 sm:gap-1.5 sm:px-3 sm:py-1.5"
+                                >
+                                    <Square
+                                        size={16}
+                                        strokeWidth={2.2}
+                                        className="shrink-0"
+                                    />
+                                    <span className="hidden text-sm sm:inline">
+                                        Stop
+                                    </span>
+                                </button>
+
+                                <span className="ml-auto hidden text-[10px] text-muted sm:inline sm:text-xs">
+                                    Step{" "}
+                                    {Math.min(
+                                        stepIndex + 1,
+                                        steps.length
+                                    )}{" "}
+                                    / {steps.length}
+                                </span>
+                            </div>
+
+                            <div className="h-1.5 w-full overflow-hidden rounded-full bg-element">
+                                <div
+                                    className="h-full rounded-full bg-accent transition-all duration-200"
+                                    style={{
+                                        width: `${steps.length
+                                            ? ((stepIndex +
+                                                1) /
+                                                steps.length) *
+                                            100
+                                            : 0
+                                            }%`,
+                                    }}
+                                />
+                            </div>
+                        </div>
                     )}
-                    {isVisible && (
+
+                    {arrExist &&
+                        array.includes(
+                            "NULL"
+                        ) &&
+                        !isSorting && (
+                            <p className="mt-2 text-xs text-swapping">
+                                Fill every slot before sorting —{" "}
+                                {
+                                    array.filter(
+                                        (v) =>
+                                            v ===
+                                            "NULL"
+                                    ).length
+                                }{" "}
+                                slot(s) still empty.
+                            </p>
+                        )}
+
+                    {isSorting && (
                         <p className="mt-2 text-xs text-muted">
-                            Current minimum: <b className="text-ink">{min >= 0 ? array[min] : '—'}</b>
+                            Current minimum:{" "}
+                            <b className="text-ink">
+                                {currentStep?.min >=
+                                    0
+                                    ? currentStep
+                                        .array[
+                                    currentStep
+                                        .min
+                                    ]
+                                    : "—"}
+                            </b>
                         </p>
                     )}
                 </div>
 
                 {/* =================================================
-              Visualizer
-          ================================================= */}
+                    VISUALIZER
+                ================================================= */}
                 <div className="mt-5 overflow-hidden rounded-xl border border-border bg-bg">
                     <div className="flex items-center justify-between border-b border-border px-4 py-3 sm:px-5">
                         <div>
-                            <div className="text-sm font-semibold text-ink">Array Visualizer</div>
-                            <div className="mt-0.5 text-xs text-muted">{arrExist ? `${array.length} elements` : 'No array created'}</div>
+                            <div className="text-sm font-semibold text-ink">
+                                Array Visualizer
+                            </div>
+
+                            <div className="mt-0.5 text-xs text-muted">
+                                {arrExist
+                                    ? `${displayArray.length} elements`
+                                    : "No array created"}
+                            </div>
                         </div>
-                        {isSorted && (
-                            <span className="rounded-full bg-sorted/10 px-2.5 py-1 text-xs font-medium text-sorted">Sorted ✓</span>
+
+                        {showSortedBadge && (
+                            <span className="rounded-full bg-sorted/10 px-2.5 py-1 text-xs font-medium text-sorted">
+                                Sorted ✓
+                            </span>
                         )}
                     </div>
 
                     <div className="overflow-x-auto p-4 sm:p-5">
-                        {arrExist && array.length > 0 ? (
+                        {arrExist &&
+                            displayArray.length >
+                            0 ? (
                             <div className="w-max min-w-full">
-                                <div className="grid w-fit grid-rows-2" style={{ gridTemplateColumns: `repeat(${array.length}, auto)` }}>
+                                <div
+                                    className="grid w-fit grid-rows-2"
+                                    style={{
+                                        gridTemplateColumns: `repeat(${displayArray.length}, auto)`,
+                                    }}
+                                >
                                     {/* Index row */}
-                                    {array.map((_, index) => (
-                                        <div key={`idx-${index}`} className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-medium text-muted">
-                                            {index}
-                                        </div>
-                                    ))}
+                                    {displayArray.map(
+                                        (
+                                            _,
+                                            index
+                                        ) => (
+                                            <div
+                                                key={`idx-${index}`}
+                                                className="flex h-5 w-10 shrink-0 items-center justify-center text-[10px] font-medium text-muted sm:h-6 sm:w-14 sm:text-xs"
+                                            >
+                                                {
+                                                    index
+                                                }
+                                            </div>
+                                        )
+                                    )}
 
                                     {/* Cells */}
-                                    {array.map((item, index) => {
-                                        const offset = swapOffsets[index];
-                                        return (
-                                            <div
-                                                key={`cell-${index}`}
-                                                id={`node-${index}`}
-                                                ref={(el) => (divRefs.current[index] = el)}
-                                                className={`cell arrayDiv h-11 w-14 shrink-0 font-semibold animate-fade-in
-                                                    ${item === 'NULL' ? 'italic font-normal text-muted' : ''}
-                                                    ${offset ? 'relative z-10' : ''}`}
-                                                style={{
-                                                    ...cellStyle(index),
-                                                    transform: offset ? `translateX(${offset}px)` : undefined,
-                                                    transition: 'transform 0.35s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
-                                                    animationDelay: `${oldArray ? '0.2' : index * 0.2}s`,
-                                                    animationFillMode: 'both',
-                                                }}
-                                            >
-                                                {item}
-                                            </div>
-                                        );
-                                    })}
+                                    {displayArray.map(
+                                        (
+                                            item,
+                                            index
+                                        ) => {
+                                            const {
+                                                transform,
+                                                transition,
+                                            } =
+                                                getCellTransform(
+                                                    index
+                                                );
+
+                                            return (
+                                                <div
+                                                    key={`cell-${index}`}
+                                                    className={`cell arrayDiv h-8 w-10 shrink-0 text-xs sm:h-11 sm:w-14 sm:text-base font-semibold relative
+                ${item ===
+                                                            "NULL"
+                                                            ? "italic font-normal text-muted"
+                                                            : ""
+                                                        }
+                ${transform !==
+                                                            "none"
+                                                            ? "z-10"
+                                                            : ""
+                                                        }`}
+                                                    style={{
+                                                        ...getCellStyle(
+                                                            index
+                                                        ),
+                                                        transform,
+                                                        transition,
+                                                        animationDelay:
+                                                            `${oldArray
+                                                                ? "0.2"
+                                                                : index *
+                                                                0.2
+                                                            }s`,
+                                                        animationFillMode:
+                                                            "both",
+                                                    }}
+                                                >
+                                                    {
+                                                        item
+                                                    }
+                                                </div>
+                                            );
+                                        }
+                                    )}
                                 </div>
 
-                                {stepMessage && (
-                                    <div
-                                        className="mt-3 rounded-md border border-border bg-surface px-3 py-2 text-xs leading-relaxed text-secondary sm:text-sm"
-                                        aria-live="polite"
-                                    >
-                                        {stepMessage}
+                                {isSorting && currentStep?.message && (
+                                    <div className="mb-4 mt-3" aria-live="polite">
+                                        {(() => {
+                                            const action = getStepAction(currentStep);
+                                            const Icon =
+                                                action?.icon ?? ArrowLeftRight;
+
+                                            const toneClasses = {
+                                                accent:
+                                                    "border-accent/30 bg-accent/5 text-accent",
+
+                                                comparing:
+                                                    "border-comparing/30 bg-comparing/10 text-comparing-text",
+
+                                                swapping:
+                                                    "border-swapping/30 bg-swapping/10 text-swapping-text",
+
+                                                pivot:
+                                                    "border-pivot/30 bg-pivot/10 text-pivot-text",
+
+                                                sorted:
+                                                    "border-sorted/30 bg-sorted/10 text-sorted-text",
+
+                                                secondary:
+                                                    "border-border bg-surface text-secondary",
+                                            };
+
+                                            return (
+                                                <div
+                                                    key={stepIndex}
+                                                    className={`animate-fade-in flex items-center gap-3 rounded-lg border px-3 py-2.5 sm:px-4 sm:py-3 ${toneClasses[
+                                                        action?.tone
+                                                    ] ??
+                                                        toneClasses.secondary
+                                                        }`}
+                                                >
+                                                    {/* Action icon */}
+                                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface sm:h-9 sm:w-9">
+                                                        <Icon
+                                                            size={17}
+                                                            strokeWidth={2.2}
+                                                            className="shrink-0"
+                                                            color="blue"
+                                                        />
+                                                    </div>
+
+                                                    {/* Action text */}
+                                                    <div className="min-w-0">
+                                                        <div className="text-[10px] text-white font-semibold uppercase tracking-[0.08em] opacity-70 sm:text-[11px]">
+                                                            {action?.label ??
+                                                                "Processing"}
+                                                        </div>
+
+                                                        <div className="mt-0.5 text-xs font-medium leading-relaxed text-ink sm:text-sm">
+                                                            {currentStep.message}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 )}
 
                                 <div className="mt-4">
                                     <StateLegend
                                         items={[
-                                            { token: 'frontier', label: 'Sorted boundary' },
-                                            { token: 'comparing', label: 'New minimum' },
-                                            { token: 'pivot', label: 'Minimum so far' },
+                                            {
+                                                token: "frontier",
+                                                label: "Sorted boundary",
+                                            },
+                                            {
+                                                token: "comparing",
+                                                label: "New minimum",
+                                            },
+                                            {
+                                                token: "pivot",
+                                                label: "Minimum so far",
+                                            },
                                         ]}
                                     />
                                 </div>
                             </div>
                         ) : (
                             <div className="flex min-h-[150px] flex-col items-center justify-center text-center">
-                                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-element text-muted">∅</div>
-                                <p className="text-sm font-medium text-ink">No array to visualize</p>
-                                <p className="mt-1 max-w-xs text-xs leading-relaxed text-muted">Create an array above to start experimenting.</p>
+                                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-element text-muted">
+                                    ∅
+                                </div>
+
+                                <p className="text-sm font-medium text-ink">
+                                    No array to visualize
+                                </p>
+
+                                <p className="mt-1 max-w-xs text-xs leading-relaxed text-muted">
+                                    Create an array above to start experimenting.
+                                </p>
                             </div>
                         )}
                     </div>

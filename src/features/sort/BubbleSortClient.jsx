@@ -1,9 +1,19 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { DetailsStateContext } from '@/context/DetailsContext';
 import StateLegend from '@/components/StateLegend';
 import { toast } from 'react-toastify';
+import {
+    Play,
+    Pause,
+    ChevronLeft,
+    ChevronRight,
+    RotateCcw,
+    Square,
+    ArrowLeftRight,
+    CheckCircle2,
+} from "lucide-react";
 
 const OPERATION_TABS = [
     { id: 'create', label: 'Create' },
@@ -12,12 +22,213 @@ const OPERATION_TABS = [
     { id: 'delete', label: 'Delete' },
 ];
 
-const CELL_WIDTH = 56;
 const SPEED_OPTIONS = [
-    { id: 'slow', label: 'Slow', multiplier: 1.6 },
-    { id: 'normal', label: 'Normal', multiplier: 1 },
-    { id: 'fast', label: 'Fast', multiplier: 0.5 },
+    { id: 'slow', label: 'Slow', ms: 1900 },
+    { id: 'normal', label: 'Normal', ms: 1200 },
+    { id: 'fast', label: 'Fast', ms: 550 },
 ];
+
+// Relative pacing per frame type — comparisons/decisions get full reading
+// time, the swap slide gets a short (floor-protected) beat, transitional
+// frames are quick. Multiplied against the selected speed's base ms.
+const FRAME_PACING = {
+    start: 0.5,
+    compare: 1,
+    'decide-swap': 0.95,
+    'decide-no-swap': 0.8,
+    'swap-animating': 0.55,
+    'swap-done': 0.7,
+    'pass-end': 0.9,
+    sorted: 0.5,
+};
+
+const SWAP_SLIDE_MS = 320; // must match the CSS transition duration below
+
+function getFrameDelay(type, baseMs) {
+    const floor = type === 'swap-animating' ? SWAP_SLIDE_MS + 80 : 200;
+    return Math.max(floor, Math.round(baseMs * (FRAME_PACING[type] ?? 1)));
+}
+
+
+
+function getStepAction(step) {
+    if (!step) return null;
+
+    switch (step.type) {
+        case 'start':
+            return {
+                icon: Play,
+                label: 'Starting',
+                tone: 'accent',
+            };
+
+        case 'compare':
+            return {
+                icon: ArrowLeftRight,
+                label: 'Comparing',
+                tone: 'comparing',
+            };
+
+        case 'decide-swap':
+            return {
+                icon: ArrowLeftRight,
+                label: 'Out of order',
+                tone: 'swapping',
+            };
+
+        case 'decide-no-swap':
+            return {
+                icon: CheckCircle2,
+                label: 'No swap needed',
+                tone: 'secondary',
+            };
+
+        case 'swap-animating':
+            return {
+                icon: ArrowLeftRight,
+                label: 'Swapping',
+                tone: 'swapping',
+            };
+
+        case 'swap-done':
+            return {
+                icon: CheckCircle2,
+                label: 'Swap complete',
+                tone: 'sorted',
+            };
+
+        case 'pass-end':
+            return {
+                icon: CheckCircle2,
+                label: 'Pass complete',
+                tone: 'sorted',
+            };
+
+        case 'sorted':
+            return {
+                icon: CheckCircle2,
+                label: 'Sorted',
+                tone: 'sorted',
+            };
+
+        default:
+            return {
+                icon: ArrowLeftRight,
+                label: 'Processing',
+                tone: 'secondary',
+            };
+    }
+}
+
+// =========================================================
+// Step generator — builds the ENTIRE run as a linear list of frames up
+// front. Nothing here is async; Play/Pause/Prev/Next just move a pointer
+// through this array, so none of it can get out of sync or "double-fire".
+// =========================================================
+function buildBubbleSortSteps(initialArray) {
+    const steps = [];
+    let arr = [...initialArray];
+    const n = arr.length;
+    let sortedFrom = n;
+
+    steps.push({
+        type: 'start',
+        array: [...arr],
+        compare: [],
+        message: "Starting Bubble Sort — we'll walk through every comparison, one step at a time.",
+        pass: 0,
+        comparison: 0,
+        sortedFrom,
+    });
+
+    for (let j = 0; j < n - 1; j++) {
+        let swappedInPass = false;
+
+        for (let i = 0; i < n - 1 - j; i++) {
+            steps.push({
+                type: 'compare',
+                array: [...arr],
+                compare: [i, i + 1],
+                message: `Comparing ${arr[i]} and ${arr[i + 1]}`,
+                pass: j + 1,
+                comparison: i + 1,
+                sortedFrom,
+            });
+
+            const shouldSwap = arr[i] > arr[i + 1];
+
+            steps.push({
+                type: shouldSwap ? 'decide-swap' : 'decide-no-swap',
+                array: [...arr],
+                compare: [i, i + 1],
+                message: shouldSwap
+                    ? `${arr[i]} is larger than ${arr[i + 1]} — they are out of order`
+                    : `${arr[i]} is not larger than ${arr[i + 1]} — no swap needed`,
+                pass: j + 1,
+                comparison: i + 1,
+                sortedFrom,
+            });
+
+            if (shouldSwap) {
+                const leftValue = arr[i];
+                const rightValue = arr[i + 1];
+
+                steps.push({
+                    type: 'swap-animating',
+                    array: [...arr],
+                    compare: [i, i + 1],
+                    message: `Swapping ${leftValue} ↔ ${rightValue}`,
+                    pass: j + 1,
+                    comparison: i + 1,
+                    sortedFrom,
+                });
+
+                [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+                swappedInPass = true;
+
+                steps.push({
+                    type: 'swap-done',
+                    array: [...arr],
+                    compare: [i, i + 1],
+                    message: `Swapped — ${arr[i]} and ${arr[i + 1]} are now in the correct order`,
+                    pass: j + 1,
+                    comparison: i + 1,
+                    sortedFrom,
+                });
+            }
+        }
+
+        sortedFrom = n - 1 - j;
+        steps.push({
+            type: 'pass-end',
+            array: [...arr],
+            compare: [],
+            message: swappedInPass
+                ? `End of pass ${j + 1} — the largest remaining value has bubbled into place.`
+                : `No swaps in pass ${j + 1} — the array is already sorted, stopping early.`,
+            pass: j + 1,
+            comparison: 0,
+            sortedFrom,
+        });
+
+        if (!swappedInPass) {
+            sortedFrom = 0;
+            break;
+        }
+    }
+
+    steps.push({
+        type: 'sorted',
+        array: [...arr],
+        compare: [],
+        message: 'Array is sorted!',
+        pass: steps[steps.length - 1].pass,
+        comparison: 0,
+        sortedFrom: 0,
+    });
+
+    return steps;
+}
 
 export default function BubbleSortClient() {
     const [array, setArray] = useState([220, 148, 132, 101, 95, 87, 64, 53, 8]);
@@ -32,34 +243,23 @@ export default function BubbleSortClient() {
 
     const [activeTab, setActiveTab] = useState('create');
 
-    const abortRef = useRef(false);
-    const [isRunning, setIsRunning] = useState(false);
     const [isSorted, setIsSorted] = useState(false);
-    const [iterations, setIterations] = useState(0);
-    const [comparisons, setComparisons] = useState(0);
-    const [stepMessage, setStepMessage] = useState('');
-    const divRefs = useRef([]);
 
-    const [isGreater, setIsGreater] = useState(false);
-    const [firstEle, setFirstEle] = useState(-1);
-    const [secondEle, setSecondEle] = useState(-1);
+    // ---- Step player state ---------------------------------------
+    const [steps, setSteps] = useState([]);
+    const [stepIndex, setStepIndex] = useState(0);
+    const [isSorting, setIsSorting] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const directionRef = useRef('forward');
+    const sortedToastShownRef = useRef(false);
 
-    // Cells currently mid-swap get a translateX offset here so they visibly
-    // slide past each other instead of just flashing a new value in place.
-    const [swapOffsets, setSwapOffsets] = useState({});
+    const currentStep = isSorting ? steps[stepIndex] ?? null : null;
 
     const [speed, setSpeed] = useState('normal');
-    const speedRef = useRef(1);
-    useEffect(() => {
-        speedRef.current = SPEED_OPTIONS.find((o) => o.id === speed)?.multiplier ?? 1;
-    }, [speed]);
+    const speedMs = SPEED_OPTIONS.find((o) => o.id === speed)?.ms ?? 1000;
 
     const { detailsState, updateState } = useContext(DetailsStateContext);
     const handleToggle = (id, isOpen) => updateState(id, isOpen);
-
-    // Reads speedRef fresh on every call, so changing speed mid-sort takes
-    // effect immediately instead of only on the next run.
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms * speedRef.current));
 
     useEffect(() => {
         if (array.length === 0 && activeTab !== 'create') {
@@ -67,21 +267,21 @@ export default function BubbleSortClient() {
         }
     }, [array.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    useEffect(() => {
-        setIsGreater(false);
-        setIterations(0);
-        setComparisons(0);
-        setFirstEle(-1);
-        setSecondEle(-1);
+    // Clears any sort/step state — called before any structural change to
+    // the array from the Build panel (create/push/pop/insert/delete).
+    const resetSortView = () => {
         setIsSorted(false);
-        setStepMessage('');
-        setSwapOffsets({});
-    }, [array]);
+        setSteps([]);
+        setStepIndex(0);
+        setIsSorting(false);
+        setIsPlaying(false);
+        sortedToastShownRef.current = false;
+    };
 
     // =========================================================
-    // Sort
+    // Sort — start / stop / navigate
     // =========================================================
-    const bubbleSort = async () => {
+    const startSort = () => {
         if (!arrExist) {
             toast.error('Please create an array first.');
             return;
@@ -95,70 +295,100 @@ export default function BubbleSortClient() {
             return;
         }
 
-        abortRef.current = false;
-        setIsRunning(true);
+        const generated = buildBubbleSortSteps(array);
+        sortedToastShownRef.current = false;
+        setSteps(generated);
+        setStepIndex(0);
         setIsSorted(false);
-        setComparisons(0);
+        setIsSorting(true);
+        directionRef.current = 'forward';
+        setIsPlaying(true);
+    };
 
-        // Work on a local copy so every visual update goes through setArray
-        // instead of mutating state directly.
-        let workingArray = [...array];
+    const stopSort = (commit = true) => {
+        const step = steps[stepIndex];
+        if (commit && step) {
+            setArray(step.array);
+        }
+        setIsPlaying(false);
+        setIsSorting(false);
+        setSteps([]);
+        setStepIndex(0);
+        toast.info('Sorting stopped.');
+    };
 
-        for (let j = 0; j < workingArray.length - 1; j++) {
-            setIterations(j + 1);
-            let swappedInPass = false;
+    const goNext = useCallback(() => {
+        setIsPlaying(false);
+        directionRef.current = 'forward';
+        setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+    }, [steps.length]);
 
-            for (let i = 0; i < workingArray.length - 1 - j; i++) {
-                if (abortRef.current) {
-                    setIsRunning(false);
-                    setStepMessage('');
-                    setSwapOffsets({});
-                    toast.info('Sorting aborted.');
-                    return;
-                }
-                setComparisons(i + 1);
-                setFirstEle(i);
-                setSecondEle(i + 1);
-                setStepMessage(`Comparing ${workingArray[i]} and ${workingArray[i + 1]}`);
-                await delay(1000);
+    const goPrev = useCallback(() => {
+        setIsPlaying(false);
+        directionRef.current = 'backward';
+        setStepIndex((i) => Math.max(i - 1, 0));
+    }, []);
 
-                if (workingArray[i] > workingArray[i + 1]) {
-                    setIsGreater(true);
-                    setStepMessage(`${workingArray[i]} > ${workingArray[i + 1]} — swapping`);
-                    // Slide the two cells toward each other's slot first...
-                    setSwapOffsets({ [i]: CELL_WIDTH, [i + 1]: -CELL_WIDTH });
-                    await delay(500);
+    const togglePlay = useCallback(() => {
+        if (stepIndex >= steps.length - 1) {
+            directionRef.current = 'forward';
+            setStepIndex(0);
+            setIsPlaying(true);
+            return;
+        }
 
-                    // ...then commit the data change. Because the offset resets to 0
-                    // in the same update as the new (already-swapped) values, the
-                    // cells appear to glide the rest of the way into their new home.
-                    const swapped = [...workingArray];
-                    [swapped[i], swapped[i + 1]] = [swapped[i + 1], swapped[i]];
-                    workingArray = swapped;
-                    setArray(swapped);
-                    setSwapOffsets({});
-                    swappedInPass = true;
-                    await delay(400);
-                } else {
-                    setStepMessage(`${workingArray[i]} ≤ ${workingArray[i + 1]} — already in order, no swap`);
-                    await delay(700);
-                }
+        directionRef.current = 'forward';
+        setIsPlaying((p) => !p);
+    }, [stepIndex, steps.length]);
 
-                setIsGreater(false);
-                await delay(300);
-            }
+    const restartSort = () => {
+        directionRef.current = 'forward';
+        setStepIndex(0);
+        setIsPlaying(true);
+    };
 
-            if (!swappedInPass) {
-                setStepMessage('No swaps this pass — the array is already sorted, stopping early.');
-                break;
+    // Auto-advance while playing
+    useEffect(() => {
+        if (!isPlaying || !steps.length) return;
+        if (stepIndex >= steps.length - 1) {
+            setIsPlaying(false);
+            return;
+        }
+        const type = steps[stepIndex]?.type;
+        const t = setTimeout(() => {
+            directionRef.current = 'forward';
+            setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+        }, getFrameDelay(type, speedMs));
+        return () => clearTimeout(t);
+    }, [isPlaying, stepIndex, steps, speedMs]);
+
+    // Commit the sorted array back into real state once the player reaches
+    // the final frame (whether via autoplay or manual Next).
+    useEffect(() => {
+        if (!isSorting) return;
+        const step = steps[stepIndex];
+        if (step && step.type === 'sorted') {
+            setArray(step.array);
+            setIsSorted(true);
+            setIsPlaying(false);
+            if (!sortedToastShownRef.current) {
+                toast.success('Array is sorted!');
+                sortedToastShownRef.current = true;
             }
         }
-        setFirstEle(-1);
-        setSecondEle(-1);
-        setIsRunning(false);
-        setIsSorted(true);
-        setStepMessage('Array is sorted!');
-    };
+    }, [stepIndex, steps, isSorting]);
+
+    // Keyboard nav while a sort is active: ← / → step, space toggles play
+    useEffect(() => {
+        if (!isSorting) return;
+        const handler = (e) => {
+            if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+            else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [isSorting, goNext, goPrev, togglePlay]);
 
     // =========================================================
     // Create array
@@ -169,11 +399,11 @@ export default function BubbleSortClient() {
             return;
         }
 
-        await delay(200);
+        resetSortView();
         setOldArray(false);
         setArray([]);
         setArrExist(true);
-        await delay(500);
+        await new Promise((r) => setTimeout(r, 500));
         setArray(Array(parseInt(arrayLength)).fill('NULL'));
         toast.success('Array created successfully', { position: 'top-center' });
         setActiveTab('pushpop');
@@ -191,6 +421,7 @@ export default function BubbleSortClient() {
             toast.error('Please enter an element');
             return;
         }
+        resetSortView();
         setOldArray(true);
         setArray([...array, Number(pushValue)]);
         toast.success('Element successfully pushed into the array.');
@@ -206,6 +437,7 @@ export default function BubbleSortClient() {
             toast.error('Array is already empty.');
             return;
         }
+        resetSortView();
         setArray(array.slice(0, -1));
         toast.success('Element popped from the array.');
     };
@@ -235,7 +467,8 @@ export default function BubbleSortClient() {
             return;
         }
 
-        await delay(1000);
+        resetSortView();
+        await new Promise((r) => setTimeout(r, 400));
 
         if (index === array.length) {
             setArray((prev) => [...prev, value]);
@@ -264,6 +497,7 @@ export default function BubbleSortClient() {
             toast.error('Element not found.');
             return;
         }
+        resetSortView();
         setArray((prev) => prev.map((item) => (item === Number(deleteValue) ? 'NULL' : item)));
         toast.success('Element deleted.');
         setDeleteValue('');
@@ -274,6 +508,7 @@ export default function BubbleSortClient() {
             toast.error('Please create an array first.');
             return;
         }
+        resetSortView();
         setOldArray(false);
         setArray([]);
         setArrExist(false);
@@ -284,19 +519,90 @@ export default function BubbleSortClient() {
         setDeleteValue('');
     };
 
-    const cellStyle = (index) => {
-        const isComparing = index === firstEle || index === secondEle;
+    // =========================================================
+    // Rendering helpers
+    // =========================================================
+    const displayArray =
+        isSorting && currentStep
+            ? currentStep.array
+            : array;
 
-        if (isComparing) {
+    const getCellStyle = (index) => {
+        if (isSorting && currentStep) {
+            const [a, b] = currentStep.compare;
+            if (index === a || index === b) {
+                const swapPhase =
+                    currentStep.type === 'decide-swap' ||
+                    currentStep.type === 'swap-animating' ||
+                    currentStep.type === 'swap-done';
+                return swapPhase
+                    ? {
+                        backgroundColor: 'rgb(var(--color-swapping))',
+                        borderColor: 'rgb(var(--color-swapping))',
+                        color: 'rgb(var(--color-swapping-text))',
+                    }
+                    : {
+                        backgroundColor: 'rgb(var(--color-comparing))',
+                        borderColor: 'rgb(var(--color-comparing))',
+                        color: 'rgb(var(--color-comparing-text))',
+                    };
+            }
+            if (index >= currentStep.sortedFrom) {
+                return {
+                    backgroundColor: 'rgb(var(--color-sorted))',
+                    borderColor: 'rgb(var(--color-sorted))',
+                    color: 'rgb(var(--color-sorted-text))',
+                };
+            }
+            return {};
+        }
+        if (isSorted) {
             return {
-                backgroundColor: isGreater ? 'rgb(var(--color-swapping))' : 'rgb(var(--color-comparing))',
-                borderColor: isGreater ? 'rgb(var(--color-swapping))' : 'rgb(var(--color-comparing))',
-                color: isGreater ? 'rgb(var(--color-swapping-text))' : 'rgb(var(--color-comparing-text))',
+                backgroundColor: 'rgb(var(--color-sorted))',
+                borderColor: 'rgb(var(--color-sorted))',
+                color: 'rgb(var(--color-sorted-text))',
+            };
+        }
+        return {};
+    };
+
+    // Only the forward transition INTO 'swap-animating' gets an animated
+    // transform. Every other frame change (including the settle onto the
+    // swapped data, and any backward navigation) snaps instantly — this is
+    // what removes the old "double swap" look.
+    const getCellTransform = (index) => {
+        if (!isSorting || !currentStep) {
+            return {
+                transform: undefined,
+                transition: 'none',
             };
         }
 
-        return {};
+        const [a, b] = currentStep.compare;
+
+        // Only animate while entering the swap frame.
+        // Once swap-done is reached, the values are already in their
+        // final positions and the transform must disappear instantly.
+        if (
+            currentStep.type === 'swap-animating' &&
+            directionRef.current === 'forward' &&
+            (index === a || index === b)
+        ) {
+            return {
+                transform: index === a
+                    ? 'translateX(100%)'
+                    : 'translateX(-100%)',
+                transition: `transform ${SWAP_SLIDE_MS}ms ease`,
+            };
+        }
+
+        return {
+            transform: 'none',
+            transition: 'none',
+        };
     };
+
+    const showSortedBadge = isSorting ? currentStep?.type === 'sorted' : isSorted;
 
     return (
         <details
@@ -328,11 +634,11 @@ export default function BubbleSortClient() {
                                 <button
                                     key={tab.id}
                                     type="button"
-                                    disabled={disabled || isRunning}
+                                    disabled={disabled || isSorting}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex-1 basis-[calc(50%-4px)] m-0.5 rounded px-2 py-1.5 text-[10px] sm:basis-0 sm:m-0 sm:px-3 sm:py-2 sm:text-sm font-medium transition-colors
                       ${activeTab === tab.id ? 'bg-accent text-white' : 'text-muted hover:bg-element hover:text-ink'}
-                      ${disabled || isRunning ? 'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted' : ''}`}
+                      ${disabled || isSorting ? 'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted' : ''}`}
                                 >
                                     {tab.label}
                                 </button>
@@ -354,9 +660,9 @@ export default function BubbleSortClient() {
                                     onChange={(e) => setArrayLength(e.target.value)}
                                     className="opInput w-full sm:flex-1"
                                     placeholder="Array length"
-                                    disabled={isRunning}
+                                    disabled={isSorting}
                                 />
-                                <button type="button" onClick={createArray} disabled={isRunning} className="opBtn w-full whitespace-nowrap sm:w-auto">
+                                <button type="button" onClick={createArray} disabled={isSorting} className="opBtn w-full whitespace-nowrap sm:w-auto">
                                     Create Array
                                 </button>
                             </div>
@@ -375,13 +681,13 @@ export default function BubbleSortClient() {
                                     onChange={(e) => setPushValue(e.target.value)}
                                     className="opInput w-full sm:flex-1"
                                     placeholder="Value"
-                                    disabled={isRunning}
+                                    disabled={isSorting}
                                 />
                                 <div className="flex w-full gap-2 sm:w-auto">
-                                    <button type="button" onClick={arrayPushOperation} disabled={isRunning} className="opBtn flex-1 whitespace-nowrap sm:flex-none">
+                                    <button type="button" onClick={arrayPushOperation} disabled={isSorting} className="opBtn flex-1 whitespace-nowrap sm:flex-none">
                                         Push
                                     </button>
-                                    <button type="button" onClick={arrayPopOperation} disabled={isRunning} className="opBtn-secondary flex-1 whitespace-nowrap sm:flex-none">
+                                    <button type="button" onClick={arrayPopOperation} disabled={isSorting} className="opBtn-secondary flex-1 whitespace-nowrap sm:flex-none">
                                         Pop
                                     </button>
                                 </div>
@@ -401,7 +707,7 @@ export default function BubbleSortClient() {
                                     onChange={(e) => setInsertValue(e.target.value)}
                                     className="opInput w-full sm:flex-1"
                                     placeholder="Value"
-                                    disabled={isRunning}
+                                    disabled={isSorting}
                                 />
                                 <input
                                     type="number"
@@ -410,9 +716,9 @@ export default function BubbleSortClient() {
                                     onChange={(e) => setInsertIndex(e.target.value)}
                                     className="opInput w-full sm:flex-1"
                                     placeholder="Index"
-                                    disabled={isRunning}
+                                    disabled={isSorting}
                                 />
-                                <button type="button" onClick={arrayInsert} disabled={isRunning} className="opBtn w-full whitespace-nowrap sm:w-auto">
+                                <button type="button" onClick={arrayInsert} disabled={isSorting} className="opBtn w-full whitespace-nowrap sm:w-auto">
                                     Insert
                                 </button>
                             </div>
@@ -429,9 +735,9 @@ export default function BubbleSortClient() {
                                     onChange={(e) => setDeleteValue(e.target.value)}
                                     className="opInput w-full sm:max-w-[180px]"
                                     placeholder="Value"
-                                    disabled={isRunning}
+                                    disabled={isSorting}
                                 />
-                                <button type="button" onClick={removeByEle} disabled={isRunning} className="opBtn-secondary w-full whitespace-nowrap sm:w-auto">
+                                <button type="button" onClick={removeByEle} disabled={isSorting} className="opBtn-secondary w-full whitespace-nowrap sm:w-auto">
                                     Delete
                                 </button>
                             </div>
@@ -442,7 +748,7 @@ export default function BubbleSortClient() {
                                 <button
                                     type="button"
                                     onClick={removeArray}
-                                    disabled={isRunning}
+                                    disabled={isSorting}
                                     className="opBtn-danger w-full whitespace-nowrap sm:w-auto"
                                 >
                                     Delete Array
@@ -459,12 +765,14 @@ export default function BubbleSortClient() {
                     <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
                         <div>
                             <h3 className="text-sm font-semibold text-ink">Sort</h3>
-                            <p className="text-[10px] leading-relaxed text-muted sm:text-xs">Compares each adjacent pair and swaps them if they're out of order.</p>
+                            <p className="text-[10px] leading-relaxed text-muted sm:text-xs">
+                                Compares each adjacent pair, one step at a time, and swaps them if they're out of order.
+                            </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-medium text-muted sm:text-xs">
                             <div className="flex gap-3">
-                                <span>Pass: {iterations}</span>
-                                <span>Comparisons: {comparisons}</span>
+                                <span>Pass: {currentStep?.pass ?? 0}</span>
+                                <span>Comparison: {currentStep?.comparison ?? 0}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span>Speed</span>
@@ -484,18 +792,93 @@ export default function BubbleSortClient() {
                             </div>
                         </div>
                     </div>
-                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                        {isRunning ? (
-                            <button type="button" onClick={() => (abortRef.current = true)} className="opBtn-danger w-full whitespace-nowrap sm:w-auto">
-                                Abort Sorting
-                            </button>
-                        ) : (
-                            <button type="button" onClick={bubbleSort} className="opBtn w-full whitespace-nowrap sm:w-auto">
-                                Sort
-                            </button>
-                        )}
-                    </div>
-                    {arrExist && array.includes('NULL') && (
+
+                    {!isSorting ? (
+                        <button
+                            type="button"
+                            onClick={startSort}
+                            className="opBtn flex w-full items-center justify-center gap-1.5 whitespace-nowrap sm:w-auto"
+                        >
+                            <Play
+                                size={16}
+                                strokeWidth={2.2}
+                                className="shrink-0"
+                            />
+                            <span>Sort</span>
+                        </button>
+                    ) : (
+                        <div className="flex flex-col gap-3">
+                            <div className="flex w-full items-center gap-1.5 sm:gap-2">
+                                <button
+                                    type="button"
+                                    onClick={goPrev}
+                                    disabled={stepIndex === 0}
+                                    className="opBtn opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs sm:flex-none sm:px-3 sm:text-sm"
+                                >
+                                    <ChevronLeft
+                                        size={15}
+                                        className="shrink-0 sm:h-[17px] sm:w-[17px]"
+                                    />
+                                    <span>Prev</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={togglePlay}
+                                    className="opBtn opBtn-primary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs sm:flex-none sm:px-3 sm:text-sm"
+                                >
+                                    {isPlaying ? (
+                                        <>
+                                            <Pause size={15} className="shrink-0 sm:h-[17px] sm:w-[17px]" />
+                                            <span className="sm:inline">Pause</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Play size={15} className="shrink-0 sm:h-[17px] sm:w-[17px]" />
+                                            <span className="sm:inline">Play</span>
+                                        </>
+                                    )}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={goNext}
+                                    disabled={stepIndex >= steps.length - 1}
+                                    className="opBtn opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs sm:flex-none sm:px-3 sm:text-sm"
+                                >
+                                    <span>Next</span>
+                                    <ChevronRight
+                                        size={15}
+                                        className="shrink-0 sm:h-[17px] sm:w-[17px]"
+                                    />
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={restartSort}
+                                    aria-label="Restart"
+                                    title="Restart"
+                                    className="opBtn opBtn-secondary flex shrink-0 items-center justify-center p-1.5 sm:gap-1.5 sm:px-3 sm:py-1.5"
+                                >
+                                    <RotateCcw size={15} className="sm:h-[17px] sm:w-[17px]" />
+                                    <span className="hidden sm:inline text-sm">Restart</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={stopSort}
+                                    aria-label="Stop"
+                                    title="Stop"
+                                    className="opBtn-danger flex shrink-0 items-center justify-center p-1.5 sm:gap-1.5 sm:px-3 sm:py-1.5"
+                                >
+                                    <Square size={14} className="sm:h-4 sm:w-4" />
+                                    <span className="hidden sm:inline text-sm">Stop</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {arrExist && array.includes('NULL') && !isSorting && (
                         <p className="mt-2 text-xs text-swapping">
                             Fill every slot before sorting — {array.filter((v) => v === 'NULL').length} slot(s) still empty.
                         </p>
@@ -509,47 +892,38 @@ export default function BubbleSortClient() {
                     <div className="flex items-center justify-between border-b border-border px-4 py-3 sm:px-5">
                         <div>
                             <div className="text-sm font-semibold text-ink">Array Visualizer</div>
-                            <div className="mt-0.5 text-xs text-muted">{arrExist ? `${array.length} elements` : 'No array created'}</div>
+                            <div className="mt-0.5 text-xs text-muted">{arrExist ? `${displayArray.length} elements` : 'No array created'}</div>
                         </div>
-                        {isSorted && (
+                        {showSortedBadge && (
                             <span className="rounded-full bg-sorted/10 px-2.5 py-1 text-xs font-medium text-sorted">Sorted ✓</span>
                         )}
                     </div>
 
                     <div className="overflow-x-auto p-4 sm:p-5">
-                        {arrExist && array.length > 0 ? (
+                        {arrExist && displayArray.length > 0 ? (
                             <div className="w-max min-w-full">
-                                <div className="grid w-fit grid-rows-2" style={{ gridTemplateColumns: `repeat(${array.length}, auto)` }}>
+                                <div className="grid w-fit grid-rows-2" style={{ gridTemplateColumns: `repeat(${displayArray.length}, auto)` }}>
                                     {/* Index row */}
-                                    {array.map((_, index) => (
+                                    {displayArray.map((_, index) => (
                                         <div key={`idx-${index}`} className="flex h-5 w-10 shrink-0 items-center justify-center text-[10px] font-medium text-muted sm:h-6 sm:w-14 sm:text-xs">
                                             {index}
                                         </div>
                                     ))}
 
                                     {/* Cells */}
-                                    {array.map((item, index) => {
-                                        const offset = swapOffsets[index];
-                                        // The multiplier for translateX must match the cell width on mobile vs desktop.
-                                        // In our JS logic, CELL_WIDTH is fixed at 56 (w-14).
-                                        // To fix this perfectly, we'd need a dynamic CELL_WIDTH or CSS variables.
-                                        // For now, let's keep the size consistent or adjust CELL_WIDTH logic.
-                                        // Let's try to maintain w-14 on desktop and w-10 on mobile.
+                                    {displayArray.map((item, index) => {
+                                        const { transform, transition } = getCellTransform(index);
+
                                         return (
                                             <div
                                                 key={`cell-${index}`}
-                                                id={`node-${index}`}
-                                                ref={(el) => (divRefs.current[index] = el)}
-                                                className={`cell arrayDiv h-8 w-10 shrink-0 text-xs sm:h-11 sm:w-14 sm:text-base font-semibold animate-fade-in
-                                                    ${item === 'NULL' ? 'italic font-normal text-muted' : ''}
-                                                    ${offset ? 'relative z-10' : ''}`}
+                                                className={`cell arrayDiv h-8 w-10 shrink-0 text-xs sm:h-11 sm:w-14 sm:text-base font-semibold relative
+                ${item === 'NULL' ? 'italic font-normal text-muted' : ''}
+                ${transform !== 'none' ? 'z-10' : ''}`}
                                                 style={{
-                                                    ...cellStyle(index),
-                                                    // If we change the width from 56 (w-14) to 40 (w-10), we must adjust the offset.
-                                                    transform: offset ? `translateX(${(offset / 56) * (window.innerWidth < 640 ? 40 : 56)}px)` : undefined,
-                                                    transition: 'transform 0.35s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
-                                                    animationDelay: `${oldArray ? '0.2' : index * 0.2}s`,
-                                                    animationFillMode: 'both',
+                                                    ...getCellStyle(index),
+                                                    transform,
+                                                    transition,
                                                 }}
                                             >
                                                 {item}
@@ -558,12 +932,58 @@ export default function BubbleSortClient() {
                                     })}
                                 </div>
 
-                                {stepMessage && (
-                                    <div
-                                        className="mt-3 rounded-md border border-border bg-surface px-3 py-2 text-xs leading-relaxed text-secondary sm:text-sm"
-                                        aria-live="polite"
-                                    >
-                                        {stepMessage}
+                                {isSorting && currentStep?.message && (
+                                    <div className="mb-4 mt-3" aria-live="polite">
+                                        {(() => {
+                                            const action = getStepAction(currentStep);
+                                            const Icon = action?.icon ?? ArrowLeftRight;
+
+                                            const toneClasses = {
+                                                accent:
+                                                    'border-accent/30 bg-accent/5 text-accent',
+
+                                                comparing:
+                                                    'border-comparing/30 bg-comparing/10 text-comparing-text',
+
+                                                swapping:
+                                                    'border-swapping/30 bg-swapping/10 text-swapping-text',
+
+                                                sorted:
+                                                    'border-sorted/30 bg-sorted/10 text-sorted-text',
+
+                                                secondary:
+                                                    'border-border bg-surface text-secondary',
+                                            };
+
+                                            return (
+                                                <div
+                                                    key={stepIndex}
+                                                    className={`animate-fade-in flex items-center gap-3 rounded-lg border px-3 py-2.5 sm:px-4 sm:py-3 ${toneClasses[action?.tone] ?? toneClasses.secondary
+                                                        }`}
+                                                >
+                                                    {/* Action icon */}
+                                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface sm:h-9 sm:w-9">
+                                                        <Icon
+                                                            size={17}
+                                                            strokeWidth={2.2}
+                                                            className="shrink-0"
+                                                            color="blue"
+                                                        />
+                                                    </div>
+
+                                                    {/* Action text */}
+                                                    <div className="min-w-0">
+                                                        <div className="text-[10px] text-white font-semibold uppercase tracking-[0.08em] opacity-70 sm:text-[11px]">
+                                                            {action?.label ?? 'Processing'}
+                                                        </div>
+
+                                                        <div className="mt-0.5 break-words text-xs font-medium leading-relaxed text-ink sm:text-sm">
+                                                            {currentStep.message}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 )}
 
@@ -572,6 +992,7 @@ export default function BubbleSortClient() {
                                         items={[
                                             { token: 'comparing', label: 'Comparing' },
                                             { token: 'swapping', label: 'Swapping' },
+                                            { token: 'sorted', label: 'Sorted' },
                                         ]}
                                     />
                                 </div>
