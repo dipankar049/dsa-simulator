@@ -7,6 +7,9 @@ export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "DSA Simulator", template: "%s | DSA Simulator" },
   description: "Interactive visual simulator for learning data structures and algorithms.",
+  verification: {
+    google: "google93b25ea8a78ac7e5",
+  },
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
