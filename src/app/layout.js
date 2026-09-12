@@ -8,7 +8,7 @@ export const metadata = {
   title: { default: "DSA Simulator", template: "%s | DSA Simulator" },
   description: "Interactive visual simulator for learning data structures and algorithms.",
   verification: {
-    google: "google93b25ea8a78ac7e5",
+    google: "g4f9XpjcAb9L7b1tvfmqYG4YdPR5OhNqZcYAdwtxfDM",
   },
   openGraph: {
     type: "website",
