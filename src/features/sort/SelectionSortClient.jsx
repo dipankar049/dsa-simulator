@@ -7,8 +7,8 @@ import React, {
     useContext,
     useCallback,
 } from "react";
-import { DetailsStateContext } from "../../context/DetailsContext";
 import StateLegend from "../../components/StateLegend";
+import { CollapsibleSimulatorSection } from "@/components/simulator";
 import { toast } from "react-toastify";
 import {
     Play,
@@ -21,6 +21,9 @@ import {
     ArrowDown,
     CheckCircle2,
 } from "lucide-react";
+import { buildSelectionSortSteps } from "@/lib/algorithms/selectionSort";
+import { getSpeedMs, getSelectionSortFrameDelay } from "@/lib/simulation";
+import { useSortPlayback } from "@/hooks/useSortPlayback";
 
 const OPERATION_TABS = [
     { id: "create", label: "Create" },
@@ -138,174 +141,6 @@ function getStepAction(step) {
     }
 }
 
-// =========================================================
-// Step generator
-// Builds the entire Selection Sort run up front.
-// Nothing here is async.
-// =========================================================
-function buildSelectionSortSteps(initialArray) {
-    const steps = [];
-    let arr = [...initialArray];
-    const n = arr.length;
-
-    steps.push({
-        type: "start",
-        array: [...arr],
-        min: -1,
-        first: -1,
-        second: -1,
-        pass: 0,
-        comparison: 0,
-        sortedFrom: n,
-        message:
-            "Starting Selection Sort — we'll find the smallest value in each unsorted section and move it to the front.",
-    });
-
-    for (let j = 0; j < n - 1; j++) {
-        let minIndex = j;
-
-        // ---------------------------------------------------------
-        // Start of pass — current position becomes the boundary.
-        // ---------------------------------------------------------
-        steps.push({
-            type: "compare",
-            array: [...arr],
-            min: minIndex,
-            first: j,
-            second: -1,
-            pass: j + 1,
-            comparison: 0,
-            sortedFrom: j,
-            message:
-                `Starting pass ${j + 1}. ${arr[j]} is the current minimum candidate.`,
-        });
-
-        for (let i = j + 1; i < n; i++) {
-            steps.push({
-                type: "compare",
-                array: [...arr],
-                min: minIndex,
-                first: j,
-                second: i,
-                pass: j + 1,
-                comparison: i - j,
-                sortedFrom: j,
-                message:
-                    `Comparing ${arr[i]} with the current minimum ${arr[minIndex]}.`,
-            });
-
-            if (arr[i] < arr[minIndex]) {
-                minIndex = i;
-
-                steps.push({
-                    type: "new-minimum",
-                    array: [...arr],
-                    min: minIndex,
-                    first: j,
-                    second: i,
-                    pass: j + 1,
-                    comparison: i - j,
-                    sortedFrom: j,
-                    message:
-                        `${arr[i]} is smaller — it becomes the new minimum.`,
-                });
-            } else {
-                steps.push({
-                    type: "no-change",
-                    array: [...arr],
-                    min: minIndex,
-                    first: j,
-                    second: i,
-                    pass: j + 1,
-                    comparison: i - j,
-                    sortedFrom: j,
-                    message:
-                        `${arr[i]} is not smaller — the current minimum stays ${arr[minIndex]}.`,
-                });
-            }
-        }
-
-        // ---------------------------------------------------------
-        // Swap if a smaller value was found.
-        // ---------------------------------------------------------
-        if (minIndex !== j) {
-            const leftValue = arr[j];
-            const minValue = arr[minIndex];
-
-            steps.push({
-                type: "swap",
-                array: [...arr],
-                min: minIndex,
-                first: j,
-                second: minIndex,
-                pass: j + 1,
-                comparison: 0,
-                sortedFrom: j,
-                message:
-                    `${minValue} is the smallest value found, so we'll swap it with ${leftValue}.`,
-            });
-
-            steps.push({
-                type: "swap-animating",
-                array: [...arr],
-                min: minIndex,
-                first: j,
-                second: minIndex,
-                pass: j + 1,
-                comparison: 0,
-                sortedFrom: j,
-                swapFrom: j,
-                swapTo: minIndex,
-                message:
-                    `Moving ${minValue} to position ${j} and ${leftValue} to position ${minIndex}.`,
-            });
-
-            [arr[j], arr[minIndex]] = [arr[minIndex], arr[j]];
-
-            steps.push({
-                type: "swap-done",
-                array: [...arr],
-                min: -1,
-                first: j,
-                second: -1,
-                pass: j + 1,
-                comparison: 0,
-                sortedFrom: j + 1,
-                message:
-                    `Swap complete — ${arr[j]} is now in its sorted position.`,
-            });
-        } else {
-            steps.push({
-                type: "no-swap",
-                array: [...arr],
-                min: -1,
-                first: j,
-                second: -1,
-                pass: j + 1,
-                comparison: 0,
-                sortedFrom: j + 1,
-                message:
-                    `${arr[j]} is already the smallest value in the unsorted part — no swap needed.`,
-            });
-        }
-    }
-
-    steps.push({
-        type: "sorted",
-        array: [...arr],
-        min: -1,
-        first: -1,
-        second: -1,
-        pass: n > 1 ? n - 1 : 0,
-        comparison: 0,
-        sortedFrom: 0,
-        message:
-            "Array is sorted! Every value is now in its correct position.",
-    });
-
-    return steps;
-}
-
 const SelectionSortClient = () => {
     const [array, setArray] = useState([
         20,
@@ -332,67 +167,56 @@ const SelectionSortClient = () => {
 
     const [isSorted, setIsSorted] = useState(false);
 
-    // =========================================================
-    // Step player state
-    // =========================================================
-    const [steps, setSteps] = useState([]);
-    const [stepIndex, setStepIndex] = useState(0);
-    const [isSorting, setIsSorting] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
-
-    const directionRef = useRef("forward");
-    const sortedToastShownRef = useRef(false);
-
-    const currentStep = isSorting
-        ? steps[stepIndex] ?? null
-        : null;
-
     const [speed, setSpeed] = useState("normal");
+    const speedMs = getSpeedMs(speed);
 
-    const speedMs =
-        SPEED_OPTIONS.find((o) => o.id === speed)?.ms ?? 1200;
+    const handleSortedStep = useCallback((step) => {
+        setArray(step.array);
+        setIsSorted(true);
+    }, []);
 
-    const { detailsState, updateState } =
-        useContext(DetailsStateContext);
+    const getFrameDelayForStep = useCallback(
+        (step) => getSelectionSortFrameDelay(step?.type, speedMs),
+        [speedMs]
+    );
 
-    const handleToggle = (id, isOpen) =>
-        updateState(id, isOpen);
+    const {
+        steps,
+        stepIndex,
+        isPlaying,
+        isSorting,
+        currentStep,
+        directionRef,
+        resetSortPlayback,
+        startSortPlayback,
+        goNext,
+        goPrev,
+        togglePlay,
+        restart: restartSort,
+        pause,
+        clearSession,
+    } = useSortPlayback({
+        speedMs,
+        getFrameDelay: getFrameDelayForStep,
+        onSortedStep: handleSortedStep,
+    });
 
-    useEffect(() => {
-        if (array.length === 0 && activeTab !== "create") {
-            setActiveTab("create");
-        }
-    }, [array.length, activeTab]);
-
-    // =========================================================
-    // Reset sort/player state
-    // =========================================================
     const resetSortView = () => {
         setIsSorted(false);
-        setSteps([]);
-        setStepIndex(0);
-        setIsSorting(false);
-        setIsPlaying(false);
-        sortedToastShownRef.current = false;
-        directionRef.current = "forward";
+        resetSortPlayback();
     };
 
-    // =========================================================
-    // Sort — start / stop / navigation
-    // =========================================================
     const startSort = () => {
         if (!arrExist) {
             toast.error("Please create an array first.");
             return;
         }
-
         if (array.includes("NULL")) {
             toast.error(
                 "Fill every slot first — sorting needs a complete array, no empty slots."
             );
             return;
         }
-
         if (array.length < 2) {
             toast.info(
                 "Array already has fewer than 2 elements — nothing to sort."
@@ -400,164 +224,16 @@ const SelectionSortClient = () => {
             return;
         }
 
-        const generated =
-            buildSelectionSortSteps(array);
-
-        sortedToastShownRef.current = false;
-
-        setSteps(generated);
-        setStepIndex(0);
         setIsSorted(false);
-        setIsSorting(true);
-
-        directionRef.current = "forward";
-        setIsPlaying(true);
+        startSortPlayback(buildSelectionSortSteps(array));
     };
 
-    const stopSort = (commit = true) => {
-        const step = steps[stepIndex];
-
-        if (commit && step) {
-            setArray(step.array);
-        }
-
-        setIsPlaying(false);
-        setIsSorting(false);
-        setSteps([]);
-        setStepIndex(0);
-
-        directionRef.current = "forward";
-
+    const stopSort = useCallback(() => {
+        if (currentStep) setArray(currentStep.array);
+        pause();
+        clearSession();
         toast.info("Sorting stopped.");
-    };
-
-    const goNext = useCallback(() => {
-        setIsPlaying(false);
-        directionRef.current = "forward";
-
-        setStepIndex((i) =>
-            Math.min(i + 1, steps.length - 1)
-        );
-    }, [steps.length]);
-
-    const goPrev = useCallback(() => {
-        setIsPlaying(false);
-        directionRef.current = "backward";
-
-        setStepIndex((i) =>
-            Math.max(i - 1, 0)
-        );
-    }, []);
-
-    const togglePlay = useCallback(() => {
-        if (!steps.length) return;
-
-        if (stepIndex >= steps.length - 1) {
-            directionRef.current = "forward";
-            setStepIndex(0);
-            setIsPlaying(true);
-            return;
-        }
-
-        directionRef.current = "forward";
-        setIsPlaying((p) => !p);
-    }, [stepIndex, steps.length]);
-
-    const restartSort = () => {
-        directionRef.current = "forward";
-        setStepIndex(0);
-        setIsPlaying(true);
-    };
-
-    // =========================================================
-    // Auto advance
-    // =========================================================
-    useEffect(() => {
-        if (!isPlaying || !steps.length) return;
-
-        if (stepIndex >= steps.length - 1) {
-            setIsPlaying(false);
-            return;
-        }
-
-        const type =
-            steps[stepIndex]?.type;
-
-        const timer = setTimeout(() => {
-            directionRef.current = "forward";
-
-            setStepIndex((i) =>
-                Math.min(i + 1, steps.length - 1)
-            );
-        }, getFrameDelay(type, speedMs));
-
-        return () => clearTimeout(timer);
-    }, [
-        isPlaying,
-        stepIndex,
-        steps,
-        speedMs,
-    ]);
-
-    // =========================================================
-    // Commit final sorted state
-    // =========================================================
-    useEffect(() => {
-        if (!isSorting) return;
-
-        const step = steps[stepIndex];
-
-        if (step?.type === "sorted") {
-            setArray(step.array);
-            setIsSorted(true);
-            setIsPlaying(false);
-
-            if (!sortedToastShownRef.current) {
-                toast.success("Array is sorted!");
-                sortedToastShownRef.current = true;
-            }
-        }
-    }, [
-        stepIndex,
-        steps,
-        isSorting,
-    ]);
-
-    // =========================================================
-    // Keyboard controls
-    // =========================================================
-    useEffect(() => {
-        if (!isSorting) return;
-
-        const handler = (e) => {
-            if (e.key === "ArrowRight") {
-                e.preventDefault();
-                goNext();
-            } else if (e.key === "ArrowLeft") {
-                e.preventDefault();
-                goPrev();
-            } else if (e.key === " ") {
-                e.preventDefault();
-                togglePlay();
-            }
-        };
-
-        window.addEventListener(
-            "keydown",
-            handler
-        );
-
-        return () =>
-            window.removeEventListener(
-                "keydown",
-                handler
-            );
-    }, [
-        isSorting,
-        goNext,
-        goPrev,
-        togglePlay,
-    ]);
+    }, [currentStep, pause, clearSession]);
 
     // =========================================================
     // Create array
@@ -939,31 +615,7 @@ const SelectionSortClient = () => {
             : isSorted;
 
     return (
-        <details
-            id="selectionSortOp"
-            className="mb-5 w-full overflow-hidden rounded-xl border border-border bg-surface text-ink"
-            onToggle={(e) =>
-                handleToggle(
-                    "selectionSortOp",
-                    e.target.open
-                )
-            }
-            open={
-                detailsState[
-                    "selectionSortOp"
-                ] !== undefined
-                    ? detailsState[
-                    "selectionSortOp"
-                    ]
-                    : true
-            }
-        >
-            <summary className="cursor-pointer select-none px-4 py-4 sm:px-5 text-base sm:text-lg md:text-xl font-semibold text-ink marker:text-accent hover:bg-bg/50 transition-colors">
-                Selection Sort
-            </summary>
-
-            <div className="px-4 pb-5 sm:px-5">
-
+        <CollapsibleSimulatorSection detailsId="selectionSortOp" title="Selection Sort">
                 {/* =================================================
                     OPERATIONS PANEL
                 ================================================= */}
@@ -1392,7 +1044,7 @@ const SelectionSortClient = () => {
 
                                 <button
                                     type="button"
-                                    onClick={() => stopSort(true)}
+                                    onClick={() => stopSort()}
                                     aria-label="Stop sorting"
                                     title="Stop"
                                     className="opBtn-danger flex shrink-0 items-center justify-center p-1.5 sm:gap-1.5 sm:px-3 sm:py-1.5"
@@ -1673,8 +1325,7 @@ const SelectionSortClient = () => {
                         )}
                     </div>
                 </div>
-            </div>
-        </details>
+        </CollapsibleSimulatorSection>
     );
 };
 

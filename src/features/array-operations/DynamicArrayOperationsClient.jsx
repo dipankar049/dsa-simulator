@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { delay } from "@/lib/simulation/timing";
 import { DetailsStateContext } from "../../context/DetailsContext";
 
 const OPERATION_TABS = [
@@ -56,8 +56,6 @@ export default function DynamicArrayOperationsClient() {
     // =========================================================
     // Utility
     // =========================================================
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
     const isArrayExist = () => {
         if (array.length === 0) {
             toast.error("Please create an array first.");

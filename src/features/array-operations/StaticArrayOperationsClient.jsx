@@ -3,7 +3,7 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
 import { DetailsStateContext } from "../../context/DetailsContext";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { delay } from "@/lib/simulation/timing";
 
 const OPERATION_TABS = [
     { id: "create", label: "Create" },
@@ -33,8 +33,6 @@ const StaticArrayOperationsClient = () => {
 
     const { detailsState, updateState } = useContext(DetailsStateContext);
     const handleToggle = (id, isOpen) => updateState(id, isOpen);
-
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
     const isArrayExist = () => {
         if (array.length === 0) {

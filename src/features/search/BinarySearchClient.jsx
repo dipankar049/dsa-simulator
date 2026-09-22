@@ -4,13 +4,14 @@ import React, {
     useState,
     useRef,
     useEffect,
-    useContext,
     useCallback,
 } from "react";
-import { DetailsStateContext } from "../../context/DetailsContext";
 import StateLegend from "../../components/StateLegend";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { CollapsibleSimulatorSection, SpeedSelector, PlaybackControls, StepCallout, VisualizationViewport, EmptyVisualizationPlaceholder, ArrayWorkbench } from "@/components/simulator";
+import { useStepPlayback } from "@/hooks/useStepPlayback";
+import { getSpeedMs, getBinarySearchFrameDelay, BINARY_SEARCH_STEP_ACTIONS, resolveStepAction, toneClassFor } from "@/lib/simulation";
+import { delay } from "@/lib/simulation/timing";
 import {
     Play,
     Pause,
@@ -24,6 +25,7 @@ import {
     ArrowRight,
     Search,
 } from "lucide-react";
+import { buildBinarySearchSteps } from "@/lib/algorithms/binarySearch";
 
 const OPERATION_TABS = [
     { id: "create", label: "Create" },
@@ -31,199 +33,6 @@ const OPERATION_TABS = [
     { id: "insert", label: "Insert" },
     { id: "delete", label: "Delete" },
 ];
-
-const SPEED_OPTIONS = [
-    { id: "slow", label: "Slow", ms: 1900 },
-    { id: "normal", label: "Normal", ms: 1200 },
-    { id: "fast", label: "Fast", ms: 550 },
-];
-
-const FRAME_PACING = {
-    start: 0.6,
-    compare: 1,
-    "move-left": 0.9,
-    "move-right": 0.9,
-    found: 0.8,
-    "not-found": 0.8,
-};
-
-const getFrameDelay = (step, speedMs) => {
-    const pacing = FRAME_PACING[step?.type] ?? 1;
-    return Math.max(250, Math.round(speedMs * pacing));
-};
-
-function getStepAction(step) {
-    if (!step) return null;
-
-    switch (step.type) {
-        case "start":
-            return {
-                icon: Search,
-                label: "Starting search",
-                tone: "accent",
-            };
-
-        case "compare":
-            return {
-                icon: ArrowLeftRight,
-                label: "Comparing",
-                tone: "comparing",
-            };
-
-        case "move-left":
-            return {
-                icon: ArrowLeft,
-                label: "Move left",
-                tone: "pivot",
-            };
-
-        case "move-right":
-            return {
-                icon: ArrowRight,
-                label: "Move right",
-                tone: "pivot",
-            };
-
-        case "found":
-            return {
-                icon: CheckCircle2,
-                label: "Found",
-                tone: "sorted",
-            };
-
-        case "not-found":
-            return {
-                icon: CheckCircle2,
-                label: "Not found",
-                tone: "swapping",
-            };
-
-        default:
-            return {
-                icon: Search,
-                label: "Processing",
-                tone: "secondary",
-            };
-    }
-}
-
-function buildBinarySearchSteps(inputArray, target) {
-    const steps = [];
-
-    if (!inputArray.length) {
-        return steps;
-    }
-
-    let low = 0;
-    let high = inputArray.length - 1;
-    let iterations = 0;
-
-    const pushStep = ({
-        type,
-        message,
-        currentLow = low,
-        currentHigh = high,
-        currentMid = -1,
-        midVisible = false,
-        equal = false,
-        found = "",
-        iteration = iterations,
-    }) => {
-        steps.push({
-            type,
-            message,
-            array: [...inputArray],
-            low: currentLow,
-            high: currentHigh,
-            mid: currentMid,
-            midVisible,
-            equal,
-            found,
-            iterations: iteration,
-        });
-    };
-
-    pushStep({
-        type: "start",
-        message: `Searching for ${target}. The search range starts from index 0 to ${inputArray.length - 1}.`,
-    });
-
-    while (low <= high) {
-        const mid = Math.floor((low + high) / 2);
-        const midValue = inputArray[mid];
-
-        iterations += 1;
-
-        pushStep({
-            type: "compare",
-            currentLow: low,
-            currentHigh: high,
-            currentMid: mid,
-            midVisible: true,
-            iteration: iterations,
-            message: `Checking index ${mid} with value ${midValue} — the midpoint of [${low}, ${high}].`,
-        });
-
-        if (target === midValue) {
-            pushStep({
-                type: "found",
-                currentLow: low,
-                currentHigh: high,
-                currentMid: mid,
-                midVisible: true,
-                equal: true,
-                found: "Found",
-                iteration: iterations,
-                message: `${target} = ${midValue} — match found at index ${mid}!`,
-            });
-
-            return steps;
-        }
-
-        if (target < midValue) {
-            const newHigh = mid - 1;
-
-            pushStep({
-                type: "move-left",
-                currentLow: low,
-                currentHigh: newHigh,
-                currentMid: mid,
-                midVisible: true,
-                iteration: iterations,
-                message: `${target} < ${midValue} — target must be in the left half, so High moves to ${newHigh}.`,
-            });
-
-            high = newHigh;
-        } else {
-            const newLow = mid + 1;
-
-            pushStep({
-                type: "move-right",
-                currentLow: newLow,
-                currentHigh: high,
-                currentMid: mid,
-                midVisible: true,
-                iteration: iterations,
-                message: `${target} > ${midValue} — target must be in the right half, so Low moves to ${newLow}.`,
-            });
-
-            low = newLow;
-        }
-    }
-
-    pushStep({
-        type: "not-found",
-        currentLow: low,
-        currentHigh: high,
-        currentMid: -1,
-        midVisible: false,
-        found: "Not Found",
-        iteration: iterations,
-        message: `Low crossed High — ${target} is not in the array.`,
-    });
-
-    return steps;
-}
 
 const BinarySearchClient = () => {
     const [array, setArray] = useState([
@@ -251,18 +60,47 @@ const BinarySearchClient = () => {
     const [searchEle, setSearchEle] = useState("");
     const [emptySearchElement, setEmptySearchElement] = useState(false);
 
-    // =========================================================
-    // Search player state
-    // =========================================================
-    const [steps, setSteps] = useState([]);
-    const [stepIndex, setStepIndex] = useState(0);
-    const [isSearching, setIsSearching] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
     const [speed, setSpeed] = useState("normal");
+    const speedMs = getSpeedMs(speed);
+    const resultToastShownRef = useRef(false);
 
-    const directionRef = useRef("forward");
-    const timerRef = useRef(null);
-    const sortedToastShownRef = useRef(false);
+    const getFrameDelayForStep = useCallback(
+        (step) => getBinarySearchFrameDelay(step, speedMs),
+        [speedMs]
+    );
+
+    const handleSearchStepChange = useCallback((step) => {
+        if (!step) return;
+        if (step.type === "found" && !resultToastShownRef.current) {
+            toast.info("Element found");
+            resultToastShownRef.current = true;
+        }
+        if (step.type === "not-found" && !resultToastShownRef.current) {
+            toast.info("Element not found");
+            resultToastShownRef.current = true;
+        }
+    }, []);
+
+    const {
+        steps,
+        stepIndex,
+        isPlaying,
+        isSessionActive: isSearching,
+        currentStep,
+        directionRef,
+        startSession,
+        clearSession,
+        goNext,
+        goPrev,
+        togglePlay,
+        restart,
+        pause,
+    } = useStepPlayback({
+        speedMs,
+        getFrameDelay: getFrameDelayForStep,
+        onStepChange: handleSearchStepChange,
+        pauseOnStepTypes: ["found", "not-found"],
+    });
 
     // Current visual state
     const [low, setLow] = useState(0);
@@ -277,22 +115,8 @@ const BinarySearchClient = () => {
 
     const divRefs = useRef([]);
 
-    const { detailsState, updateState } =
-        useContext(DetailsStateContext);
-
-    const handleToggle = (id, isOpen) =>
-        updateState(id, isOpen);
-
     const hasEmptySlots =
         arrExist && array.includes("NULL");
-
-    const currentStep = steps[stepIndex] ?? null;
-
-    // =========================================================
-    // Delay helper for array operations only
-    // =========================================================
-    const delay = (ms) =>
-        new Promise((resolve) => setTimeout(resolve, ms));
 
     // =========================================================
     // Apply one search frame to the visualizer
@@ -319,15 +143,8 @@ const BinarySearchClient = () => {
     // =========================================================
     const resetSearchView = useCallback(
         (nextArray = array) => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-                timerRef.current = null;
-            }
-
-            setSteps([]);
-            setStepIndex(0);
-            setIsSearching(false);
-            setIsPlaying(false);
+            clearSession();
+            resultToastShownRef.current = false;
 
             setIsEqual(false);
             setLow(0);
@@ -342,11 +159,8 @@ const BinarySearchClient = () => {
             setIsFound("");
             setIterations(0);
             setStepMessage("");
-
-            directionRef.current = "forward";
-            sortedToastShownRef.current = false;
         },
-        [array]
+        [array, clearSession]
     );
 
     // =========================================================
@@ -389,127 +203,6 @@ const BinarySearchClient = () => {
         }
     }, [array.length, activeTab]);
 
-    // =========================================================
-    // Auto playback
-    // =========================================================
-    useEffect(() => {
-        if (!isSearching || !isPlaying || !currentStep) {
-            return undefined;
-        }
-
-        if (stepIndex >= steps.length - 1) {
-            setIsPlaying(false);
-            setIsSearching(false);
-
-            if (
-                currentStep.type === "found" &&
-                !sortedToastShownRef.current
-            ) {
-                sortedToastShownRef.current = true;
-                toast.info("Element found");
-            }
-
-            if (
-                currentStep.type === "not-found" &&
-                !sortedToastShownRef.current
-            ) {
-                sortedToastShownRef.current = true;
-                toast.info("Element not found");
-            }
-
-            return undefined;
-        }
-
-        const speedOption =
-            SPEED_OPTIONS.find(
-                (item) => item.id === speed
-            ) ?? SPEED_OPTIONS[1];
-
-        timerRef.current = setTimeout(() => {
-            setStepIndex((prev) => {
-                const nextIndex = Math.min(
-                    prev + 1,
-                    steps.length - 1
-                );
-
-                directionRef.current = "forward";
-
-                return nextIndex;
-            });
-        }, getFrameDelay(currentStep, speedOption.ms));
-
-        return () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-                timerRef.current = null;
-            }
-        };
-    }, [
-        isSearching,
-        isPlaying,
-        currentStep,
-        stepIndex,
-        steps.length,
-        speed,
-    ]);
-
-    // =========================================================
-    // Keyboard controls
-    // =========================================================
-    useEffect(() => {
-        const handleKeyDown = (event) => {
-            if (!isSearching || !steps.length) return;
-
-            if (event.code === "Space") {
-                event.preventDefault();
-
-                setIsPlaying((prev) => !prev);
-                return;
-            }
-
-            if (event.key === "ArrowLeft") {
-                event.preventDefault();
-
-                setIsPlaying(false);
-                directionRef.current = "backward";
-
-                setStepIndex((prev) =>
-                    Math.max(0, prev - 1)
-                );
-
-                return;
-            }
-
-            if (event.key === "ArrowRight") {
-                event.preventDefault();
-
-                setIsPlaying(false);
-                directionRef.current = "forward";
-
-                setStepIndex((prev) =>
-                    Math.min(
-                        steps.length - 1,
-                        prev + 1
-                    )
-                );
-            }
-        };
-
-        window.addEventListener(
-            "keydown",
-            handleKeyDown
-        );
-
-        return () =>
-            window.removeEventListener(
-                "keydown",
-                handleKeyDown
-            );
-    }, [isSearching, steps.length]);
-
-    // =========================================================
-    // Start Binary Search
-    // =========================================================
     const binSearch = () => {
         if (!arrExist) {
             toast.error(
@@ -542,130 +235,20 @@ const BinarySearchClient = () => {
             return;
         }
 
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-        }
-
-        const generatedSteps =
-            buildBinarySearchSteps(
-                array,
-                target
-            );
+        const generatedSteps = buildBinarySearchSteps(array, target);
 
         if (!generatedSteps.length) {
             return;
         }
 
-        sortedToastShownRef.current = false;
-        directionRef.current = "forward";
-
-        setSteps(generatedSteps);
-        setStepIndex(0);
-        setIsSearching(true);
-        setIsPlaying(true);
+        resultToastShownRef.current = false;
         setEmptySearchElement(false);
-
-        applyStep(generatedSteps[0]);
+        startSession(generatedSteps);
     };
 
-    // =========================================================
-    // Pause / Play
-    // =========================================================
-    const togglePlayPause = () => {
-        if (!steps.length) return;
-
-        if (
-            stepIndex >=
-            steps.length - 1
-        ) {
-            setStepIndex(0);
-            setIsSearching(true);
-            setIsPlaying(true);
-            sortedToastShownRef.current = false;
-            directionRef.current = "forward";
-            return;
-        }
-
-        setIsSearching(true);
-        setIsPlaying((prev) => !prev);
-    };
-
-    // =========================================================
-    // Previous
-    // =========================================================
-    const handlePrevious = () => {
-        if (!steps.length) return;
-
-        setIsSearching(true);
-        setIsPlaying(false);
-
-        directionRef.current = "backward";
-
-        setStepIndex((prev) =>
-            Math.max(0, prev - 1)
-        );
-    };
-
-    // =========================================================
-    // Next
-    // =========================================================
-    const handleNext = () => {
-        if (!steps.length) return;
-
-        setIsSearching(true);
-        setIsPlaying(false);
-
-        directionRef.current = "forward";
-
-        setStepIndex((prev) =>
-            Math.min(
-                steps.length - 1,
-                prev + 1
-            )
-        );
-    };
-
-    // =========================================================
-    // Restart
-    // =========================================================
-    const handleRestart = () => {
-        if (!steps.length) return;
-
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-        }
-
-        sortedToastShownRef.current = false;
-        directionRef.current = "forward";
-
-        setStepIndex(0);
-        setIsSearching(true);
-        setIsPlaying(true);
-
-        applyStep(steps[0]);
-    };
-
-    // =========================================================
-    // Stop
-    // =========================================================
     const handleStop = () => {
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-        }
-
-        setIsPlaying(false);
-        setIsSearching(false);
-        directionRef.current = "forward";
-    };
-
-    // =========================================================
-    // Speed
-    // =========================================================
-    const handleSpeedChange = (speedId) => {
-        setSpeed(speedId);
+        pause();
+        clearSession();
     };
 
     // =========================================================
@@ -1007,8 +590,10 @@ const BinarySearchClient = () => {
             return null;
         }
 
-        const action =
-            getStepAction(currentStep);
+        const action = resolveStepAction(
+            currentStep,
+            BINARY_SEARCH_STEP_ACTIONS
+        );
 
         const Icon =
             action?.icon ?? Search;
@@ -1090,7 +675,7 @@ const BinarySearchClient = () => {
                     {/* Previous */}
                     <button
                         type="button"
-                        onClick={handlePrevious}
+                        onClick={goPrev}
                         disabled={atStart}
                         title="Previous step"
                         className="opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-0.5 px-1.5 py-2 text-[11px] sm:flex-none sm:gap-1 sm:px-3 sm:text-sm"
@@ -1105,7 +690,7 @@ const BinarySearchClient = () => {
                     {/* Play / Pause */}
                     <button
                         type="button"
-                        onClick={togglePlayPause}
+                        onClick={togglePlay}
                         title={
                             isPlaying
                                 ? "Pause"
@@ -1135,7 +720,7 @@ const BinarySearchClient = () => {
                     {/* Next */}
                     <button
                         type="button"
-                        onClick={handleNext}
+                        onClick={goNext}
                         disabled={atEnd}
                         title="Next step"
                         className="opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-0.5 px-1.5 py-2 text-[11px] sm:flex-none sm:gap-1 sm:px-3 sm:text-sm"
@@ -1150,7 +735,7 @@ const BinarySearchClient = () => {
                     {/* Restart */}
                     <button
                         type="button"
-                        onClick={handleRestart}
+                        onClick={restart}
                         title="Restart"
                         aria-label="Restart"
                         className="opBtn-secondary flex h-9 w-9 shrink-0 items-center justify-center px-0 sm:h-auto sm:w-auto sm:gap-1 sm:px-3 sm:py-2"
@@ -1200,30 +785,7 @@ const BinarySearchClient = () => {
     };
 
     return (
-        <details
-            id="binarySearchOp"
-            className="mb-5 w-full overflow-hidden rounded-xl border border-border bg-surface text-ink"
-            onToggle={(e) =>
-                handleToggle(
-                    "binarySearchOp",
-                    e.target.open
-                )
-            }
-            open={
-                detailsState[
-                    "binarySearchOp"
-                ] !== undefined
-                    ? detailsState[
-                    "binarySearchOp"
-                    ]
-                    : true
-            }
-        >
-            <summary className="cursor-pointer select-none px-4 py-4 text-base font-semibold text-ink marker:text-accent transition-colors hover:bg-bg/50 sm:px-5 sm:text-lg md:text-xl">
-                Binary Search
-            </summary>
-
-            <div className="px-4 pb-5 sm:px-5">
+        <CollapsibleSimulatorSection detailsId="binarySearchOp" title="Binary Search">
                 {/* =================================================
                     OPERATIONS PANEL
                 ================================================= */}
@@ -1577,28 +1139,7 @@ const BinarySearchClient = () => {
             Iterations: {iterations}
         </span>
 
-        <div className="flex items-center gap-1.5">
-            <span>Speed</span>
-
-            <div className="flex rounded-md border border-borderStrong bg-surface p-0.5">
-                {SPEED_OPTIONS.map((option) => (
-                    <button
-                        key={option.id}
-                        type="button"
-                        onClick={() =>
-                            handleSpeedChange(option.id)
-                        }
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors sm:px-2 sm:py-1 sm:text-xs ${
-                            speed === option.id
-                                ? "bg-accent text-white"
-                                : "text-muted hover:bg-element hover:text-ink"
-                        }`}
-                    >
-                        {option.label}
-                    </button>
-                ))}
-            </div>
-        </div>
+        <SpeedSelector speed={speed} onSpeedChange={setSpeed} />
     </div>
 </div>
 
@@ -1660,7 +1201,7 @@ const BinarySearchClient = () => {
     <div className="mt-3 flex w-full items-center gap-1.5 sm:gap-2">
         <button
             type="button"
-            onClick={handlePrevious}
+            onClick={goPrev}
             disabled={stepIndex <= 0}
             className="opBtn opBtn-secondary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs sm:flex-none sm:px-3 sm:text-sm"
         >
@@ -1673,7 +1214,7 @@ const BinarySearchClient = () => {
 
         <button
             type="button"
-            onClick={togglePlayPause}
+            onClick={togglePlay}
             className="opBtn opBtn-primary flex min-w-0 flex-1 items-center justify-center gap-1 px-2 py-1.5 text-xs sm:flex-none sm:px-3 sm:text-sm"
         >
             {isPlaying ? (
@@ -1697,7 +1238,7 @@ const BinarySearchClient = () => {
 
         <button
             type="button"
-            onClick={handleNext}
+            onClick={goNext}
             disabled={
                 stepIndex >= steps.length - 1
             }
@@ -1712,7 +1253,7 @@ const BinarySearchClient = () => {
 
         <button
             type="button"
-            onClick={handleRestart}
+            onClick={restart}
             aria-label="Restart"
             title="Restart"
             className="opBtn opBtn-secondary flex shrink-0 items-center justify-center p-1.5 sm:gap-1.5 sm:px-3 sm:py-1.5"
@@ -1968,8 +1509,7 @@ const BinarySearchClient = () => {
                         )}
                     </div>
                 </div>
-            </div>
-        </details>
+        </CollapsibleSimulatorSection>
     );
 };
 

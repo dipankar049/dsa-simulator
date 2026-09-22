@@ -3,8 +3,6 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
 import { DetailsStateContext } from "../../context/DetailsContext";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
 const OPERATION_TABS = [
     { id: "create", label: "Create" },
     { id: "insert", label: "Insert" },

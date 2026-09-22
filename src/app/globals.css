@@ -18,6 +18,10 @@
    Raw channel tokens — light mode
    -------------------------------------------------------------------------- */
 :root {
+  --shell-sidebar-width: 17%;
+  --sim-cell-size: 3.5rem;
+  --sim-gap: 0.25rem;
+
   --ch-bg:               250 251 253;
   --ch-surface:          255 255 255;
   --ch-surface-elevated: 255 255 255;
@@ -102,6 +106,11 @@
   --color-pivot-text:       rgb(var(--ch-pivot-text));
   --color-frontier-text:    rgb(var(--ch-frontier-text));
   --color-visited-text:     rgb(var(--ch-visited-text));
+
+  /* Aliases used in feature clients (prefer ink-* / border-* in new code) */
+  --color-muted:            rgb(var(--ch-ink-muted));
+  --color-secondary:        rgb(var(--ch-ink-secondary));
+  --color-borderStrong:     rgb(var(--ch-border-strong));
 
   /* Custom height utilities: h-1p … h-100p */
   --height-1p:   1%;

@@ -3,6 +3,15 @@ import "./globals.css";
 import Providers from "./providers";
 import { SITE_URL, SITE_NAME } from "@/lib/seo";
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#3854d6" },
+    { media: "(prefers-color-scheme: dark)", color: "#5b7cff" },
+  ],
+};
+
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "DSA Simulator", template: "%s | DSA Simulator" },

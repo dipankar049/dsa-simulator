@@ -26,9 +26,9 @@ function InnerShell({ children }) {
         <div className="w-full min-h-screen bg-theme-gradient">
             <ToastContainer limit={3} autoClose={3000} newestOnTop pauseOnHover theme={theme} pauseOnFocusLoss />
             <Header toggleSidebar={toggleSidebar} changeLanguage={handleChangeLanguage} />
-            <div className="w-full flex pt-4 md: pt-20">
+            <div className="w-full flex pt-20 md:pt-20">
                 <MenubarUn isOpen={sidebarOpen} closeSidebar={closeSidebar} />
-                <div className="relative w-full text-ink px-4 md:text-base sm:text-sm text-xs md:ml-[17%]">
+                <div className="relative w-full max-w-[100vw] text-ink px-4 pb-8 text-xs sm:text-sm md:ml-0 md:max-w-none md:px-6 md:pb-10 md:text-base lg:ml-[var(--shell-sidebar-width,17%)]">
                     {children}
                 </div>
             </div>
