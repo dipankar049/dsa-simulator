@@ -32,7 +32,7 @@ const OPERATION_TABS = [
 ];
 
 export default function BubbleSortClient() {
-    const [array, setArray] = useState([220, 148, 132, 101, 95, 87, 64, 53, 8]);
+    const [array, setArray] = useState([220, 148, 101, 64, 53, 8]);
     const [arrExist, setArrExist] = useState(true);
     const [oldArray, setOldArray] = useState(false);
 

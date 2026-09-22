@@ -29,7 +29,7 @@ const OPERATION_TABS = [
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function LinearSearchClient() {
-    const [array, setArray] = useState([42, 17, 88, 5, 63, 29, 74, 11]);
+    const [array, setArray] = useState([42, 17, 63, 29, 74, 11]);
     const [arrExist, setArrExist] = useState(true);
     const [oldArray, setOldArray] = useState(false);
 
@@ -393,7 +393,7 @@ export default function LinearSearchClient() {
                     <div className="w-max min-w-full">
                         <div className="grid w-fit grid-rows-2" style={{ gridTemplateColumns: `repeat(${array.length}, auto)` }}>
                             {array.map((_, index) => (
-                                <div key={`idx-${index}`} className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-medium text-muted">
+                                <div key={`idx-${index}`} className="flex h-5 w-10 shrink-0 items-center justify-center text-[10px] font-medium text-muted sm:h-6 sm:w-14 sm:text-xs">
                                     {index}
                                 </div>
                             ))}
@@ -407,7 +407,7 @@ export default function LinearSearchClient() {
                                         key={`cell-${index}`}
                                         id={`node-${index}`}
                                         ref={(el) => { divRefs.current[index] = el; }}
-                                        className={`cell arrayDiv h-11 w-14 shrink-0 font-semibold
+                                        className={`cell arrayDiv h-8 w-10 shrink-0 text-xs font-semibold sm:h-11 sm:w-14 sm:text-base
                                             ${item === 'NULL' ? 'italic font-normal text-muted' : ''}
                                             ${isVisited ? '!border-visited !bg-visited/15 !text-visited' : ''}
                                             ${isCurrent && !isMatch ? '!border-frontier !bg-frontier text-frontier-text animate-pulse' : ''}

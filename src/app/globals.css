@@ -19,7 +19,7 @@
    -------------------------------------------------------------------------- */
 :root {
   --shell-sidebar-width: 17%;
-  --sim-cell-size: 3.5rem;
+  --sim-cell-size: 2.5rem;
   --sim-gap: 0.25rem;
 
   --ch-bg:               250 251 253;
@@ -74,6 +74,12 @@
   --ch-pivot-text:       11 14 20;
   --ch-frontier-text:    11 14 20;
   --ch-visited-text:     255 255 255;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --sim-cell-size: 3.5rem;
+  }
 }
 
 /* --------------------------------------------------------------------------

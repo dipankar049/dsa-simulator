@@ -25,8 +25,6 @@ const OPERATION_TABS = [
     { id: "delete", label: "Delete" },
 ];
 
-const CELL_WIDTH = 56;
-
 const SPEED_OPTIONS = [
     { id: "slow", label: "Slow", ms: 1900 },
     { id: "normal", label: "Normal", ms: 1200 },
@@ -147,12 +145,9 @@ export default function QuickSortClient() {
     const [array, setArray] = useState([
         20,
         64,
-        132,
         101,
         95,
         7,
-        64,
-        153,
         80,
     ]);
 
@@ -766,8 +761,8 @@ export default function QuickSortClient() {
             return {
                 transform:
                     index === a
-                        ? `translateX(${distance * CELL_WIDTH}px)`
-                        : `translateX(-${distance * CELL_WIDTH}px)`,
+                        ? `translateX(calc(${distance} * var(--sim-cell-size)))`
+                        : `translateX(calc(-${distance} * var(--sim-cell-size)))`,
                 transition: `transform ${SWAP_SLIDE_MS}ms ease`,
             };
         }
@@ -1319,7 +1314,7 @@ export default function QuickSortClient() {
                                         (_, index) => (
                                             <div
                                                 key={`idx-${index}`}
-                                                className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-medium text-muted"
+                                                className="flex h-5 w-10 shrink-0 items-center justify-center text-[10px] font-medium text-muted sm:h-6 sm:w-14 sm:text-xs"
                                             >
                                                 {index}
                                             </div>
@@ -1350,7 +1345,7 @@ export default function QuickSortClient() {
                                                     ] =
                                                         el)
                                                     }
-                                                    className={`cell arrayDiv h-11 w-14 shrink-0 border-2 font-semibold animate-fade-in
+                                                    className={`cell arrayDiv h-8 w-10 shrink-0 border-2 text-xs font-semibold animate-fade-in sm:h-11 sm:w-14 sm:text-base
                                                         ${item ===
                                                             "NULL"
                                                             ? "italic font-normal text-muted"

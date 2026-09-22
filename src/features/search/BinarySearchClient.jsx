@@ -41,8 +41,6 @@ const BinarySearchClient = () => {
         32,
         48,
         51,
-        57,
-        64,
         73,
     ]);
 
@@ -1347,7 +1345,7 @@ const BinarySearchClient = () => {
                                         ) => (
                                             <div
                                                 key={`mid-${index}`}
-                                                className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-semibold text-pivot"
+                                                className="flex h-5 w-10 shrink-0 items-center justify-center text-[10px] font-semibold text-pivot sm:h-6 sm:w-14 sm:text-xs"
                                             >
                                                 {index ===
                                                     mid &&
@@ -1366,7 +1364,7 @@ const BinarySearchClient = () => {
                                         ) => (
                                             <div
                                                 key={`lh-${index}`}
-                                                className="flex h-6 w-14 shrink-0 items-center justify-center text-xs font-medium text-frontier"
+                                                className="flex h-5 w-10 shrink-0 items-center justify-center text-[10px] font-medium text-frontier sm:h-6 sm:w-14 sm:text-xs"
                                             >
                                                 {index ===
                                                     low ? (
@@ -1416,7 +1414,7 @@ const BinarySearchClient = () => {
                                                     ] =
                                                         el)
                                                     }
-                                                    className={`cell arrayDiv h-11 w-14 shrink-0 font-semibold
+                                                    className={`cell arrayDiv h-8 w-10 shrink-0 text-xs font-semibold sm:h-11 sm:w-14 sm:text-base
                                                         ${item ===
                                                             "NULL"
                                                             ? "italic font-normal text-white"

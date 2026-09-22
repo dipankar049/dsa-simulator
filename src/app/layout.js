@@ -2,6 +2,7 @@ import Script from "next/script";
 import "./globals.css";
 import Providers from "./providers";
 import { SITE_URL, SITE_NAME } from "@/lib/seo";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 export const viewport = {
   width: "device-width",
@@ -50,6 +51,7 @@ export default function RootLayout({ children }) {
       </head>
       <body suppressHydrationWarning>
         <Providers>{children}</Providers>
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

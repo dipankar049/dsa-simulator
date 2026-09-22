@@ -145,11 +145,8 @@ const SelectionSortClient = () => {
     const [array, setArray] = useState([
         20,
         64,
-        132,
         101,
         95,
-        7,
-        64,
         153,
         80,
     ]);

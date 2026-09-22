@@ -27,8 +27,6 @@ const OPERATION_TABS = [
     { id: "delete", label: "Delete" },
 ];
 
-const CELL_WIDTH = 56;
-
 const SIBLING_GAP = 8;
 
 const SPEED_OPTIONS = [
@@ -80,11 +78,8 @@ export default function MergeSortClient() {
         20,
         64,
         132,
-        101,
         95,
         7,
-        64,
-        153,
         80,
     ]);
 
@@ -1545,7 +1540,7 @@ export default function MergeSortClient() {
                                 <div
                                     className="mb-2 grid"
                                     style={{
-                                        gridTemplateColumns: `repeat(${array.length}, ${CELL_WIDTH}px)`,
+                                        gridTemplateColumns: `repeat(${array.length}, var(--sim-cell-size))`,
                                     }}
                                 >
                                     {array.map(
@@ -1555,7 +1550,7 @@ export default function MergeSortClient() {
                                         ) => (
                                             <div
                                                 key={`idx-${index}`}
-                                                className="flex h-6 items-center justify-center text-xs font-medium text-muted"
+                                                className="flex h-5 items-center justify-center text-[10px] font-medium text-muted sm:h-6 sm:text-xs"
                                             >
                                                 {
                                                     index
@@ -1569,7 +1564,7 @@ export default function MergeSortClient() {
                                     <div
                                         className="grid"
                                         style={{
-                                            gridTemplateColumns: `repeat(${array.length}, ${CELL_WIDTH}px)`,
+                                            gridTemplateColumns: `repeat(${array.length}, var(--sim-cell-size))`,
                                         }}
                                     >
                                         {array.map(
@@ -1588,7 +1583,7 @@ export default function MergeSortClient() {
                                                     ] =
                                                         el)
                                                     }
-                                                    className={`cell arrayDiv h-11 w-14 shrink-0 font-semibold animate-fade-in ${item ===
+                                                    className={`cell arrayDiv h-8 w-10 shrink-0 text-xs font-semibold animate-fade-in sm:h-11 sm:w-14 sm:text-base ${item ===
                                                         "NULL"
                                                         ? "italic font-normal text-muted"
                                                         : ""
@@ -1630,7 +1625,7 @@ export default function MergeSortClient() {
                                                         }
                                                         className="grid animate-fade-in"
                                                         style={{
-                                                            gridTemplateColumns: `repeat(${array.length}, ${CELL_WIDTH}px)`,
+                                                            gridTemplateColumns: `repeat(${array.length}, var(--sim-cell-size))`,
                                                             animationFillMode:
                                                                 "both",
                                                         }}
@@ -1679,11 +1674,11 @@ export default function MergeSortClient() {
                                                                         key={`${key}-${nodeIndex}`}
                                                                         style={{
                                                                             gridColumn: `${node.left + 1} / ${node.right + 2}`,
-                                                                            width: `calc(${span * CELL_WIDTH}px - ${SIBLING_GAP}px)`,
+                                                                            width: `calc(${span} * var(--sim-cell-size) - ${SIBLING_GAP}px)`,
                                                                             marginRight:
                                                                                 `${SIBLING_GAP}px`,
                                                                         }}
-                                                                        className={`flex h-11 divide-x divide-border overflow-hidden rounded-md border-2 transition-all duration-300
+                                                                        className={`flex h-8 divide-x divide-border overflow-hidden rounded-md border-2 transition-all duration-300 sm:h-11
                                                                             ${isActive
                                                                                 ? "border-accent"
                                                                                 : "border-border"
@@ -1717,7 +1712,7 @@ export default function MergeSortClient() {
                                                                                         key={
                                                                                             idx
                                                                                         }
-                                                                                        className="flex w-14 shrink-0 items-center justify-center text-sm font-semibold transition-colors duration-200"
+                                                                                        className="flex w-10 shrink-0 items-center justify-center text-xs font-semibold transition-colors duration-200 sm:w-14 sm:text-sm"
                                                                                         style={
                                                                                             isComparing
                                                                                                 ? {
